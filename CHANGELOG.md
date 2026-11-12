@@ -2,6 +2,48 @@
 
 Prelaunch. There are no version numbers yet: entries are dated, newest first. Numbering starts at launch.
 
+## 2026-11-12 (third entry)
+
+What three design studies in a project still found missing, added as general components. One package was
+added, and only for one item: `@sparkjsdev/spark` (MIT), which `model-viewer` fetches when a file is
+Gaussian splats and not otherwise. Everything else is built on what the library already used.
+
+- **3D.** `model-viewer`: one model to turn, zoom and reset. glTF and GLB through three.js's own loader;
+  Gaussian splats (.spz, .ply, .splat, .ksplat, .sog) through Spark. It is plain three.js rather than a
+  react-three-fiber scene, so the file itself carries nothing heavy: three.js, the loader and Spark are
+  fetched when the viewer comes near the screen. A poster and progress while loading; arrows turn, plus and
+  minus zoom, Home resets, each announced; buttons for all of it; a named still where WebGL 2 is missing
+  or the file cannot be read; no turning by itself under reduced motion, and a button to stop it otherwise;
+  drawing stops off screen and in a hidden tab; vertical swipes and the plain wheel stay with the page;
+  an optional hand-off to AR Quick Look (USDZ) or Scene Viewer behind `ar`. Two viewers given the same
+  `view` and `bounds` share one camera.
+- **Comparison and provenance.** `compare-slider` (two layers of any content cut with `clip-path`, a divider
+  that is a slider), `certainty-legend` (classes the project names, each with a pattern as well as a colour,
+  switched on and off) and `provenance-label` (what a picture is, with its sources, placed where a player's
+  controls cannot cover it).
+- **Collections.** `carousel` (native scroll-snap; previous and next, dots or a count, autoplay that needs
+  its pause button and stops on hover, focus, off screen and under reduced motion), `virtual-list`
+  (`VirtualList` and `VirtualGrid`: thousands of items of any height, only those in view in the page, each
+  with its place in the whole list, the scroll position remembered) and `media-row-list` (reorderable
+  upload rows with progress, retry, remove, a description field and a cover choice, composed from
+  `dropzone` and `sortable-list`).
+- **Timed scenes.** `film-stage`: the chrome and the clock for a sequence of scenes the project draws from
+  time. Play, pause, seek and rate, controlled or not; cuts and crossfades computed from the time; the
+  existing `scrubber`, `scene-strip`, `captions` and `hotspots` work inside it; a clock that sound and
+  anything else can follow; and `renderAt(time)`, which draws one moment with no timer running, for export
+  frame by frame from a headless browser.
+- **Decided against, with the releases checked on 2026-11-12.** Embla (`embla-carousel-react` 8.6.0, MIT)
+  for the carousel: the browser's scroll-snap already gives swipe, momentum and right-to-left. TanStack
+  Virtual (`@tanstack/react-virtual` 3.14.26, MIT) for the list: it is headless, and the roles, the
+  positions, focus and restoration that make up most of the component would still be written here. For the
+  viewer: `@google/model-viewer` 4.4.0 (Apache 2.0) is a web component that asks for three.js 0.183 where
+  the library is on 0.187, and has no splats; `@react-three/drei` 10.7.9 (MIT) would add a large package for one loader hook;
+  `@mkkellogg/gaussian-splats-3d` 0.4.7 (MIT) was last released in January 2025; `gsplat` 1.2.9 (MIT) has
+  its own renderer rather than three.js and reads fewer formats.
+- **Showcase and checks.** Five more component pages (`/models`, `/evidence`, `/carousel`, `/lists`,
+  `/stage`) with their checks. `scripts/make-test-assets.ts` writes the small 3D files the viewer's page
+  loads (a vase as glTF, USDZ and splats in three formats, all computed, about 380 KB together).
+
 ## 2026-11-12 (second entry)
 
 What a real project found missing, added for every project. No package was added to the library for
