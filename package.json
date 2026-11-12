@@ -43,7 +43,9 @@
     "site:start": "next start site -p 3320",
     "smoke": "node --experimental-strip-types --no-warnings scripts/smoke.ts",
     "lint:install": "npm install --prefix lint",
-    "lint": "node lint/node_modules/eslint/bin/eslint.js --config lint/eslint.config.ts registry scripts site/src/app lint/eslint.config.ts"
+    "lint": "node lint/node_modules/eslint/bin/eslint.js --config lint/eslint.config.ts registry scripts site/src/app lint/eslint.config.ts",
+    "check": "node --experimental-strip-types --no-warnings scripts/check.ts",
+    "site:typecheck": "tsc --noEmit -p site/tsconfig.json"
   },
   "description": "Rivier UI: a component library for AI-native development. Prelaunch: no version numbers.",
   "license": "Apache-2.0"

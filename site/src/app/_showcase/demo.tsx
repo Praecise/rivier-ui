@@ -25,3 +25,8 @@ export function Group({ id, title, description, children }: { id: string; title:
     </section>
   );
 }
+
+/** The reading direction a component page was asked for: /choices?dir=rtl. */
+export function dirFrom(searchParams: { dir?: string | string[] | undefined }): "ltr" | "rtl" {
+  return searchParams.dir === "rtl" ? "rtl" : "ltr";
+}
