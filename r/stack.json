@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "stack",
+  "type": "registry:component",
+  "title": "Stack",
+  "description": "A flex row or column with a gap from a fixed scale, and props for alignment, distribution and wrapping.",
+  "dependencies": [
+    "class-variance-authority",
+    "radix-ui"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/layout/stack.tsx",
+      "type": "registry:component",
+      "target": "components/layout/stack.tsx",
+      "content": "/**\n * @name stack\n * @category layout\n * @description A flex row or column with a gap from a fixed scale, and props for alignment, distribution and wrapping.\n * @when Spacing a run of siblings evenly: form fields, a button row, a header with actions. For columns that reflow by width use grid; for unequal tiles use bento-grid.\n * @example\n * <Stack gap=\"lg\">\n *   <h2>Title</h2>\n *   <p>Body</p>\n * </Stack>\n * <Stack direction=\"horizontal\" gap=\"sm\" align=\"center\" justify=\"between\" wrap>\n *   <span>Plan</span>\n *   <Button size=\"sm\">Change</Button>\n * </Stack>\n * <Stack asChild gap=\"xs\"><ul><li>One</li><li>Two</li></ul></Stack>\n */\nimport { Slot } from \"radix-ui\";\nimport { cva, type VariantProps } from \"class-variance-authority\";\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport const stackVariants = cva(\"flex min-w-0\", {\n  variants: {\n    direction: {\n      vertical: \"flex-col\",\n      horizontal: \"flex-row\",\n    },\n    gap: {\n      none: \"gap-0\",\n      xs: \"gap-1\",\n      sm: \"gap-2\",\n      md: \"gap-4\",\n      lg: \"gap-6\",\n      xl: \"gap-10\",\n    },\n    align: {\n      start: \"items-start\",\n      center: \"items-center\",\n      end: \"items-end\",\n      stretch: \"items-stretch\",\n      baseline: \"items-baseline\",\n    },\n    justify: {\n      start: \"justify-start\",\n      center: \"justify-center\",\n      end: \"justify-end\",\n      between: \"justify-between\",\n    },\n    wrap: {\n      true: \"flex-wrap\",\n      false: \"\",\n    },\n  },\n  defaultVariants: { direction: \"vertical\", gap: \"md\", wrap: false },\n});\n\nexport type StackProps = ComponentProps<\"div\"> &\n  VariantProps<typeof stackVariants> & {\n    /** Render the child element (ul, nav, form) as the stack. */\n    asChild?: boolean;\n  };\n\nexport function Stack({ className, direction, gap, align, justify, wrap, asChild = false, ...props }: StackProps) {\n  const Comp = asChild ? Slot.Root : \"div\";\n  return <Comp data-slot=\"stack\" className={cn(stackVariants({ direction, gap, align, justify, wrap }), className)} {...props} />;\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "layout",
+    "when": "Spacing a run of siblings evenly: form fields, a button row, a header with actions. For columns that reflow by width use grid; for unequal tiles use bento-grid.",
+    "example": "<Stack gap=\"lg\">\n  <h2>Title</h2>\n  <p>Body</p>\n</Stack>\n<Stack direction=\"horizontal\" gap=\"sm\" align=\"center\" justify=\"between\" wrap>\n  <span>Plan</span>\n  <Button size=\"sm\">Change</Button>\n</Stack>\n<Stack asChild gap=\"xs\"><ul><li>One</li><li>Two</li></ul></Stack>",
+    "client": false
+  }
+}

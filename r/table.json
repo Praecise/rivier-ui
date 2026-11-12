@@ -1,0 +1,26 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "table",
+  "type": "registry:ui",
+  "title": "Table",
+  "description": "A semantic table with styled parts, inside a wrapper that scrolls sideways so it never overflows a narrow screen.",
+  "dependencies": [],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/table.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/table.tsx",
+      "content": "/**\n * @name table\n * @category ui\n * @description A semantic table with styled parts, inside a wrapper that scrolls sideways so it never overflows a narrow screen.\n * @when Rows of the same kind of thing compared across columns. For sorting, filtering and paging build on these parts. For two or three facts per item use cards; for one number use stat.\n * @example\n * <Table>\n *   <TableCaption>Invoices this quarter</TableCaption>\n *   <TableHeader>\n *     <TableRow>\n *       <TableHead>Invoice</TableHead>\n *       <TableHead>Status</TableHead>\n *       <TableHead numeric>Amount</TableHead>\n *     </TableRow>\n *   </TableHeader>\n *   <TableBody>\n *     <TableRow>\n *       <TableCell>INV-001</TableCell>\n *       <TableCell>Paid</TableCell>\n *       <TableCell numeric>€250.00</TableCell>\n *     </TableRow>\n *   </TableBody>\n *   <TableFooter>\n *     <TableRow>\n *       <TableCell colSpan={2}>Total</TableCell>\n *       <TableCell numeric>€250.00</TableCell>\n *     </TableRow>\n *   </TableFooter>\n * </Table>\n */\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\n/** The helper for number columns: digits line up and the text sits at the end of the cell. */\nexport const tableNumeric = \"tabular-nums text-end\";\n\nexport type TableProps = ComponentProps<\"table\"> & {\n  /** Classes for the scrolling wrapper (a border and radius, a max height). `className` goes to the table. */\n  containerClassName?: string;\n};\n\nexport function Table({ className, containerClassName, ...props }: TableProps) {\n  return (\n    <div data-slot=\"table-container\" className={cn(\"relative w-full overflow-x-auto\", containerClassName)}>\n      <table data-slot=\"table\" className={cn(\"w-full caption-bottom border-collapse text-sm\", className)} {...props} />\n    </div>\n  );\n}\n\nexport function TableHeader({ className, ...props }: ComponentProps<\"thead\">) {\n  return <thead data-slot=\"table-header\" className={cn(\"[&_tr]:border-b\", className)} {...props} />;\n}\n\nexport function TableBody({ className, ...props }: ComponentProps<\"tbody\">) {\n  return <tbody data-slot=\"table-body\" className={cn(\"[&_tr:last-child]:border-b-0\", className)} {...props} />;\n}\n\nexport function TableFooter({ className, ...props }: ComponentProps<\"tfoot\">) {\n  return <tfoot data-slot=\"table-footer\" className={cn(\"border-t bg-muted font-medium text-foreground [&_tr:last-child]:border-b-0\", className)} {...props} />;\n}\n\n/** Set `data-state=\"selected\"` on a selected row. */\nexport function TableRow({ className, ...props }: ComponentProps<\"tr\">) {\n  return <tr data-slot=\"table-row\" className={cn(\"border-b hover:bg-accent data-[state=selected]:bg-highlight-soft\", className)} {...props} />;\n}\n\nexport type TableHeadProps = ComponentProps<\"th\"> & {\n  /** A column of numbers: tabular digits, aligned to the end. */\n  numeric?: boolean;\n};\n\nexport function TableHead({ className, numeric = false, scope = \"col\", ...props }: TableHeadProps) {\n  return (\n    <th\n      data-slot=\"table-head\"\n      scope={scope}\n      className={cn(\"h-10 px-3 text-start align-middle font-medium whitespace-nowrap text-muted-foreground\", numeric && tableNumeric, className)}\n      {...props}\n    />\n  );\n}\n\nexport type TableCellProps = ComponentProps<\"td\"> & {\n  /** A number: tabular digits, aligned to the end. */\n  numeric?: boolean;\n};\n\nexport function TableCell({ className, numeric = false, ...props }: TableCellProps) {\n  return <td data-slot=\"table-cell\" className={cn(\"px-3 py-2.5 align-middle\", numeric && tableNumeric, className)} {...props} />;\n}\n\nexport function TableCaption({ className, ...props }: ComponentProps<\"caption\">) {\n  return <caption data-slot=\"table-caption\" className={cn(\"mt-3 text-start text-sm text-muted-foreground\", className)} {...props} />;\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "Rows of the same kind of thing compared across columns. For sorting, filtering and paging build on these parts. For two or three facts per item use cards; for one number use stat.",
+    "example": "<Table>\n  <TableCaption>Invoices this quarter</TableCaption>\n  <TableHeader>\n    <TableRow>\n      <TableHead>Invoice</TableHead>\n      <TableHead>Status</TableHead>\n      <TableHead numeric>Amount</TableHead>\n    </TableRow>\n  </TableHeader>\n  <TableBody>\n    <TableRow>\n      <TableCell>INV-001</TableCell>\n      <TableCell>Paid</TableCell>\n      <TableCell numeric>€250.00</TableCell>\n    </TableRow>\n  </TableBody>\n  <TableFooter>\n    <TableRow>\n      <TableCell colSpan={2}>Total</TableCell>\n      <TableCell numeric>€250.00</TableCell>\n    </TableRow>\n  </TableFooter>\n</Table>",
+    "client": false
+  }
+}

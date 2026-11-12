@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "section",
+  "type": "registry:component",
+  "title": "Section",
+  "description": "A band of a page with consistent vertical rhythm, an optional eyebrow, title and description, and three tones: default, muted, inverse.",
+  "dependencies": [
+    "class-variance-authority"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn",
+    "@rivier-ui/container"
+  ],
+  "files": [
+    {
+      "path": "registry/layout/section.tsx",
+      "type": "registry:component",
+      "target": "components/layout/section.tsx",
+      "content": "/**\n * @name section\n * @category layout\n * @description A band of a page with consistent vertical rhythm, an optional eyebrow, title and description, and three tones: default, muted, inverse.\n * @when Every top-level block of a marketing or content page. \"inverse\" makes a dark band on a light page and re-themes everything inside it. Inside an app screen use stack and card instead.\n * @example\n * <Section eyebrow=\"Features\" title=\"Everything in one place\" description=\"Built on the same tokens.\">\n *   <BentoGrid>…</BentoGrid>\n * </Section>\n * <Section tone=\"inverse\" align=\"center\" title=\"Ready to start?\">\n *   <Button>Get in touch</Button>\n * </Section>\n * <Section tone=\"muted\" spacing=\"sm\" container=\"narrow\">Plain content, no header.</Section>\n */\nimport { cva, type VariantProps } from \"class-variance-authority\";\nimport type { ComponentProps, ReactNode } from \"react\";\nimport { cn } from \"@/lib/cn\";\nimport { Container, type ContainerProps } from \"@/components/layout/container\";\n\n/*\n * Inverse sets data-theme=\"dark\" on the section, which is how the theme scopes dark to part of a page: the\n * theme works its tokens out again on any element that carries data-theme, so everything inside re-themes.\n * When the page is already dark the band is the card colour, so it still reads as a band.\n */\nconst INVERSE = \"bg-background text-foreground [.dark_&]:bg-card [[data-theme=dark]_&]:bg-card\";\n\nexport const sectionVariants = cva(\"w-full\", {\n  variants: {\n    tone: {\n      default: \"bg-background text-foreground\",\n      muted: \"bg-muted text-foreground\",\n      inverse: INVERSE,\n    },\n    spacing: {\n      none: \"\",\n      sm: \"py-10 md:py-14\",\n      md: \"py-16 md:py-24\",\n      lg: \"py-20 md:py-32\",\n    },\n  },\n  defaultVariants: { tone: \"default\", spacing: \"md\" },\n});\n\nexport type SectionProps = Omit<ComponentProps<\"section\">, \"title\"> &\n  VariantProps<typeof sectionVariants> & {\n    /** A short line above the title. */\n    eyebrow?: ReactNode;\n    /** The section's heading, rendered as an h2. */\n    title?: ReactNode;\n    description?: ReactNode;\n    /** Where the header sits. Defaults to \"start\". */\n    align?: \"start\" | \"center\";\n    /** The width of the inner container, or `false` to place children edge to edge. Defaults to \"page\". */\n    container?: ContainerProps[\"size\"] | false;\n  };\n\nexport function Section({ className, tone, spacing, eyebrow, title, description, align = \"start\", container = \"page\", children, ...props }: SectionProps) {\n  const kind = tone ?? \"default\";\n  const header =\n    eyebrow || title || description ? (\n      <header data-slot=\"section-header\" className={cn(\"mb-10 flex max-w-2xl flex-col gap-3 md:mb-14\", align === \"center\" && \"mx-auto items-center text-center\")}>\n        {eyebrow ? (\n          <p data-slot=\"section-eyebrow\" className=\"text-sm font-medium text-muted-foreground\">\n            {eyebrow}\n          </p>\n        ) : null}\n        {title ? (\n          <h2 data-slot=\"section-title\" className=\"text-3xl leading-tight font-medium tracking-tight text-balance md:text-4xl\">\n            {title}\n          </h2>\n        ) : null}\n        {description ? (\n          <p data-slot=\"section-description\" className=\"text-base text-pretty text-muted-foreground md:text-lg\">\n            {description}\n          </p>\n        ) : null}\n      </header>\n    ) : null;\n\n  return (\n    <section\n      data-slot=\"section\"\n      data-tone={kind}\n      data-theme={kind === \"inverse\" ? \"dark\" : undefined}\n      className={cn(sectionVariants({ tone: kind, spacing }), className)}\n      {...props}\n    >\n      {container === false ? (\n        <>\n          {header ? <Container>{header}</Container> : null}\n          {children}\n        </>\n      ) : (\n        <Container size={container}>\n          {header}\n          {children}\n        </Container>\n      )}\n    </section>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "layout",
+    "when": "Every top-level block of a marketing or content page. \"inverse\" makes a dark band on a light page and re-themes everything inside it. Inside an app screen use stack and card instead.",
+    "example": "<Section eyebrow=\"Features\" title=\"Everything in one place\" description=\"Built on the same tokens.\">\n  <BentoGrid>…</BentoGrid>\n</Section>\n<Section tone=\"inverse\" align=\"center\" title=\"Ready to start?\">\n  <Button>Get in touch</Button>\n</Section>\n<Section tone=\"muted\" spacing=\"sm\" container=\"narrow\">Plain content, no header.</Section>",
+    "client": false
+  }
+}

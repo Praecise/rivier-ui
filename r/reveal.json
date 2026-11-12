@@ -1,0 +1,27 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "reveal",
+  "type": "registry:component",
+  "title": "Reveal",
+  "description": "Fades and moves its content into place when it scrolls into view.",
+  "dependencies": [],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn",
+    "@rivier-ui/motion"
+  ],
+  "files": [
+    {
+      "path": "registry/motion/reveal.tsx",
+      "type": "registry:component",
+      "target": "components/motion/reveal.tsx",
+      "content": "\"use client\";\n/**\n * @name reveal\n * @category motion\n * @description Fades and moves its content into place when it scrolls into view.\n * @when A section, card or image that should arrive as the page is read. For a list revealed one after another use stagger; for a heading use text-reveal; for conditional UI that mounts and unmounts use presence.\n * @example\n * <Reveal>\n *   <h2 className=\"text-2xl font-medium\">Built to be owned</h2>\n * </Reveal>\n * <Reveal direction=\"start\" distance={40} delay={0.1} once={false}>\n *   <img src=\"/studio.jpg\" alt=\"The studio\" className=\"rounded-surface\" />\n * </Reveal>\n */\nimport { useImperativeHandle, useRef, type ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\nimport { useEntrance, type EntranceDirection, type EntranceOptions } from \"@/lib/motion\";\n\nexport type RevealProps = ComponentProps<\"div\"> & {\n  /** The way the content travels as it arrives; \"start\" and \"end\" follow the writing direction. Default \"up\". */\n  direction?: EntranceDirection;\n  /** How far it travels, in pixels. Default 24. */\n  distance?: number;\n  /** Seconds to wait once it is in view. Default 0. */\n  delay?: number;\n  /** Seconds the entrance takes. Default: the scene duration (0.7). */\n  duration?: number;\n  /** Play once (default), or again each time it comes back into view. */\n  once?: boolean;\n  /** Also play when it is already in view as the page loads (it is hidden first). Default false: left as it is. */\n  playOnLoad?: boolean;\n  /** Grows or shrinks the viewport edge used for \"in view\", as a CSS margin. */\n  margin?: EntranceOptions[\"margin\"];\n  /** How much of the box must be in view: \"some\" (default), \"all\", or a fraction. */\n  amount?: EntranceOptions[\"amount\"];\n  /** Classes for the inner, animated element that holds the children (flex, grid, gap go here). */\n  contentClassName?: string;\n};\n\n/**\n * Two elements on purpose. The root is never transformed and is the one watched, so content that starts\n * clipped by a parent or moved out of view still triggers; the inner element is the one that moves.\n * `className` sizes and places the root; `contentClassName` lays out the children.\n */\nexport function Reveal({\n  className,\n  contentClassName,\n  children,\n  direction = \"up\",\n  distance = 24,\n  delay = 0,\n  duration,\n  once = true,\n  playOnLoad = false,\n  margin,\n  amount,\n  ref,\n  ...props\n}: RevealProps) {\n  const rootRef = useRef<HTMLDivElement>(null);\n  const contentRef = useRef<HTMLDivElement>(null);\n  useImperativeHandle(ref, () => rootRef.current as HTMLDivElement, []);\n  useEntrance(rootRef, () => (contentRef.current ? [contentRef.current] : []), {\n    direction,\n    distance,\n    delay,\n    duration,\n    once,\n    playOnLoad,\n    margin,\n    amount,\n  });\n\n  return (\n    <div ref={rootRef} data-slot=\"reveal\" className={cn(className)} {...props}>\n      <div ref={contentRef} data-slot=\"reveal-content\" className={cn(\"h-full\", contentClassName)}>\n        {children}\n      </div>\n    </div>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "motion",
+    "when": "A section, card or image that should arrive as the page is read. For a list revealed one after another use stagger; for a heading use text-reveal; for conditional UI that mounts and unmounts use presence.",
+    "example": "<Reveal>\n  <h2 className=\"text-2xl font-medium\">Built to be owned</h2>\n</Reveal>\n<Reveal direction=\"start\" distance={40} delay={0.1} once={false}>\n  <img src=\"/studio.jpg\" alt=\"The studio\" className=\"rounded-surface\" />\n</Reveal>",
+    "client": true
+  }
+}

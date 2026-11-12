@@ -1,0 +1,26 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "textarea",
+  "type": "registry:ui",
+  "title": "Textarea",
+  "description": "A multi-line text input that grows with its content, with an invalid state.",
+  "dependencies": [],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/textarea.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/textarea.tsx",
+      "content": "/**\n * @name textarea\n * @category ui\n * @description A multi-line text input that grows with its content, with an invalid state.\n * @when Free text of more than one line: a message, a note, a description. Wrap it in field for a label and an error; use input for a single line.\n * @example\n * <Textarea placeholder=\"Tell us about the project\" rows={4} />\n * <Textarea aria-invalid=\"true\" aria-label=\"Message\" defaultValue=\"Too short\" />\n */\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport function Textarea({ className, ...props }: ComponentProps<\"textarea\">) {\n  return (\n    <textarea\n      data-slot=\"textarea\"\n      className={cn(\n        \"field-sizing-content block min-h-20 w-full min-w-0 rounded-control border border-input bg-background px-3 py-2 text-sm text-foreground transition-[border-color,opacity] duration-instant ease-out placeholder:text-muted-foreground disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive motion-reduce:transition-none\",\n        className,\n      )}\n      {...props}\n    />\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "Free text of more than one line: a message, a note, a description. Wrap it in field for a label and an error; use input for a single line.",
+    "example": "<Textarea placeholder=\"Tell us about the project\" rows={4} />\n<Textarea aria-invalid=\"true\" aria-label=\"Message\" defaultValue=\"Too short\" />",
+    "client": false
+  }
+}

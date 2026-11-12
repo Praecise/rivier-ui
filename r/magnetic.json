@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "magnetic",
+  "type": "registry:component",
+  "title": "Magnetic",
+  "description": "A wrapper whose child is gently pulled toward the pointer while it is hovered, and springs back when the pointer leaves.",
+  "dependencies": [
+    "motion"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn",
+    "@rivier-ui/motion"
+  ],
+  "files": [
+    {
+      "path": "registry/motion/magnetic.tsx",
+      "type": "registry:component",
+      "target": "components/motion/magnetic.tsx",
+      "content": "\"use client\";\n/**\n * @name magnetic\n * @category motion\n * @description A wrapper whose child is gently pulled toward the pointer while it is hovered, and springs back when the pointer leaves.\n * @when The one main call to action on a marketing page, or an icon button that should feel alive. Not for every button, not inside dense interfaces, and it does nothing on touch screens.\n * @example\n * <Magnetic>\n *   <Button size=\"lg\">Start a project</Button>\n * </Magnetic>\n * <Magnetic strength={0.5}>\n *   <Button variant=\"outline\" size=\"icon\" aria-label=\"Play\"><Play /></Button>\n * </Magnetic>\n */\nimport { motion, useSpring } from \"motion/react\";\nimport { useEffect, useImperativeHandle, useRef, type ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\nimport { SPRING, isFinePointer, useMotionSafe } from \"@/lib/motion\";\n\nexport type MagneticProps = ComponentProps<\"div\"> & {\n  /** How far the child follows, as a fraction of the pointer's distance from the centre (0 to 1). Default 0.3. */\n  strength?: number;\n};\n\n/**\n * The root keeps its place and is the hover area (so the target does not run away from the pointer); the\n * inner element is the one moved, with transform only. Pointer positions go straight into spring motion\n * values: no React state changes while the pointer moves.\n */\nexport function Magnetic({ className, strength = 0.3, children, ref, ...props }: MagneticProps) {\n  const rootRef = useRef<HTMLDivElement>(null);\n  useImperativeHandle(ref, () => rootRef.current as HTMLDivElement, []);\n  const safe = useMotionSafe();\n  const x = useSpring(0, SPRING);\n  const y = useSpring(0, SPRING);\n\n  useEffect(() => {\n    const root = rootRef.current;\n    if (!safe || !root || !isFinePointer()) return;\n    const pull = Math.max(0, Math.min(1, strength));\n    const move = (event: PointerEvent): void => {\n      if (event.pointerType === \"touch\") return;\n      const rect = root.getBoundingClientRect();\n      x.set((event.clientX - (rect.left + rect.width / 2)) * pull);\n      y.set((event.clientY - (rect.top + rect.height / 2)) * pull);\n    };\n    const leave = (): void => {\n      x.set(0);\n      y.set(0);\n    };\n    root.addEventListener(\"pointermove\", move, { passive: true });\n    root.addEventListener(\"pointerleave\", leave, { passive: true });\n    return () => {\n      root.removeEventListener(\"pointermove\", move);\n      root.removeEventListener(\"pointerleave\", leave);\n      x.jump(0);\n      y.jump(0);\n    };\n  }, [safe, strength, x, y]);\n\n  return (\n    <div ref={rootRef} data-slot=\"magnetic\" className={cn(\"inline-block\", className)} {...props}>\n      <motion.div data-slot=\"magnetic-content\" className=\"inline-block align-top\" style={{ x, y }}>\n        {children}\n      </motion.div>\n    </div>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "motion",
+    "when": "The one main call to action on a marketing page, or an icon button that should feel alive. Not for every button, not inside dense interfaces, and it does nothing on touch screens.",
+    "example": "<Magnetic>\n  <Button size=\"lg\">Start a project</Button>\n</Magnetic>\n<Magnetic strength={0.5}>\n  <Button variant=\"outline\" size=\"icon\" aria-label=\"Play\"><Play /></Button>\n</Magnetic>",
+    "client": true
+  }
+}

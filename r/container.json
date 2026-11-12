@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "container",
+  "type": "registry:component",
+  "title": "Container",
+  "description": "Centres content at the page width with the page gutter on both sides. Four sizes: narrow, page, wide, full.",
+  "dependencies": [
+    "class-variance-authority",
+    "radix-ui"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/layout/container.tsx",
+      "type": "registry:component",
+      "target": "components/layout/container.tsx",
+      "content": "/**\n * @name container\n * @category layout\n * @description Centres content at the page width with the page gutter on both sides. Four sizes: narrow, page, wide, full.\n * @when Around the content of every page band so edges line up down the page. \"narrow\" for reading text, \"wide\" for galleries and dashboards, \"full\" to keep only the gutter. Section already wraps its children in one.\n * @example\n * <Container>\n *   <h1>Pricing</h1>\n * </Container>\n * <Container size=\"narrow\" asChild>\n *   <article>Long-form text…</article>\n * </Container>\n */\nimport { Slot } from \"radix-ui\";\nimport { cva, type VariantProps } from \"class-variance-authority\";\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport const containerVariants = cva(\"mx-auto w-full px-(--gutter)\", {\n  variants: {\n    size: {\n      narrow: \"max-w-3xl\",\n      page: \"max-w-page\",\n      wide: \"max-w-[96rem]\",\n      full: \"max-w-none\",\n    },\n  },\n  defaultVariants: { size: \"page\" },\n});\n\nexport type ContainerProps = ComponentProps<\"div\"> &\n  VariantProps<typeof containerVariants> & {\n    /** Render the child element (main, article, header) with the container's width and gutter. */\n    asChild?: boolean;\n  };\n\nexport function Container({ className, size, asChild = false, ...props }: ContainerProps) {\n  const Comp = asChild ? Slot.Root : \"div\";\n  return <Comp data-slot=\"container\" className={cn(containerVariants({ size }), className)} {...props} />;\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "layout",
+    "when": "Around the content of every page band so edges line up down the page. \"narrow\" for reading text, \"wide\" for galleries and dashboards, \"full\" to keep only the gutter. Section already wraps its children in one.",
+    "example": "<Container>\n  <h1>Pricing</h1>\n</Container>\n<Container size=\"narrow\" asChild>\n  <article>Long-form text…</article>\n</Container>",
+    "client": false
+  }
+}

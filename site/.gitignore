@@ -1,0 +1,6 @@
+.next/
+next-env.d.ts
+# Installed from ../registry by "npm run site:install"; the registry is the source.
+src/components/
+src/lib/
+src/styles/

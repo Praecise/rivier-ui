@@ -1,0 +1,27 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "stagger",
+  "type": "registry:component",
+  "title": "Stagger",
+  "description": "A container whose items fade and move into place one after another when it scrolls into view.",
+  "dependencies": [],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn",
+    "@rivier-ui/motion"
+  ],
+  "files": [
+    {
+      "path": "registry/motion/stagger.tsx",
+      "type": "registry:component",
+      "target": "components/motion/stagger.tsx",
+      "content": "\"use client\";\n/**\n * @name stagger\n * @category motion\n * @description A container whose items fade and move into place one after another when it scrolls into view.\n * @when A grid of cards, a feature list, a row of logos. For one block use reveal; for the words of a heading use text-reveal.\n * @example\n * <Stagger className=\"grid gap-4 sm:grid-cols-3\" interval={0.08}>\n *   <StaggerItem><Card>Design</Card></StaggerItem>\n *   <StaggerItem><Card>Build</Card></StaggerItem>\n *   <StaggerItem><Card>Launch</Card></StaggerItem>\n * </Stagger>\n */\nimport { useImperativeHandle, useRef, type ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\nimport { useEntrance, type EntranceDirection, type EntranceOptions } from \"@/lib/motion\";\n\nexport type StaggerProps = ComponentProps<\"div\"> & {\n  /** Seconds between one item and the next. Default 0.08. */\n  interval?: number;\n  /** Seconds before the first item. Default 0. */\n  delay?: number;\n  /** Seconds each item takes. Default: the scene duration (0.7). */\n  duration?: number;\n  /** The way each item travels as it arrives. Default \"up\". */\n  direction?: EntranceDirection;\n  /** How far each item travels, in pixels. Default 16. */\n  distance?: number;\n  /** Play once (default), or again each time the container comes back into view. */\n  once?: boolean;\n  /** Also play when it is already in view as the page loads (items are hidden first). Default false. */\n  playOnLoad?: boolean;\n  /** Grows or shrinks the viewport edge used for \"in view\", as a CSS margin. */\n  margin?: EntranceOptions[\"margin\"];\n  /** How much of the container must be in view: \"some\" (default), \"all\", or a fraction. */\n  amount?: EntranceOptions[\"amount\"];\n};\n\n/** The items of this container in document order; items of a Stagger nested inside belong to that one. */\nfunction itemsOf(root: HTMLElement): HTMLElement[] {\n  return Array.from(root.querySelectorAll<HTMLElement>('[data-slot=\"stagger-item\"]')).filter(\n    (item) => item.closest('[data-slot=\"stagger\"]') === root,\n  );\n}\n\n/** The container is never transformed and is the element watched; only the items move. */\nexport function Stagger({\n  className,\n  interval = 0.08,\n  delay = 0,\n  duration,\n  direction = \"up\",\n  distance = 16,\n  once = true,\n  playOnLoad = false,\n  margin,\n  amount,\n  ref,\n  ...props\n}: StaggerProps) {\n  const rootRef = useRef<HTMLDivElement>(null);\n  useImperativeHandle(ref, () => rootRef.current as HTMLDivElement, []);\n  useEntrance(rootRef, itemsOf, {\n    direction,\n    distance,\n    duration,\n    delay: (index) => delay + index * interval,\n    once,\n    playOnLoad,\n    margin,\n    amount,\n  });\n\n  return <div ref={rootRef} data-slot=\"stagger\" className={cn(className)} {...props} />;\n}\n\n/** One revealed item. It can sit at any depth inside its Stagger; the order is the order in the document. */\nexport function StaggerItem({ className, ...props }: ComponentProps<\"div\">) {\n  return <div data-slot=\"stagger-item\" className={cn(className)} {...props} />;\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "motion",
+    "when": "A grid of cards, a feature list, a row of logos. For one block use reveal; for the words of a heading use text-reveal.",
+    "example": "<Stagger className=\"grid gap-4 sm:grid-cols-3\" interval={0.08}>\n  <StaggerItem><Card>Design</Card></StaggerItem>\n  <StaggerItem><Card>Build</Card></StaggerItem>\n  <StaggerItem><Card>Launch</Card></StaggerItem>\n</Stagger>",
+    "client": true
+  }
+}

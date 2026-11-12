@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "separator",
+  "type": "registry:ui",
+  "title": "Separator",
+  "description": "A hairline between two pieces of content, horizontal or vertical, with an optional label in the middle.",
+  "dependencies": [
+    "radix-ui"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/separator.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/separator.tsx",
+      "content": "\"use client\";\n/**\n * @name separator\n * @category ui\n * @description A hairline between two pieces of content, horizontal or vertical, with an optional label in the middle.\n * @when Dividing groups inside a surface or a toolbar. Between page sections use section spacing instead, and inside a list prefer a border on the rows.\n * @example\n * <Separator />\n * <Separator>or continue with</Separator>\n * <div className=\"flex h-5 items-center gap-3\">\n *   <span>Docs</span>\n *   <Separator orientation=\"vertical\" />\n *   <span>Blog</span>\n * </div>\n */\nimport { Separator as SeparatorPrimitive } from \"radix-ui\";\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nconst line =\n  \"shrink-0 bg-border data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch\";\n\nexport type SeparatorProps = ComponentProps<typeof SeparatorPrimitive.Root>;\n\n/**\n * Decorative by default (hidden from assistive technology). Pass `decorative={false}` when the split carries\n * meaning. Children become a centred label; a label is only drawn on a horizontal separator.\n */\nexport function Separator({ className, orientation = \"horizontal\", decorative = true, children, asChild, ...props }: SeparatorProps) {\n  if (children && orientation === \"horizontal\" && !asChild) {\n    return (\n      <div\n        data-slot=\"separator\"\n        data-orientation=\"horizontal\"\n        role={decorative ? undefined : \"separator\"}\n        className={cn(\"flex w-full items-center gap-3 text-xs text-muted-foreground\", className)}\n        {...props}\n      >\n        <SeparatorPrimitive.Root decorative className={cn(line, \"min-w-4 flex-1 data-[orientation=horizontal]:w-auto\")} />\n        <span data-slot=\"separator-label\" className=\"min-w-0 text-center\">\n          {children}\n        </span>\n        <SeparatorPrimitive.Root decorative className={cn(line, \"min-w-4 flex-1 data-[orientation=horizontal]:w-auto\")} />\n      </div>\n    );\n  }\n  return (\n    <SeparatorPrimitive.Root\n      data-slot=\"separator\"\n      orientation={orientation}\n      decorative={decorative}\n      asChild={asChild}\n      className={cn(line, className)}\n      {...props}\n    >\n      {asChild ? children : undefined}\n    </SeparatorPrimitive.Root>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "Dividing groups inside a surface or a toolbar. Between page sections use section spacing instead, and inside a list prefer a border on the rows.",
+    "example": "<Separator />\n<Separator>or continue with</Separator>\n<div className=\"flex h-5 items-center gap-3\">\n  <span>Docs</span>\n  <Separator orientation=\"vertical\" />\n  <span>Blog</span>\n</div>",
+    "client": true
+  }
+}

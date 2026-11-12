@@ -1,0 +1,26 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "card",
+  "type": "registry:ui",
+  "title": "Card",
+  "description": "A flat surface with a hairline edge, and parts for a header, title, description, content and footer.",
+  "dependencies": [],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/card.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/card.tsx",
+      "content": "/**\n * @name card\n * @category ui\n * @description A flat surface with a hairline edge, and parts for a header, title, description, content and footer.\n * @when Grouping related content: a plan, a stat, a form section. For a grid of unequal cards use bento-grid.\n * @example\n * <Card>\n *   <CardHeader>\n *     <CardTitle>Usage</CardTitle>\n *     <CardDescription>This month</CardDescription>\n *   </CardHeader>\n *   <CardContent>1,204 requests</CardContent>\n *   <CardFooter><Button size=\"sm\">Details</Button></CardFooter>\n * </Card>\n */\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport function Card({ className, ...props }: ComponentProps<\"div\">) {\n  return <div data-slot=\"card\" className={cn(\"flex flex-col rounded-surface border bg-card text-card-foreground\", className)} {...props} />;\n}\n\nexport function CardHeader({ className, ...props }: ComponentProps<\"div\">) {\n  return <div data-slot=\"card-header\" className={cn(\"flex flex-col gap-1 p-5\", className)} {...props} />;\n}\n\n/** Renders an h3. Pass `asChild`-free: change the level by using your own heading with these classes if needed. */\nexport function CardTitle({ className, ...props }: ComponentProps<\"h3\">) {\n  return <h3 data-slot=\"card-title\" className={cn(\"text-base font-medium leading-tight\", className)} {...props} />;\n}\n\nexport function CardDescription({ className, ...props }: ComponentProps<\"p\">) {\n  return <p data-slot=\"card-description\" className={cn(\"text-sm text-muted-foreground\", className)} {...props} />;\n}\n\nexport function CardContent({ className, ...props }: ComponentProps<\"div\">) {\n  return <div data-slot=\"card-content\" className={cn(\"p-5 pt-0 first:pt-5\", className)} {...props} />;\n}\n\nexport function CardFooter({ className, ...props }: ComponentProps<\"div\">) {\n  return <div data-slot=\"card-footer\" className={cn(\"mt-auto flex items-center gap-2 border-t p-5\", className)} {...props} />;\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "Grouping related content: a plan, a stat, a form section. For a grid of unequal cards use bento-grid.",
+    "example": "<Card>\n  <CardHeader>\n    <CardTitle>Usage</CardTitle>\n    <CardDescription>This month</CardDescription>\n  </CardHeader>\n  <CardContent>1,204 requests</CardContent>\n  <CardFooter><Button size=\"sm\">Details</Button></CardFooter>\n</Card>",
+    "client": false
+  }
+}

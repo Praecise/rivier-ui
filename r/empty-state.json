@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "empty-state",
+  "type": "registry:ui",
+  "title": "Empty State",
+  "description": "What a list, a table or a search shows when there is nothing in it: an icon, a title, a description and an action.",
+  "dependencies": [
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/empty-state.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/empty-state.tsx",
+      "content": "/**\n * @name empty-state\n * @category ui\n * @description What a list, a table or a search shows when there is nothing in it: an icon, a title, a description and an action.\n * @when An empty list, zero search results, a first run. Say what belongs here and offer the one action that fills it. For a failure use alert; while loading use skeleton.\n * @example\n * <EmptyState\n *   title=\"No projects yet\"\n *   description=\"Projects you create will appear here.\"\n *   action={<Button>New project</Button>}\n * />\n * <EmptyState icon={<SearchX />} title=\"No results\" description=\"Try a shorter search.\" bordered={false} />\n */\nimport { Inbox } from \"lucide-react\";\nimport type { ComponentProps, ReactNode } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport type EmptyStateProps = Omit<ComponentProps<\"div\">, \"title\"> & {\n  /** An icon element. Defaults to an inbox; pass `null` for none. */\n  icon?: ReactNode;\n  title: ReactNode;\n  description?: ReactNode;\n  /** One button or link, or two at most. */\n  action?: ReactNode;\n  /** Draws the dashed edge. Turn it off inside a card or a table. */\n  bordered?: boolean;\n};\n\n/** The title is an h3. Children, if any, are placed under the action. */\nexport function EmptyState({ className, icon, title, description, action, bordered = true, children, ...props }: EmptyStateProps) {\n  return (\n    <div\n      data-slot=\"empty-state\"\n      className={cn(\n        \"flex w-full flex-col items-center justify-center gap-4 px-6 py-12 text-center\",\n        bordered && \"rounded-surface border border-dashed border-border-strong\",\n        className,\n      )}\n      {...props}\n    >\n      {icon === null ? null : (\n        <div data-slot=\"empty-state-icon\" aria-hidden=\"true\" className=\"flex size-10 items-center justify-center rounded-control bg-muted text-foreground [&_svg]:size-5\">\n          {icon === undefined ? <Inbox strokeWidth={1.5} /> : icon}\n        </div>\n      )}\n      <div className=\"flex max-w-prose flex-col gap-1\">\n        <h3 data-slot=\"empty-state-title\" className=\"text-base font-medium leading-tight\">\n          {title}\n        </h3>\n        {description ? (\n          <p data-slot=\"empty-state-description\" className=\"text-sm text-muted-foreground\">\n            {description}\n          </p>\n        ) : null}\n      </div>\n      {action ? (\n        <div data-slot=\"empty-state-action\" className=\"flex flex-wrap items-center justify-center gap-2\">\n          {action}\n        </div>\n      ) : null}\n      {children}\n    </div>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "An empty list, zero search results, a first run. Say what belongs here and offer the one action that fills it. For a failure use alert; while loading use skeleton.",
+    "example": "<EmptyState\n  title=\"No projects yet\"\n  description=\"Projects you create will appear here.\"\n  action={<Button>New project</Button>}\n/>\n<EmptyState icon={<SearchX />} title=\"No results\" description=\"Try a shorter search.\" bordered={false} />",
+    "client": false
+  }
+}

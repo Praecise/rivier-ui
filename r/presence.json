@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "presence",
+  "type": "registry:component",
+  "title": "Presence",
+  "description": "Animates its children in when they are shown and out before they are removed.",
+  "dependencies": [
+    "motion"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn",
+    "@rivier-ui/motion"
+  ],
+  "files": [
+    {
+      "path": "registry/motion/presence.tsx",
+      "type": "registry:component",
+      "target": "components/motion/presence.tsx",
+      "content": "\"use client\";\n/**\n * @name presence\n * @category motion\n * @description Animates its children in when they are shown and out before they are removed.\n * @when Conditional UI that is not a Radix primitive: an inline notice, a revealed panel, a step that swaps. Radix dialogs, popovers and menus already animate with their own classes; for content entering on scroll use reveal.\n * @example\n * const [open, setOpen] = useState(false);\n * <Button onClick={() => setOpen((value) => !value)}>Toggle</Button>\n * <Presence show={open} preset=\"slide-up\" className=\"mt-4 rounded-surface border p-4\">\n *   Saved. Your changes are live.\n * </Presence>\n */\nimport { AnimatePresence, motion, useReducedMotion, type AnimatePresenceProps, type HTMLMotionProps } from \"motion/react\";\nimport { cn } from \"@/lib/cn\";\nimport { DURATION, EASE, useMotionSafe } from \"@/lib/motion\";\n\nexport type PresencePreset = \"fade\" | \"scale\" | \"slide-up\" | \"slide-down\";\n\n/** Where each preset starts from and leaves to. Shown is always opacity 1 with no transform. */\nconst HIDDEN: Record<PresencePreset, { opacity: number; scale?: number; y?: number }> = {\n  fade: { opacity: 0 },\n  scale: { opacity: 0, scale: 0.96 },\n  \"slide-up\": { opacity: 0, y: 8 },\n  \"slide-down\": { opacity: 0, y: -8 },\n};\n\nconst SHOWN = { opacity: 1, scale: 1, y: 0 };\n\nexport type PresenceProps = Omit<HTMLMotionProps<\"div\">, \"initial\" | \"animate\" | \"exit\"> & {\n  /** Whether the children are present. When it turns false they animate out and are then removed from the page. */\n  show: boolean;\n  /** fade, scale (fade with a slight grow), slide-up (rises in, sinks out) or slide-down. Default \"fade\". */\n  preset?: PresencePreset;\n  /** Also animate in when it is shown from the first render of a client-side mount. Never on server markup. Default false. */\n  appear?: boolean;\n  /** AnimatePresence mode: \"sync\" (default), \"wait\" or \"popLayout\". */\n  mode?: AnimatePresenceProps[\"mode\"];\n  /** Called when the exit has finished and the children are gone. */\n  onExitComplete?: () => void;\n};\n\n/**\n * Opacity and transform only. Content that is shown on the server is rendered in its final state (no\n * entrance on first render), and under reduced motion it appears and disappears at once.\n */\nexport function Presence({ className, show, preset = \"fade\", appear = false, mode = \"sync\", onExitComplete, transition, ...props }: PresenceProps) {\n  const safe = useMotionSafe();\n  const reduced = useReducedMotion();\n  const hidden = HIDDEN[preset];\n\n  return (\n    <AnimatePresence initial={appear && safe} mode={mode} onExitComplete={onExitComplete}>\n      {show ? (\n        <motion.div\n          key=\"presence\"\n          data-slot=\"presence\"\n          className={cn(className)}\n          initial={hidden}\n          animate={SHOWN}\n          exit={hidden}\n          transition={reduced ? { duration: 0 } : (transition ?? { duration: DURATION.base, ease: EASE })}\n          {...props}\n        />\n      ) : null}\n    </AnimatePresence>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "motion",
+    "when": "Conditional UI that is not a Radix primitive: an inline notice, a revealed panel, a step that swaps. Radix dialogs, popovers and menus already animate with their own classes; for content entering on scroll use reveal.",
+    "example": "const [open, setOpen] = useState(false);\n<Button onClick={() => setOpen((value) => !value)}>Toggle</Button>\n<Presence show={open} preset=\"slide-up\" className=\"mt-4 rounded-surface border p-4\">\n  Saved. Your changes are live.\n</Presence>",
+    "client": true
+  }
+}

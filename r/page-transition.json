@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "page-transition",
+  "type": "registry:component",
+  "title": "Page Transition",
+  "description": "Wraps page content and plays a short enter (a fade and a small rise) each time the route changes.",
+  "dependencies": [
+    "motion"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn",
+    "@rivier-ui/motion"
+  ],
+  "files": [
+    {
+      "path": "registry/motion/page-transition.tsx",
+      "type": "registry:component",
+      "target": "components/motion/page-transition.tsx",
+      "content": "\"use client\";\n/**\n * @name page-transition\n * @category motion\n * @description Wraps page content and plays a short enter (a fade and a small rise) each time the route changes.\n * @when The content area of an app or site, once, in the layout. The first page load is not animated. Where the browser supports it and elements should morph between pages, use view-transition instead; do not use both.\n * @example\n * // app/template.tsx (Next.js). A template is re-created on navigation; the pathname is the key.\n * \"use client\";\n * import { usePathname } from \"next/navigation\";\n * import type { ReactNode } from \"react\";\n * import { PageTransition } from \"@/components/motion/page-transition\";\n *\n * export default function Template({ children }: { children: ReactNode }) {\n *   return <PageTransition routeKey={usePathname()}>{children}</PageTransition>;\n * }\n */\nimport { AnimatePresence, motion, useReducedMotion, type HTMLMotionProps } from \"motion/react\";\nimport { cn } from \"@/lib/cn\";\nimport { DURATION, EASE, useMotionSafe } from \"@/lib/motion\";\n\nexport type PageTransitionProps = Omit<HTMLMotionProps<\"div\">, \"initial\" | \"animate\" | \"exit\"> & {\n  /** Identifies the page: the pathname. The enter plays when it changes. */\n  routeKey: string;\n  /** How far the new page rises as it fades in, in pixels. Default 8. */\n  distance?: number;\n  /**\n   * Also fade the old page out before the new one enters (AnimatePresence mode=\"wait\"). This needs the\n   * PageTransition itself to stay mounted while its children change, as in a persistent layout that passes\n   * the route's element down; in a Next.js template the old page is removed at once, so leave it off there.\n   */\n  exit?: boolean;\n};\n\n/**\n * Opacity and transform only, and nothing is hidden in server markup: on the server and for the hydration\n * render the page is in its final state, and the enter plays only for pages mounted on the client after\n * that. Under reduced motion pages change at once.\n */\nexport function PageTransition({ className, routeKey, distance = 8, exit = false, transition, ...props }: PageTransitionProps) {\n  const safe = useMotionSafe();\n  const reduced = useReducedMotion();\n  const timing = reduced ? { duration: 0 } : (transition ?? { duration: DURATION.slow, ease: EASE });\n\n  const page = (\n    <motion.div\n      key={routeKey}\n      data-slot=\"page-transition\"\n      className={cn(className)}\n      initial={safe ? { opacity: 0, y: distance } : false}\n      animate={{ opacity: 1, y: 0 }}\n      exit={exit && !reduced ? { opacity: 0 } : undefined}\n      transition={timing}\n      {...props}\n    />\n  );\n\n  if (!exit) return page;\n  return (\n    <AnimatePresence mode=\"wait\" initial={false}>\n      {page}\n    </AnimatePresence>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "motion",
+    "when": "The content area of an app or site, once, in the layout. The first page load is not animated. Where the browser supports it and elements should morph between pages, use view-transition instead; do not use both.",
+    "example": "// app/template.tsx (Next.js). A template is re-created on navigation; the pathname is the key.\n\"use client\";\nimport { usePathname } from \"next/navigation\";\nimport type { ReactNode } from \"react\";\nimport { PageTransition } from \"@/components/motion/page-transition\";\n\nexport default function Template({ children }: { children: ReactNode }) {\n  return <PageTransition routeKey={usePathname()}>{children}</PageTransition>;\n}",
+    "client": true
+  }
+}

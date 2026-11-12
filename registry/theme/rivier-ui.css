@@ -1,0 +1,289 @@
+/*
+ * Rivier UI: tokens and theming.
+ *
+ * Import once, after Tailwind:
+ *   @import "tailwindcss";
+ *   @import "tw-animate-css";
+ *   @import "./rivier-ui.css";
+ *
+ * Everything a component draws comes from the variables below. Change the look by setting attributes on
+ * <html> (or on any element, to theme just that part of the page):
+ *
+ *   data-theme="light | dark"                      or the class "dark"
+ *   data-radius="none | sm | md | lg | full"       square to round
+ *   data-accent="teal | blue | violet | pink | red | orange | amber | green | ink"
+ *
+ * or set the knobs directly for any colour and any roundness:
+ *
+ *   style="--accent-hue: 262; --accent-chroma: 0.19; --radius: 0.625rem"
+ *
+ * The attributes work on any element, so one part of a page can carry its own theme. When setting the
+ * knobs by hand on an element other than <html>, also give it data-accent="custom" so its colours are worked
+ * out again there.
+ *
+ * Variable names follow the shadcn convention (--background, --primary, --ring, --radius), so components and
+ * blocks written for that convention take this theme without changes.
+ */
+
+@custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
+
+/* Knobs. Set these (or the attributes further down) to change the look. */
+:root {
+  --accent-hue: 200;
+  --accent-chroma: 0.105;
+  /* Lightness of the highlight colour in each mode, chosen so text on it keeps its contrast. */
+  --accent-l-light: 0.5;
+  --accent-l-dark: 0.82;
+  --radius: 0.25rem;
+
+  /* Motion. Transform and opacity only; components turn it off under reduced motion. */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --duration-instant: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+  --duration-scene: 700ms;
+
+  /* Sizes. */
+  --control-h: 2.5rem;
+  --control-h-sm: 2rem;
+  --control-h-lg: 2.75rem;
+  --page: 80rem;
+  --gutter: 1.5rem;
+}
+
+/* Light: ground, ink and neutrals. Flat: surfaces are told apart by a hairline, not a shadow. */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+  --is-dark: 0;
+
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.2 0.004 250);
+  --card: oklch(1 0 0);
+  --popover: oklch(1 0 0);
+  --muted: oklch(0.967 0.002 250);
+  --muted-foreground: oklch(0.47 0.006 250);
+  --secondary: oklch(0.967 0.002 250);
+  --accent: oklch(0.955 0.003 250);
+  --border: oklch(0.915 0.003 250);
+  --border-strong: oklch(0.82 0.004 250);
+  --input: oklch(0.56 0.004 250);
+  --overlay: oklch(0.2 0.004 250 / 0.4);
+  --on-highlight: oklch(1 0 0);
+
+  --destructive: oklch(0.53 0.19 29);
+  --success: oklch(0.49 0.12 145);
+  --warning: oklch(0.52 0.11 80);
+  --on-state: oklch(1 0 0);
+
+  /*
+   * Series colours for charts. A fixed order of hues that does not follow the highlight colour: this set is
+   * checked for separation under colour-blindness and in normal vision, in each mode against its ground.
+   * Change it only with a palette validator. One-hue marks (heatmap) use the highlight.
+   */
+  --chart-1: #2a78d6;
+  --chart-2: #eb6834;
+  --chart-3: #1baf7a;
+  --chart-4: #eda100;
+  --chart-5: #e87ba4;
+}
+
+.dark,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --is-dark: 1;
+
+  --background: oklch(0.18 0.003 250);
+  --foreground: oklch(0.96 0.003 100);
+  --card: oklch(0.21 0.004 250);
+  --popover: oklch(0.21 0.004 250);
+  --muted: oklch(0.245 0.004 250);
+  --muted-foreground: oklch(0.77 0.005 250);
+  --secondary: oklch(0.245 0.004 250);
+  --accent: oklch(0.27 0.005 250);
+  --border: oklch(0.3 0.005 250);
+  --border-strong: oklch(0.4 0.006 250);
+  --input: oklch(0.5 0.006 250);
+  --overlay: oklch(0 0 0 / 0.6);
+  --on-highlight: oklch(0.18 0.003 250);
+
+  --destructive: oklch(0.74 0.16 29);
+  --success: oklch(0.78 0.15 145);
+  --warning: oklch(0.8 0.13 80);
+  --on-state: oklch(0.18 0.003 250);
+
+  --chart-1: #3987e5;
+  --chart-2: #d95926;
+  --chart-3: #199e70;
+  --chart-4: #c98500;
+  --chart-5: #d55181;
+}
+
+/* Highlight presets. Any hue works: these are names for common ones. */
+[data-accent="teal"] { --accent-hue: 200; --accent-chroma: 0.105; --accent-l-light: 0.5; --accent-l-dark: 0.82; }
+[data-accent="blue"] { --accent-hue: 262; --accent-chroma: 0.19; --accent-l-light: 0.5; --accent-l-dark: 0.82; }
+[data-accent="violet"] { --accent-hue: 295; --accent-chroma: 0.2; --accent-l-light: 0.5; --accent-l-dark: 0.82; }
+[data-accent="pink"] { --accent-hue: 355; --accent-chroma: 0.2; --accent-l-light: 0.5; --accent-l-dark: 0.82; }
+[data-accent="red"] { --accent-hue: 27; --accent-chroma: 0.2; --accent-l-light: 0.5; --accent-l-dark: 0.82; }
+[data-accent="orange"] { --accent-hue: 50; --accent-chroma: 0.17; --accent-l-light: 0.5; --accent-l-dark: 0.82; }
+[data-accent="amber"] { --accent-hue: 78; --accent-chroma: 0.13; --accent-l-light: 0.5; --accent-l-dark: 0.82; }
+[data-accent="green"] { --accent-hue: 148; --accent-chroma: 0.15; --accent-l-light: 0.5; --accent-l-dark: 0.82; }
+/* Ink: no colour. The primary action is the text colour itself. */
+[data-accent="ink"] { --accent-hue: 250; --accent-chroma: 0.004; --accent-l-light: 0.2; --accent-l-dark: 0.96; }
+
+/* Roundness. --radius is the base; controls and surfaces derive from it. "full" makes controls pills. */
+[data-radius="none"] { --radius: 0rem; --radius-control-override: initial; }
+[data-radius="sm"] { --radius: 0.25rem; --radius-control-override: initial; }
+[data-radius="md"] { --radius: 0.5rem; --radius-control-override: initial; }
+[data-radius="lg"] { --radius: 0.875rem; --radius-control-override: initial; }
+[data-radius="full"] { --radius: 1.25rem; --radius-control-override: 9999px; }
+
+/*
+ * Derived tokens. A variable that refers to another is worked out where it is declared, so these are
+ * declared again on every element that changes a mode or a highlight colour. That is what lets one part of
+ * a page carry its own theme (a dark band on a light page, a card in another colour).
+ */
+:root,
+.dark,
+[data-theme],
+[data-accent] {
+  --accent-lightness: calc(var(--accent-l-light) + (var(--accent-l-dark) - var(--accent-l-light)) * var(--is-dark));
+
+  --card-foreground: var(--foreground);
+  --popover-foreground: var(--foreground);
+  --secondary-foreground: var(--foreground);
+  --accent-foreground: var(--foreground);
+
+  /* The highlight colour and what sits on it. */
+  --highlight: oklch(var(--accent-lightness) var(--accent-chroma) var(--accent-hue));
+  --highlight-foreground: var(--on-highlight);
+  --highlight-soft: oklch(calc(0.96 - 0.68 * var(--is-dark)) calc(var(--accent-chroma) * (0.25 + 0.1 * var(--is-dark))) var(--accent-hue));
+  --primary: var(--highlight);
+  --primary-foreground: var(--highlight-foreground);
+  --ring: var(--highlight);
+
+  --destructive-foreground: var(--on-state);
+  --success-foreground: var(--on-state);
+  --warning-foreground: var(--on-state);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
+  --color-highlight-soft: var(--highlight-soft);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-overlay: var(--overlay);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* rounded-control: buttons, inputs, badges. rounded-surface: cards, dialogs, popovers. */
+  --radius-control: var(--radius-control-override, var(--radius));
+  --radius-surface: calc(var(--radius) * 1.5);
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) * 1.5);
+  --radius-xl: calc(var(--radius) * 2);
+
+  --ease-out: var(--ease);
+  --ease-spring: var(--ease-spring);
+
+  --container-page: var(--page);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+@utility h-control {
+  height: var(--control-h);
+}
+@utility h-control-sm {
+  height: var(--control-h-sm);
+}
+@utility h-control-lg {
+  height: var(--control-h-lg);
+}
+@utility duration-instant {
+  transition-duration: var(--duration-instant);
+}
+@utility duration-base {
+  transition-duration: var(--duration-base);
+}
+@utility duration-slow {
+  transition-duration: var(--duration-slow);
+}
+
+/* View transitions between pages and states (components/motion/view-transition). */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: var(--duration-slow);
+    animation-timing-function: var(--ease);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* Marquee (components/layout/marquee): each track slides by its own width plus the gap. */
+@keyframes rui-marquee {
+  to {
+    transform: translateX(var(--rui-marquee-end, -100%));
+  }
+}
+/* Progress (components/ui/progress): the indeterminate bar crosses the track. */
+@keyframes rui-progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+/* Radial progress (components/viz/radial-progress): the ring fills once on mount. Paint only. */
+@keyframes rui-ring-in {
+  from {
+    stroke-dashoffset: var(--rui-ring-length);
+  }
+}

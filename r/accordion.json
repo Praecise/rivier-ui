@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "accordion",
+  "type": "registry:ui",
+  "title": "Accordion",
+  "description": "Stacked sections whose content opens and closes under its heading.",
+  "dependencies": [
+    "lucide-react",
+    "radix-ui"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/accordion.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/accordion.tsx",
+      "content": "\"use client\";\n/**\n * @name accordion\n * @category ui\n * @description Stacked sections whose content opens and closes under its heading.\n * @when Questions and answers, or long settings where people need a few sections out of many. `type=\"single\"` keeps one open (add `collapsible` so it can be closed again); `type=\"multiple\"` lets several be open. For views that replace each other in one place use tabs. Do not hide content everyone needs.\n * @example\n * <Accordion type=\"single\" collapsible defaultValue=\"shipping\">\n *   <AccordionItem value=\"shipping\">\n *     <AccordionTrigger>How long does delivery take?</AccordionTrigger>\n *     <AccordionContent>Two to four working days.</AccordionContent>\n *   </AccordionItem>\n *   <AccordionItem value=\"returns\">\n *     <AccordionTrigger>Can I send it back?</AccordionTrigger>\n *     <AccordionContent>Yes, within thirty days.</AccordionContent>\n *   </AccordionItem>\n * </Accordion>\n */\nimport { Accordion as AccordionPrimitive } from \"radix-ui\";\nimport { ChevronDown } from \"lucide-react\";\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport function Accordion({ className, ...props }: ComponentProps<typeof AccordionPrimitive.Root>) {\n  return <AccordionPrimitive.Root data-slot=\"accordion\" className={cn(\"w-full\", className)} {...props} />;\n}\n\nexport function AccordionItem({ className, ...props }: ComponentProps<typeof AccordionPrimitive.Item>) {\n  return <AccordionPrimitive.Item data-slot=\"accordion-item\" className={cn(\"border-b\", className)} {...props} />;\n}\n\n/** The heading and its button. Renders an h3; the chevron turns with a transform. */\nexport function AccordionTrigger({ className, children, ...props }: ComponentProps<typeof AccordionPrimitive.Trigger>) {\n  return (\n    <AccordionPrimitive.Header data-slot=\"accordion-header\" className=\"flex\">\n      <AccordionPrimitive.Trigger\n        data-slot=\"accordion-trigger\"\n        className={cn(\n          \"group/accordion-trigger flex min-h-12 flex-1 items-center justify-between gap-4 py-3 text-start text-base font-medium disabled:pointer-events-none disabled:opacity-50\",\n          className,\n        )}\n        {...props}\n      >\n        {children}\n        <ChevronDown\n          aria-hidden=\"true\"\n          strokeWidth={1.5}\n          className=\"size-4 shrink-0 text-muted-foreground transition-transform duration-base ease-out group-data-[state=open]/accordion-trigger:rotate-180 motion-reduce:transition-none\"\n        />\n      </AccordionPrimitive.Trigger>\n    </AccordionPrimitive.Header>\n  );\n}\n\n/*\n * No height animation. The motion rule allows only transform and opacity, and the usual accordion animation\n * (height to --radix-accordion-content-height, or a grid-rows transition) animates layout on every frame, so\n * it is not taken as an exception. The section takes its full height at once, as the direct result of the\n * click, and the content fades and settles into place with opacity and transform. Closing is immediate: an\n * exit animation would hold the open height while it runs and then jump.\n * Radix does not run this animation for sections that are open when the page loads.\n */\nexport function AccordionContent({ className, ...props }: ComponentProps<typeof AccordionPrimitive.Content>) {\n  return (\n    <AccordionPrimitive.Content\n      data-slot=\"accordion-content\"\n      className={cn(\n        \"pb-4 text-base text-muted-foreground ease-out animation-duration-(--duration-base) fade-in-0 slide-in-from-top-1 data-[state=open]:animate-in motion-reduce:animate-none!\",\n        className,\n      )}\n      {...props}\n    />\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "Questions and answers, or long settings where people need a few sections out of many. `type=\"single\"` keeps one open (add `collapsible` so it can be closed again); `type=\"multiple\"` lets several be open. For views that replace each other in one place use tabs. Do not hide content everyone needs.",
+    "example": "<Accordion type=\"single\" collapsible defaultValue=\"shipping\">\n  <AccordionItem value=\"shipping\">\n    <AccordionTrigger>How long does delivery take?</AccordionTrigger>\n    <AccordionContent>Two to four working days.</AccordionContent>\n  </AccordionItem>\n  <AccordionItem value=\"returns\">\n    <AccordionTrigger>Can I send it back?</AccordionTrigger>\n    <AccordionContent>Yes, within thirty days.</AccordionContent>\n  </AccordionItem>\n</Accordion>",
+    "client": true
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "avatar",
+  "type": "registry:ui",
+  "title": "Avatar",
+  "description": "A round picture of a person or a team, with initials shown until the image loads or when it fails, and a group that overlaps.",
+  "dependencies": [
+    "class-variance-authority",
+    "radix-ui"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/avatar.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/avatar.tsx",
+      "content": "\"use client\";\n/**\n * @name avatar\n * @category ui\n * @description A round picture of a person or a team, with initials shown until the image loads or when it fails, and a group that overlaps.\n * @when Showing who something belongs to. Always give AvatarFallback initials; give AvatarImage an alt (the name), or alt=\"\" when the name is printed next to it.\n * @example\n * <Avatar size=\"lg\">\n *   <AvatarImage src=\"/people/hana.jpg\" alt=\"Hana Ito\" />\n *   <AvatarFallback>HI</AvatarFallback>\n * </Avatar>\n * <AvatarGroup aria-label=\"Team\">\n *   <Avatar><AvatarFallback>AK</AvatarFallback></Avatar>\n *   <Avatar><AvatarFallback>BL</AvatarFallback></Avatar>\n *   <Avatar><AvatarFallback>+3</AvatarFallback></Avatar>\n * </AvatarGroup>\n */\nimport { Avatar as AvatarPrimitive } from \"radix-ui\";\nimport { cva, type VariantProps } from \"class-variance-authority\";\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport const avatarVariants = cva(\"relative inline-flex shrink-0 overflow-hidden rounded-full bg-muted align-middle select-none\", {\n  variants: {\n    size: {\n      sm: \"size-8 text-xs\",\n      md: \"size-10 text-sm\",\n      lg: \"size-12 text-base\",\n      xl: \"size-16 text-lg\",\n    },\n  },\n  defaultVariants: { size: \"md\" },\n});\n\nexport type AvatarProps = ComponentProps<typeof AvatarPrimitive.Root> & VariantProps<typeof avatarVariants>;\n\nexport function Avatar({ className, size, ...props }: AvatarProps) {\n  return <AvatarPrimitive.Root data-slot=\"avatar\" className={cn(avatarVariants({ size }), className)} {...props} />;\n}\n\nexport function AvatarImage({ className, ...props }: ComponentProps<typeof AvatarPrimitive.Image>) {\n  return <AvatarPrimitive.Image data-slot=\"avatar-image\" className={cn(\"aspect-square size-full object-cover\", className)} {...props} />;\n}\n\n/** Initials (one or two letters) or an icon. Shown while the image loads and when there is none. */\nexport function AvatarFallback({ className, ...props }: ComponentProps<typeof AvatarPrimitive.Fallback>) {\n  return (\n    <AvatarPrimitive.Fallback\n      data-slot=\"avatar-fallback\"\n      className={cn(\"flex size-full items-center justify-center bg-muted font-medium text-foreground uppercase [&_svg]:size-1/2\", className)}\n      {...props}\n    />\n  );\n}\n\n/** Avatars in a row, each overlapping the one before it. Give it an aria-label that says what the group is. */\nexport function AvatarGroup({ className, ...props }: ComponentProps<\"div\">) {\n  return (\n    <div\n      data-slot=\"avatar-group\"\n      role=\"group\"\n      className={cn(\n        \"flex items-center *:data-[slot=avatar]:border-2 *:data-[slot=avatar]:border-background [&>*+*]:-ms-2\",\n        className,\n      )}\n      {...props}\n    />\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "Showing who something belongs to. Always give AvatarFallback initials; give AvatarImage an alt (the name), or alt=\"\" when the name is printed next to it.",
+    "example": "<Avatar size=\"lg\">\n  <AvatarImage src=\"/people/hana.jpg\" alt=\"Hana Ito\" />\n  <AvatarFallback>HI</AvatarFallback>\n</Avatar>\n<AvatarGroup aria-label=\"Team\">\n  <Avatar><AvatarFallback>AK</AvatarFallback></Avatar>\n  <Avatar><AvatarFallback>BL</AvatarFallback></Avatar>\n  <Avatar><AvatarFallback>+3</AvatarFallback></Avatar>\n</AvatarGroup>",
+    "client": true
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "checkbox",
+  "type": "registry:ui",
+  "title": "Checkbox",
+  "description": "A checkbox with checked, unchecked and indeterminate states.",
+  "dependencies": [
+    "lucide-react",
+    "radix-ui"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/checkbox.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/checkbox.tsx",
+      "content": "\"use client\";\n/**\n * @name checkbox\n * @category ui\n * @description A checkbox with checked, unchecked and indeterminate states.\n * @when Choosing any number of options, or agreeing to something that is submitted with a form. For a setting that applies at once use switch; for exactly one of several use radio-group.\n * @example\n * <Label><Checkbox defaultChecked /> Email me product news</Label>\n * <Checkbox checked=\"indeterminate\" aria-label=\"Select all rows\" />\n */\nimport { Checkbox as CheckboxPrimitive } from \"radix-ui\";\nimport { Check, Minus } from \"lucide-react\";\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\n/** The box is 20px; an invisible margin makes the touch target 40px. */\nexport function Checkbox({ className, ...props }: ComponentProps<typeof CheckboxPrimitive.Root>) {\n  return (\n    <CheckboxPrimitive.Root\n      data-slot=\"checkbox\"\n      className={cn(\n        \"group/checkbox peer relative inline-flex size-5 shrink-0 items-center justify-center rounded-[min(var(--radius-control),0.25rem)] border border-input bg-background text-primary-foreground transition-[background-color,border-color,opacity] duration-instant ease-out after:absolute after:-inset-2.5 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=indeterminate]:border-primary data-[state=indeterminate]:bg-primary motion-reduce:transition-none\",\n        className,\n      )}\n      {...props}\n    >\n      <CheckboxPrimitive.Indicator data-slot=\"checkbox-indicator\" className=\"flex items-center justify-center\">\n        <Check aria-hidden=\"true\" strokeWidth={1.5} className=\"size-4 group-data-[state=indeterminate]/checkbox:hidden\" />\n        <Minus aria-hidden=\"true\" strokeWidth={1.5} className=\"hidden size-4 group-data-[state=indeterminate]/checkbox:block\" />\n      </CheckboxPrimitive.Indicator>\n    </CheckboxPrimitive.Root>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "Choosing any number of options, or agreeing to something that is submitted with a form. For a setting that applies at once use switch; for exactly one of several use radio-group.",
+    "example": "<Label><Checkbox defaultChecked /> Email me product news</Label>\n<Checkbox checked=\"indeterminate\" aria-label=\"Select all rows\" />",
+    "client": true
+  }
+}

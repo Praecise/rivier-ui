@@ -1,0 +1,30 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "toggle-group",
+  "type": "registry:ui",
+  "title": "Toggle Group",
+  "description": "A joined row of toggles where one (type=\"single\") or several (type=\"multiple\") are on.",
+  "dependencies": [
+    "class-variance-authority",
+    "radix-ui"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn",
+    "@rivier-ui/toggle"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/toggle-group.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/toggle-group.tsx",
+      "content": "\"use client\";\n/**\n * @name toggle-group\n * @category ui\n * @description A joined row of toggles where one (type=\"single\") or several (type=\"multiple\") are on.\n * @when A compact choice between a few short options or icons: alignment, a view switcher, text styles. For options with longer labels use radio-group (one) or checkboxes (several); for switching panels use tabs.\n * @example\n * <ToggleGroup type=\"single\" defaultValue=\"grid\" aria-label=\"View\" variant=\"outline\">\n *   <ToggleGroupItem value=\"grid\">Grid</ToggleGroupItem>\n *   <ToggleGroupItem value=\"list\">List</ToggleGroupItem>\n * </ToggleGroup>\n * <ToggleGroup type=\"multiple\" aria-label=\"Text style\" size=\"sm\">\n *   <ToggleGroupItem value=\"italic\" aria-label=\"Italic\"><Italic strokeWidth={1.5} /></ToggleGroupItem>\n *   <ToggleGroupItem value=\"underline\" aria-label=\"Underline\"><Underline strokeWidth={1.5} /></ToggleGroupItem>\n * </ToggleGroup>\n */\nimport { ToggleGroup as ToggleGroupPrimitive } from \"radix-ui\";\nimport type { VariantProps } from \"class-variance-authority\";\nimport { createContext, use, type ComponentProps } from \"react\";\nimport { toggleVariants } from \"@/components/ui/toggle\";\nimport { cn } from \"@/lib/cn\";\n\ntype ToggleGroupLook = VariantProps<typeof toggleVariants>;\n\nconst ToggleGroupContext = createContext<ToggleGroupLook>({});\n\nexport type ToggleGroupProps = ComponentProps<typeof ToggleGroupPrimitive.Root> & ToggleGroupLook;\n\n/** `variant` and `size` set the look of every item. `type` (\"single\" or \"multiple\") is required. */\nexport function ToggleGroup({ className, variant, size, children, ...props }: ToggleGroupProps) {\n  return (\n    <ToggleGroupPrimitive.Root\n      data-slot=\"toggle-group\"\n      data-layout={props.orientation === \"vertical\" ? \"vertical\" : \"horizontal\"}\n      className={cn(\"group/toggle-group inline-flex w-fit max-w-full items-stretch rounded-control data-[layout=vertical]:flex-col\", className)}\n      {...props}\n    >\n      <ToggleGroupContext value={{ variant, size }}>{children}</ToggleGroupContext>\n    </ToggleGroupPrimitive.Root>\n  );\n}\n\nexport type ToggleGroupItemProps = ComponentProps<typeof ToggleGroupPrimitive.Item> & ToggleGroupLook;\n\n/** Takes the group's `variant` and `size`. Items share edges: only the group's outer corners are rounded. */\nexport function ToggleGroupItem({ className, variant, size, ...props }: ToggleGroupItemProps) {\n  const group = use(ToggleGroupContext);\n  return (\n    <ToggleGroupPrimitive.Item\n      data-slot=\"toggle-group-item\"\n      className={cn(\n        toggleVariants({ variant: group.variant ?? variant, size: group.size ?? size }),\n        \"relative focus-visible:z-10 data-[state=on]:z-[1]\",\n        \"group-data-[layout=horizontal]/toggle-group:not-first:-ms-px group-data-[layout=horizontal]/toggle-group:not-first:rounded-s-none group-data-[layout=horizontal]/toggle-group:not-last:rounded-e-none\",\n        \"group-data-[layout=vertical]/toggle-group:not-first:-mt-px group-data-[layout=vertical]/toggle-group:not-first:rounded-t-none group-data-[layout=vertical]/toggle-group:not-last:rounded-b-none\",\n        className,\n      )}\n      {...props}\n    />\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "A compact choice between a few short options or icons: alignment, a view switcher, text styles. For options with longer labels use radio-group (one) or checkboxes (several); for switching panels use tabs.",
+    "example": "<ToggleGroup type=\"single\" defaultValue=\"grid\" aria-label=\"View\" variant=\"outline\">\n  <ToggleGroupItem value=\"grid\">Grid</ToggleGroupItem>\n  <ToggleGroupItem value=\"list\">List</ToggleGroupItem>\n</ToggleGroup>\n<ToggleGroup type=\"multiple\" aria-label=\"Text style\" size=\"sm\">\n  <ToggleGroupItem value=\"italic\" aria-label=\"Italic\"><Italic strokeWidth={1.5} /></ToggleGroupItem>\n  <ToggleGroupItem value=\"underline\" aria-label=\"Underline\"><Underline strokeWidth={1.5} /></ToggleGroupItem>\n</ToggleGroup>",
+    "client": true
+  }
+}

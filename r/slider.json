@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "slider",
+  "type": "registry:ui",
+  "title": "Slider",
+  "description": "A slider for one value, or a range with two thumbs.",
+  "dependencies": [
+    "radix-ui"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/slider.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/slider.tsx",
+      "content": "\"use client\";\n/**\n * @name slider\n * @category ui\n * @description A slider for one value, or a range with two thumbs.\n * @when Choosing a number where the rough position matters more than the exact figure: volume, a price range. When the exact number matters use an input with type=\"number\".\n * @example\n * <Slider defaultValue={[40]} max={100} step={5} aria-label=\"Volume\" />\n * <Slider defaultValue={[200, 800]} min={0} max={1000} step={50} thumbLabels={[\"Lowest price\", \"Highest price\"]} />\n */\nimport { Slider as SliderPrimitive } from \"radix-ui\";\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport type SliderProps = ComponentProps<typeof SliderPrimitive.Root> & {\n  /**\n   * The accessible name of each thumb, in order. One thumb can be named by `aria-label` or `aria-labelledby`\n   * on the slider instead; two thumbs are called \"Minimum\" and \"Maximum\" when this is left out.\n   */\n  thumbLabels?: string[];\n};\n\n/** `value` and `defaultValue` are arrays: one number draws one thumb, two draw a range. */\nexport function Slider({ className, value, defaultValue, thumbLabels, \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, ...props }: SliderProps) {\n  const count = Math.max(1, (value ?? defaultValue ?? [0]).length);\n  const single = count === 1;\n  return (\n    <SliderPrimitive.Root\n      data-slot=\"slider\"\n      value={value}\n      defaultValue={defaultValue}\n      aria-label={ariaLabel}\n      aria-labelledby={ariaLabelledBy}\n      className={cn(\n        \"relative flex touch-none items-center select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[orientation=horizontal]:h-10 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-40 data-[orientation=vertical]:w-10 data-[orientation=vertical]:flex-col\",\n        className,\n      )}\n      {...props}\n    >\n      <SliderPrimitive.Track\n        data-slot=\"slider-track\"\n        className=\"relative grow overflow-hidden rounded-full bg-border-strong data-[orientation=horizontal]:h-1.5 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1.5\"\n      >\n        <SliderPrimitive.Range\n          data-slot=\"slider-range\"\n          className=\"absolute bg-primary data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full\"\n        />\n      </SliderPrimitive.Track>\n      {Array.from({ length: count }, (_, index) => (\n        <SliderPrimitive.Thumb\n          key={index}\n          data-slot=\"slider-thumb\"\n          aria-label={thumbLabels?.[index] ?? (single ? ariaLabel : undefined)}\n          aria-labelledby={single && !thumbLabels?.[index] ? ariaLabelledBy : undefined}\n          className=\"relative block size-5 shrink-0 rounded-full border border-primary bg-background transition-transform duration-instant ease-out after:absolute after:-inset-2.5 active:scale-110 motion-reduce:transition-none motion-reduce:active:scale-100\"\n        />\n      ))}\n    </SliderPrimitive.Root>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "Choosing a number where the rough position matters more than the exact figure: volume, a price range. When the exact number matters use an input with type=\"number\".",
+    "example": "<Slider defaultValue={[40]} max={100} step={5} aria-label=\"Volume\" />\n<Slider defaultValue={[200, 800]} min={0} max={1000} step={50} thumbLabels={[\"Lowest price\", \"Highest price\"]} />",
+    "client": true
+  }
+}

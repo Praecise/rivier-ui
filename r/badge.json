@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "badge",
+  "type": "registry:ui",
+  "title": "Badge",
+  "description": "A small label for a status, a count or a category. Six variants and an optional leading dot.",
+  "dependencies": [
+    "class-variance-authority"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/badge.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/badge.tsx",
+      "content": "/**\n * @name badge\n * @category ui\n * @description A small label for a status, a count or a category. Six variants and an optional leading dot.\n * @when Marking a state or a tag next to other content. It is not clickable: for a removable or selectable chip use a button with size \"sm\".\n * @example\n * <Badge>New</Badge>\n * <Badge variant=\"soft\">Beta</Badge>\n * <Badge variant=\"success\" dot>Live</Badge>\n * <Badge variant=\"outline\">Draft</Badge>\n */\nimport { cva, type VariantProps } from \"class-variance-authority\";\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport const badgeVariants = cva(\n  \"inline-flex h-6 w-fit shrink-0 items-center gap-1.5 whitespace-nowrap rounded-control border border-transparent px-2 text-xs font-medium [&_svg]:size-3 [&_svg]:shrink-0\",\n  {\n    variants: {\n      variant: {\n        solid: \"bg-primary text-primary-foreground\",\n        soft: \"bg-highlight-soft text-foreground\",\n        outline: \"border-border-strong bg-background text-foreground\",\n        success: \"bg-success text-success-foreground\",\n        warning: \"bg-warning text-warning-foreground\",\n        destructive: \"bg-destructive text-destructive-foreground\",\n      },\n    },\n    defaultVariants: { variant: \"solid\" },\n  },\n);\n\nexport type BadgeProps = ComponentProps<\"span\"> &\n  VariantProps<typeof badgeVariants> & {\n    /** A small dot before the label. Decoration only: the label must still say the state. */\n    dot?: boolean;\n  };\n\nexport function Badge({ className, variant, dot = false, children, ...props }: BadgeProps) {\n  return (\n    <span data-slot=\"badge\" className={cn(badgeVariants({ variant }), className)} {...props}>\n      {dot ? <span aria-hidden=\"true\" className=\"size-1.5 shrink-0 rounded-full bg-current\" /> : null}\n      {children}\n    </span>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "Marking a state or a tag next to other content. It is not clickable: for a removable or selectable chip use a button with size \"sm\".",
+    "example": "<Badge>New</Badge>\n<Badge variant=\"soft\">Beta</Badge>\n<Badge variant=\"success\" dot>Live</Badge>\n<Badge variant=\"outline\">Draft</Badge>",
+    "client": false
+  }
+}

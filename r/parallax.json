@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "parallax",
+  "type": "registry:component",
+  "title": "Parallax",
+  "description": "A clipped frame whose layer moves at a different speed from the page as it scrolls past.",
+  "dependencies": [
+    "motion"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn",
+    "@rivier-ui/motion"
+  ],
+  "files": [
+    {
+      "path": "registry/motion/parallax.tsx",
+      "type": "registry:component",
+      "target": "components/motion/parallax.tsx",
+      "content": "\"use client\";\n/**\n * @name parallax\n * @category motion\n * @description A clipped frame whose layer moves at a different speed from the page as it scrolls past.\n * @when A background image or a decorative layer behind a section. The frame needs a height of its own (an aspect ratio or a fixed height). Not for text that must be read while it moves; for a pinned, scroll-told sequence use scroll-scene.\n * @example\n * <Parallax speed={0.3} className=\"aspect-video rounded-surface\">\n *   <img src=\"/landscape.jpg\" alt=\"\" className=\"size-full object-cover\" />\n * </Parallax>\n */\nimport { motion, useMotionTemplate, useScroll, useTransform } from \"motion/react\";\nimport { useImperativeHandle, useRef, type ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\nimport { useMotionSafe } from \"@/lib/motion\";\n\nexport type ParallaxProps = ComponentProps<\"div\"> & {\n  /**\n   * How much the layer lags the page, from -1 to 1. 0 moves with the page; positive moves slower (a background\n   * falling behind); negative moves faster. At 1 the layer travels half the frame's height each way. Default 0.3.\n   */\n  speed?: number;\n  /** Classes for the moving layer that holds the children. */\n  layerClassName?: string;\n};\n\n/**\n * Bounded by construction: the frame clips, and the layer is made taller than the frame by exactly the\n * distance it travels, so no edge is ever uncovered and nothing can overflow the page. The frame itself is\n * never transformed and is the scroll target; only the layer's transform changes.\n */\nexport function Parallax({ className, layerClassName, speed = 0.3, children, ref, ...props }: ParallaxProps) {\n  const rootRef = useRef<HTMLDivElement>(null);\n  useImperativeHandle(ref, () => rootRef.current as HTMLDivElement, []);\n  const safe = useMotionSafe();\n\n  const clamped = Math.max(-1, Math.min(1, speed));\n  /** Extra layer above and below the frame, as a percentage of the frame's height. */\n  const overscan = Math.abs(clamped) * 50;\n  /** The same distance as a percentage of the layer's own height, which is what translateY(%) uses. */\n  const travel = (overscan / (100 + 2 * overscan)) * 100 * Math.sign(clamped);\n\n  const { scrollYProgress } = useScroll({ target: rootRef, offset: [\"start end\", \"end start\"] });\n  const shift = useTransform(scrollYProgress, [0, 1], [-travel, travel]);\n  const y = useMotionTemplate`${shift}%`;\n\n  return (\n    <div ref={rootRef} data-slot=\"parallax\" className={cn(\"relative overflow-hidden\", className)} {...props}>\n      <motion.div\n        data-slot=\"parallax-layer\"\n        className={cn(\"absolute inset-x-0\", layerClassName)}\n        style={{ top: `${-overscan}%`, bottom: `${-overscan}%`, y: safe ? y : 0 }}\n      >\n        {children}\n      </motion.div>\n    </div>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "motion",
+    "when": "A background image or a decorative layer behind a section. The frame needs a height of its own (an aspect ratio or a fixed height). Not for text that must be read while it moves; for a pinned, scroll-told sequence use scroll-scene.",
+    "example": "<Parallax speed={0.3} className=\"aspect-video rounded-surface\">\n  <img src=\"/landscape.jpg\" alt=\"\" className=\"size-full object-cover\" />\n</Parallax>",
+    "client": true
+  }
+}

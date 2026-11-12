@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "layout-transition",
+  "type": "registry:component",
+  "title": "Layout Transition",
+  "description": "A shared element that animates from one place to another: render Morph with the same layoutId in two places and it travels between them.",
+  "dependencies": [
+    "motion"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn",
+    "@rivier-ui/motion"
+  ],
+  "files": [
+    {
+      "path": "registry/motion/layout-transition.tsx",
+      "type": "registry:component",
+      "target": "components/motion/layout-transition.tsx",
+      "content": "\"use client\";\n/**\n * @name layout-transition\n * @category motion\n * @description A shared element that animates from one place to another: render Morph with the same layoutId in two places and it travels between them.\n * @when A tabs or navigation indicator that slides to the active item, a card that grows into its detail view, a selection highlight. Both places must be in the same React tree. Between pages use view-transition; for content that only appears and disappears use presence.\n * @example\n * const [active, setActive] = useState(\"overview\");\n * <MorphGroup id=\"section-tabs\">\n *   <div className=\"flex gap-1\">\n *     {[\"overview\", \"pricing\", \"docs\"].map((tab) => (\n *       <button key={tab} onClick={() => setActive(tab)} className=\"relative h-control rounded-control px-4 text-sm\">\n *         {active === tab ? <Morph layoutId=\"indicator\" className=\"absolute inset-0 rounded-control bg-accent\" /> : null}\n *         <span className=\"relative capitalize\">{tab}</span>\n *       </button>\n *     ))}\n *   </div>\n * </MorphGroup>\n */\nimport { LayoutGroup, motion, useReducedMotion, type HTMLMotionProps } from \"motion/react\";\nimport type { ReactNode } from \"react\";\nimport { cn } from \"@/lib/cn\";\nimport { DURATION, EASE } from \"@/lib/motion\";\n\nexport type MorphGroupProps = {\n  /** Namespaces the layoutIds inside, so two copies of the same component on a page do not animate into each other. */\n  id?: string;\n  children?: ReactNode;\n};\n\n/** Scopes shared elements. Wrap each instance of a component that uses Morph (motion's LayoutGroup). */\nexport function MorphGroup({ id, children }: MorphGroupProps) {\n  return <LayoutGroup id={id}>{children}</LayoutGroup>;\n}\n\nexport type MorphProps = Omit<HTMLMotionProps<\"div\">, \"layoutId\"> & {\n  /** The identity shared by the two places. The element animates from wherever this id was last rendered. */\n  layoutId: string;\n};\n\n/**\n * How it moves: motion measures the element's box before and after the change and animates the difference\n * with `transform` alone (a translate3d and a scale, built in motion-dom's projection code), so layout is\n * computed once and no width, height, top or left is animated. Because the box is scaled while it travels,\n * motion rewrites `border-radius` each frame to cancel the distortion: that is the one non-transform\n * property that changes, and it does not affect layout. Children of a Morph that changes size are scaled\n * with it; make each one a Morph (or a motion element with `layout`) to keep it undistorted.\n *\n * Under reduced motion the layoutId is dropped, so the element is simply in its new place.\n */\nexport function Morph({ className, layoutId, transition, ...props }: MorphProps) {\n  const reduced = useReducedMotion();\n  return (\n    <motion.div\n      data-slot=\"morph\"\n      className={cn(className)}\n      layoutId={reduced ? undefined : layoutId}\n      transition={transition ?? { duration: DURATION.slow, ease: EASE }}\n      {...props}\n    />\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "motion",
+    "when": "A tabs or navigation indicator that slides to the active item, a card that grows into its detail view, a selection highlight. Both places must be in the same React tree. Between pages use view-transition; for content that only appears and disappears use presence.",
+    "example": "const [active, setActive] = useState(\"overview\");\n<MorphGroup id=\"section-tabs\">\n  <div className=\"flex gap-1\">\n    {[\"overview\", \"pricing\", \"docs\"].map((tab) => (\n      <button key={tab} onClick={() => setActive(tab)} className=\"relative h-control rounded-control px-4 text-sm\">\n        {active === tab ? <Morph layoutId=\"indicator\" className=\"absolute inset-0 rounded-control bg-accent\" /> : null}\n        <span className=\"relative capitalize\">{tab}</span>\n      </button>\n    ))}\n  </div>\n</MorphGroup>",
+    "client": true
+  }
+}

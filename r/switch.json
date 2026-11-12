@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "switch",
+  "type": "registry:ui",
+  "title": "Switch",
+  "description": "An on/off switch.",
+  "dependencies": [
+    "radix-ui"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/switch.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/switch.tsx",
+      "content": "\"use client\";\n/**\n * @name switch\n * @category ui\n * @description An on/off switch.\n * @when A setting that takes effect as soon as it is flipped. For a choice that is submitted with a form use checkbox; for a pressed/unpressed toolbar button use toggle.\n * @example\n * <Label><Switch defaultChecked /> Weekly summary</Label>\n * <Switch aria-label=\"Dark mode\" checked={dark} onCheckedChange={setDark} />\n */\nimport { Switch as SwitchPrimitive } from \"radix-ui\";\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\n/** The track is 44 by 24px; an invisible margin makes the touch target 40px tall. */\nexport function Switch({ className, ...props }: ComponentProps<typeof SwitchPrimitive.Root>) {\n  return (\n    <SwitchPrimitive.Root\n      data-slot=\"switch\"\n      className={cn(\n        \"peer relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-transparent bg-input transition-[background-color,border-color,opacity] duration-instant ease-out after:absolute after:-inset-x-px after:-inset-y-2 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive data-[state=checked]:bg-primary motion-reduce:transition-none\",\n        className,\n      )}\n      {...props}\n    >\n      <SwitchPrimitive.Thumb\n        data-slot=\"switch-thumb\"\n        className=\"pointer-events-none block size-5 translate-x-px rounded-full bg-background transition-transform duration-base ease-out data-[state=checked]:translate-x-[calc(100%+1px)] data-[state=checked]:bg-primary-foreground motion-reduce:transition-none rtl:-translate-x-px rtl:data-[state=checked]:-translate-x-[calc(100%+1px)]\"\n      />\n    </SwitchPrimitive.Root>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "A setting that takes effect as soon as it is flipped. For a choice that is submitted with a form use checkbox; for a pressed/unpressed toolbar button use toggle.",
+    "example": "<Label><Switch defaultChecked /> Weekly summary</Label>\n<Switch aria-label=\"Dark mode\" checked={dark} onCheckedChange={setDark} />",
+    "client": true
+  }
+}

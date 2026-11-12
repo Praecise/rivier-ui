@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "button",
+  "type": "registry:ui",
+  "title": "Button",
+  "description": "A button, or a link that looks like one. Five variants, three sizes, a loading state.",
+  "dependencies": [
+    "class-variance-authority",
+    "radix-ui"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/button.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/button.tsx",
+      "content": "/**\n * @name button\n * @category ui\n * @description A button, or a link that looks like one. Five variants, three sizes, a loading state.\n * @when Any action. One \"solid\" per view for the main action; \"outline\" or \"ghost\" for the rest; \"destructive\" only for deleting.\n * @example\n * <Button>Save</Button>\n * <Button variant=\"outline\" size=\"sm\">Cancel</Button>\n * <Button asChild><a href=\"/pricing\">See pricing</a></Button>\n * <Button loading>Saving</Button>\n */\nimport { Slot } from \"radix-ui\";\nimport { cva, type VariantProps } from \"class-variance-authority\";\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport const buttonVariants = cva(\n  \"inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-control text-sm font-medium transition-[background-color,border-color,color,opacity,scale] duration-instant ease-out select-none active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 aria-busy:pointer-events-none motion-reduce:transition-none motion-reduce:active:scale-100 [&_svg]:size-4 [&_svg]:shrink-0\",\n  {\n    variants: {\n      variant: {\n        solid: \"bg-primary text-primary-foreground hover:opacity-90\",\n        outline: \"border border-border-strong bg-background text-foreground hover:bg-accent\",\n        soft: \"bg-highlight-soft text-foreground hover:opacity-85\",\n        ghost: \"text-foreground hover:bg-accent\",\n        destructive: \"bg-destructive text-destructive-foreground hover:opacity-90\",\n        link: \"h-auto rounded-none px-0 text-foreground underline underline-offset-4 hover:opacity-70\",\n      },\n      size: {\n        sm: \"h-control-sm px-3\",\n        md: \"h-control px-4\",\n        lg: \"h-control-lg px-6 text-base\",\n        icon: \"size-(--control-h) px-0\",\n      },\n    },\n    compoundVariants: [{ variant: \"link\", class: \"h-auto px-0\" }],\n    defaultVariants: { variant: \"solid\", size: \"md\" },\n  },\n);\n\nexport type ButtonProps = ComponentProps<\"button\"> &\n  VariantProps<typeof buttonVariants> & {\n    /** Render the child element (a link, for example) with the button's look. */\n    asChild?: boolean;\n    /** Shows a spinner and blocks clicks. The label stays, so the width does not jump. */\n    loading?: boolean;\n  };\n\nexport function Button({ className, variant, size, asChild = false, loading = false, children, disabled, ...props }: ButtonProps) {\n  const Comp = asChild ? Slot.Root : \"button\";\n  return (\n    <Comp\n      data-slot=\"button\"\n      className={cn(buttonVariants({ variant, size }), className)}\n      aria-busy={loading || undefined}\n      disabled={asChild ? undefined : disabled || loading}\n      {...props}\n    >\n      {loading && !asChild ? (\n        <>\n          <span aria-hidden=\"true\" className=\"size-4 animate-spin rounded-full border-2 border-current border-r-transparent motion-reduce:animate-none\" />\n          {children}\n        </>\n      ) : (\n        children\n      )}\n    </Comp>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "Any action. One \"solid\" per view for the main action; \"outline\" or \"ghost\" for the rest; \"destructive\" only for deleting.",
+    "example": "<Button>Save</Button>\n<Button variant=\"outline\" size=\"sm\">Cancel</Button>\n<Button asChild><a href=\"/pricing\">See pricing</a></Button>\n<Button loading>Saving</Button>",
+    "client": false
+  }
+}

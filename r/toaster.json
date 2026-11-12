@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "toaster",
+  "type": "registry:ui",
+  "title": "Toaster",
+  "description": "The place where toasts appear: sonner's Toaster drawn with the theme's tokens, and its `toast` function.",
+  "dependencies": [
+    "lucide-react",
+    "sonner"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/toaster.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/toaster.tsx",
+      "content": "\"use client\";\n/**\n * @name toaster\n * @category ui\n * @description The place where toasts appear: sonner's Toaster drawn with the theme's tokens, and its `toast` function.\n * @when Short confirmations and errors that need no decision (\"Saved\", \"Could not connect\"). Render one Toaster in the root layout, then call `toast` from anywhere on the client. For something that must be answered use dialog; for a message that belongs to a field or a section, show it there.\n * @example\n * // app/layout.tsx\n * <body>\n *   {children}\n *   <Toaster />\n * </body>\n *\n * // any client component\n * <Button onClick={() => toast.success(\"Saved\", { description: \"Your changes are live.\" })}>Save</Button>\n */\nimport { CircleCheck, Info, LoaderCircle, OctagonX, TriangleExclamationPoint, X } from \"lucide-react\";\nimport type { CSSProperties } from \"react\";\nimport { Toaster as Sonner, type ToasterProps } from \"sonner\";\nimport { cn } from \"@/lib/cn\";\n\nexport { toast } from \"sonner\";\n\n/* Sonner reads its colours from these variables. Pointing them at the tokens makes toasts follow the theme\n   (light, dark, highlight, roundness) wherever the Toaster sits, so sonner's own `theme` prop is not needed.\n   --border-radius repeats the rounded-surface formula. The success, warning and error colours show with\n   `richColors`; without it every toast is the plain surface with an icon. Sonner stops its own motion under\n   reduced motion. */\nconst tokens = {\n  \"--normal-bg\": \"var(--popover)\",\n  \"--normal-bg-hover\": \"var(--accent)\",\n  \"--normal-text\": \"var(--popover-foreground)\",\n  \"--normal-border\": \"var(--border)\",\n  \"--normal-border-hover\": \"var(--border-strong)\",\n  \"--success-bg\": \"var(--success)\",\n  \"--success-text\": \"var(--success-foreground)\",\n  \"--success-border\": \"var(--success)\",\n  \"--warning-bg\": \"var(--warning)\",\n  \"--warning-text\": \"var(--warning-foreground)\",\n  \"--warning-border\": \"var(--warning)\",\n  \"--error-bg\": \"var(--destructive)\",\n  \"--error-text\": \"var(--destructive-foreground)\",\n  \"--error-border\": \"var(--destructive)\",\n  \"--info-bg\": \"var(--popover)\",\n  \"--info-text\": \"var(--popover-foreground)\",\n  \"--info-border\": \"var(--border-strong)\",\n  \"--border-radius\": \"calc(var(--radius) * 1.5)\",\n} as CSSProperties;\n\n/* Flat: sonner's shadow goes, and its shadow-drawn focus ring is replaced by the theme's outline. */\nconst toastClass = \"shadow-none! focus-visible:outline-2! focus-visible:outline-offset-2! focus-visible:outline-ring!\";\n\nexport function Toaster({ className, style, toastOptions, icons, ...props }: ToasterProps) {\n  return (\n    <Sonner\n      className={className}\n      style={{ ...tokens, ...style }}\n      icons={{\n        success: <CircleCheck aria-hidden=\"true\" strokeWidth={1.5} className=\"size-4\" />,\n        info: <Info aria-hidden=\"true\" strokeWidth={1.5} className=\"size-4\" />,\n        warning: <TriangleExclamationPoint aria-hidden=\"true\" strokeWidth={1.5} className=\"size-4\" />,\n        error: <OctagonX aria-hidden=\"true\" strokeWidth={1.5} className=\"size-4\" />,\n        loading: <LoaderCircle aria-hidden=\"true\" strokeWidth={1.5} className=\"size-4 animate-spin motion-reduce:animate-none\" />,\n        close: <X aria-hidden=\"true\" strokeWidth={1.5} className=\"size-3\" />,\n        ...icons,\n      }}\n      toastOptions={{\n        ...toastOptions,\n        classNames: {\n          ...toastOptions?.classNames,\n          toast: cn(toastClass, toastOptions?.classNames?.toast),\n          description: cn(\"text-muted-foreground!\", toastOptions?.classNames?.description),\n          closeButton: cn(toastClass, toastOptions?.classNames?.closeButton),\n        },\n      }}\n      {...props}\n    />\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "Short confirmations and errors that need no decision (\"Saved\", \"Could not connect\"). Render one Toaster in the root layout, then call `toast` from anywhere on the client. For something that must be answered use dialog; for a message that belongs to a field or a section, show it there.",
+    "example": "// app/layout.tsx\n<body>\n  {children}\n  <Toaster />\n</body>\n\n// any client component\n<Button onClick={() => toast.success(\"Saved\", { description: \"Your changes are live.\" })}>Save</Button>",
+    "client": true
+  }
+}

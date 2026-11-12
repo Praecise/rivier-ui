@@ -1,0 +1,26 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "area-chart",
+  "type": "registry:component",
+  "title": "Area Chart",
+  "description": "A line chart with the space under each line filled flat at low opacity, optionally stacked so the series add up to a total.",
+  "dependencies": [],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/line-chart"
+  ],
+  "files": [
+    {
+      "path": "registry/viz/area-chart.tsx",
+      "type": "registry:component",
+      "target": "components/viz/area-chart.tsx",
+      "content": "/**\n * @name area-chart\n * @category viz\n * @description A line chart with the space under each line filled flat at low opacity, optionally stacked so the series add up to a total.\n * @when One series over time whose volume matters, or a few series that add up to a whole (`stacked`). To compare series that cross each other use line-chart: overlapping fills hide one another.\n * @example\n * <AreaChart\n *   label=\"Storage used per month, by kind\"\n *   data={[\n *     { month: new Date(\"2026-01-01\"), images: 12, video: 30 },\n *     { month: new Date(\"2026-02-01\"), images: 18, video: 42 },\n *     { month: new Date(\"2026-03-01\"), images: 22, video: 61 },\n *   ]}\n *   x=\"month\"\n *   series={[\n *     { key: \"images\", label: \"Images\" },\n *     { key: \"video\", label: \"Video\" },\n *   ]}\n *   stacked\n * />\n */\nimport { SeriesChart, type LineChartProps } from \"@/components/viz/line-chart\";\n\nexport type AreaChartProps<T extends object> = Omit<LineChartProps<T>, \"zero\"> & {\n  /** Stack the series so the top edge is their total. Missing values count as zero. */\n  stacked?: boolean;\n};\n\n/** Same contract as LineChart. The y axis always starts at zero, because a fill is read by its height. */\nexport function AreaChart<T extends object>({ stacked = false, ...props }: AreaChartProps<T>) {\n  return <SeriesChart {...props} area stacked={stacked} slot=\"area-chart\" />;\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "viz",
+    "when": "One series over time whose volume matters, or a few series that add up to a whole (`stacked`). To compare series that cross each other use line-chart: overlapping fills hide one another.",
+    "example": "<AreaChart\n  label=\"Storage used per month, by kind\"\n  data={[\n    { month: new Date(\"2026-01-01\"), images: 12, video: 30 },\n    { month: new Date(\"2026-02-01\"), images: 18, video: 42 },\n    { month: new Date(\"2026-03-01\"), images: 22, video: 61 },\n  ]}\n  x=\"month\"\n  series={[\n    { key: \"images\", label: \"Images\" },\n    { key: \"video\", label: \"Video\" },\n  ]}\n  stacked\n/>",
+    "client": false
+  }
+}

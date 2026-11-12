@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "grid",
+  "type": "registry:component",
+  "title": "Grid",
+  "description": "A responsive grid of equal columns that fits as many as the width allows, from a minimum column width. No breakpoints.",
+  "dependencies": [
+    "class-variance-authority",
+    "radix-ui"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/layout/grid.tsx",
+      "type": "registry:component",
+      "target": "components/layout/grid.tsx",
+      "content": "/**\n * @name grid\n * @category layout\n * @description A responsive grid of equal columns that fits as many as the width allows, from a minimum column width. No breakpoints.\n * @when A set of like items: cards, logos, stats, thumbnails. It reflows inside any width, including a sidebar. For tiles of different sizes use bento-grid; for two fixed columns use split.\n * @example\n * <Grid min=\"16rem\" gap=\"md\">\n *   <Card>…</Card>\n *   <Card>…</Card>\n *   <Card>…</Card>\n * </Grid>\n * <Grid min=\"9rem\" gap=\"sm\" fit=\"fill\">{logos}</Grid>\n */\nimport { Slot } from \"radix-ui\";\nimport { cva, type VariantProps } from \"class-variance-authority\";\nimport type { ComponentProps, CSSProperties } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport const gridVariants = cva(\"grid min-w-0\", {\n  variants: {\n    fit: {\n      /** Columns stretch to fill the row, so two items share the full width. */\n      fit: \"grid-cols-[repeat(auto-fit,minmax(min(100%,var(--grid-min)),1fr))]\",\n      /** Empty columns are kept, so a few items stay at column width. */\n      fill: \"grid-cols-[repeat(auto-fill,minmax(min(100%,var(--grid-min)),1fr))]\",\n    },\n    gap: {\n      none: \"gap-0\",\n      xs: \"gap-1\",\n      sm: \"gap-2\",\n      md: \"gap-4\",\n      lg: \"gap-6\",\n      xl: \"gap-10\",\n    },\n  },\n  defaultVariants: { fit: \"fit\", gap: \"md\" },\n});\n\nexport type GridProps = ComponentProps<\"div\"> &\n  VariantProps<typeof gridVariants> & {\n    /** The narrowest a column may be, as a CSS length. Never wider than the grid itself, so it cannot overflow. Defaults to \"16rem\". */\n    min?: string;\n    /** Render the child element (ul, for example) as the grid. */\n    asChild?: boolean;\n  };\n\nexport function Grid({ className, fit, gap, min = \"16rem\", asChild = false, style, ...props }: GridProps) {\n  const Comp = asChild ? Slot.Root : \"div\";\n  return (\n    <Comp\n      data-slot=\"grid\"\n      className={cn(gridVariants({ fit, gap }), className)}\n      style={{ \"--grid-min\": min, ...style } as CSSProperties}\n      {...props}\n    />\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "layout",
+    "when": "A set of like items: cards, logos, stats, thumbnails. It reflows inside any width, including a sidebar. For tiles of different sizes use bento-grid; for two fixed columns use split.",
+    "example": "<Grid min=\"16rem\" gap=\"md\">\n  <Card>…</Card>\n  <Card>…</Card>\n  <Card>…</Card>\n</Grid>\n<Grid min=\"9rem\" gap=\"sm\" fit=\"fill\">{logos}</Grid>",
+    "client": false
+  }
+}

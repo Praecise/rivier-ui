@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "radio-group",
+  "type": "registry:ui",
+  "title": "Radio Group",
+  "description": "A set of radio buttons where exactly one is chosen, with arrow-key movement between them.",
+  "dependencies": [
+    "radix-ui"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/radio-group.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/radio-group.tsx",
+      "content": "\"use client\";\n/**\n * @name radio-group\n * @category ui\n * @description A set of radio buttons where exactly one is chosen, with arrow-key movement between them.\n * @when Picking one of two to five options that should all be visible. For a longer list use select; for a compact row of icons or short words use toggle-group; for on or off use switch.\n * @example\n * <RadioGroup defaultValue=\"monthly\" aria-label=\"Billing period\">\n *   <Label><RadioGroupItem value=\"monthly\" /> Monthly</Label>\n *   <Label><RadioGroupItem value=\"yearly\" /> Yearly</Label>\n * </RadioGroup>\n */\nimport { RadioGroup as RadioGroupPrimitive } from \"radix-ui\";\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport function RadioGroup({ className, ...props }: ComponentProps<typeof RadioGroupPrimitive.Root>) {\n  return (\n    <RadioGroupPrimitive.Root\n      data-slot=\"radio-group\"\n      className={cn(\"grid gap-3 data-[orientation=horizontal]:flex data-[orientation=horizontal]:flex-wrap data-[orientation=horizontal]:gap-x-5\", className)}\n      {...props}\n    />\n  );\n}\n\n/** The circle is 20px; an invisible margin makes the touch target 40px. Wrap it in a Label to name it. */\nexport function RadioGroupItem({ className, ...props }: ComponentProps<typeof RadioGroupPrimitive.Item>) {\n  return (\n    <RadioGroupPrimitive.Item\n      data-slot=\"radio-group-item\"\n      className={cn(\n        \"peer relative inline-flex size-5 shrink-0 items-center justify-center rounded-full border border-input bg-background transition-[background-color,border-color,opacity] duration-instant ease-out after:absolute after:-inset-2.5 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive data-[state=checked]:border-primary data-[state=checked]:bg-primary motion-reduce:transition-none\",\n        className,\n      )}\n      {...props}\n    >\n      <RadioGroupPrimitive.Indicator data-slot=\"radio-group-indicator\" className=\"size-2 rounded-full bg-primary-foreground\" />\n    </RadioGroupPrimitive.Item>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "Picking one of two to five options that should all be visible. For a longer list use select; for a compact row of icons or short words use toggle-group; for on or off use switch.",
+    "example": "<RadioGroup defaultValue=\"monthly\" aria-label=\"Billing period\">\n  <Label><RadioGroupItem value=\"monthly\" /> Monthly</Label>\n  <Label><RadioGroupItem value=\"yearly\" /> Yearly</Label>\n</RadioGroup>",
+    "client": true
+  }
+}

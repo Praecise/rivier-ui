@@ -1,0 +1,31 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "sparkline",
+  "type": "registry:component",
+  "title": "Sparkline",
+  "description": "A tiny line, area or bar chart with no axes, for a stat tile or a table cell, described in words for assistive technology.",
+  "dependencies": [
+    "d3-scale",
+    "d3-shape"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/chart",
+    "@rivier-ui/cn",
+    "@rivier-ui/use-size"
+  ],
+  "files": [
+    {
+      "path": "registry/viz/sparkline.tsx",
+      "type": "registry:component",
+      "target": "components/viz/sparkline.tsx",
+      "content": "\"use client\";\n/**\n * @name sparkline\n * @category viz\n * @description A tiny line, area or bar chart with no axes, for a stat tile or a table cell, described in words for assistive technology.\n * @when The shape of a trend beside a number that carries the value. Size it with classes (`h-8 w-24` by default). When the reader needs to read values off it, use line-chart or bar-chart.\n * @example\n * <Sparkline data={[4, 6, 5, 9, 12, 10, 14]} label=\"Signups, last 7 days\" />\n * <Sparkline data={[3, 8, 2, 7, 5]} type=\"bar\" className=\"h-6 w-16\" />\n */\nimport { scaleLinear } from \"d3-scale\";\nimport { area as areaShape, line as lineShape } from \"d3-shape\";\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\nimport { useSize } from \"@/lib/use-size\";\nimport { chartSeries, formatNumber, type ChartFormat } from \"@/components/viz/chart\";\n\nexport type SparklineProps = Omit<ComponentProps<\"span\">, \"children\"> &\n  Omit<ChartFormat, \"timeZone\"> & {\n    /** The values, oldest first. */\n    data: readonly number[];\n    type?: \"line\" | \"area\" | \"bar\";\n    /** What the numbers are (\"Signups, last 7 days\"). The first, last, lowest and highest values are added to it. */\n    label?: string;\n    /** Which series colour, 0-based. Default 0, the highlight. */\n    series?: number;\n  };\n\n/** Room for the end marker and the line's own width. */\nconst PAD = 4;\n\nexport function Sparkline({ data, type = \"line\", label, series = 0, locale, formatValue, className, ...props }: SparklineProps) {\n  const { ref, width, height } = useSize<HTMLSpanElement>();\n  const values = data.filter((value) => Number.isFinite(value));\n  const number = formatValue ?? ((value: number) => formatNumber(value, locale));\n  const first = values[0];\n  const last = values[values.length - 1];\n  const summary =\n    first === undefined || last === undefined\n      ? \"no data\"\n      : `${values.length} values, from ${number(first)} to ${number(last)}, lowest ${number(Math.min(...values))}, highest ${number(Math.max(...values))}`;\n  const style = chartSeries(series);\n\n  let drawing = null;\n  if (width > 0 && height > 0 && values.length > 0) {\n    const low = Math.min(...values);\n    const high = Math.max(...values);\n    // A line may zoom in on its own range; a fill or a bar is read by its height, so it starts at zero.\n    const from = type === \"line\" ? low : Math.min(0, low);\n    const to = type === \"line\" ? high : Math.max(0, high);\n    const y = scaleLinear()\n      .domain(from === to ? [from - 1, to + 1] : [from, to])\n      .range([height - PAD, PAD]);\n    const x = scaleLinear()\n      .domain([0, Math.max(1, values.length - 1)])\n      .range([PAD, width - PAD]);\n    if (type === \"bar\") {\n      const step = (width - PAD * 2) / values.length;\n      const thickness = Math.max(1, Math.min(8, step - 1));\n      drawing = values.map((value, index) => {\n        const a = y(0);\n        const b = y(value);\n        return <rect key={index} x={PAD + index * step + (step - thickness) / 2} y={Math.min(a, b)} width={thickness} height={Math.max(1, Math.abs(b - a))} className={style.fill} />;\n      });\n    } else {\n      const indices = values.map((_, index) => index);\n      const at = (index: number): number => y(values[index] ?? 0);\n      drawing = (\n        <>\n          {type === \"area\" ? <path d={areaShape<number>().x(x).y0(y(0)).y1(at)(indices) ?? undefined} className={style.fill} fillOpacity={0.12} /> : null}\n          <path d={lineShape<number>().x(x).y(at)(indices) ?? undefined} fill=\"none\" className={style.stroke} strokeWidth={1.5} strokeLinejoin=\"round\" strokeLinecap=\"round\" />\n          {/* The latest value, marked. */}\n          <circle cx={x(values.length - 1)} cy={at(values.length - 1)} r={2.5} className={cn(style.fill, \"stroke-background\")} strokeWidth={1.5} paintOrder=\"stroke\" />\n        </>\n      );\n    }\n  }\n\n  return (\n    <span ref={ref} data-slot=\"sparkline\" role=\"img\" aria-label={label ? `${label}: ${summary}` : summary} className={cn(\"inline-block h-8 w-24 align-middle\", className)} {...props}>\n      {drawing ? (\n        <svg aria-hidden=\"true\" width={width} height={height} viewBox={`0 0 ${width} ${height}`} className=\"block overflow-visible animate-in fade-in-0 motion-reduce:animate-none\">\n          {drawing}\n        </svg>\n      ) : null}\n    </span>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "viz",
+    "when": "The shape of a trend beside a number that carries the value. Size it with classes (`h-8 w-24` by default). When the reader needs to read values off it, use line-chart or bar-chart.",
+    "example": "<Sparkline data={[4, 6, 5, 9, 12, 10, 14]} label=\"Signups, last 7 days\" />\n<Sparkline data={[3, 8, 2, 7, 5]} type=\"bar\" className=\"h-6 w-16\" />",
+    "client": true
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "spinner",
+  "type": "registry:ui",
+  "title": "Spinner",
+  "description": "A turning ring that says something is in progress, announced to assistive technology by its label.",
+  "dependencies": [
+    "class-variance-authority"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/spinner.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/spinner.tsx",
+      "content": "/**\n * @name spinner\n * @category ui\n * @description A turning ring that says something is in progress, announced to assistive technology by its label.\n * @when A short wait of unknown length. Inside a button use the button's `loading` prop; when the shape of the content is known use skeleton; when the amount done is known use progress.\n * @example\n * <Spinner />\n * <Spinner size=\"lg\" label=\"Loading projects\" />\n * <p className=\"flex items-center gap-2\"><Spinner size=\"sm\" label=\"Saving\" /> Saving</p>\n */\nimport { cva, type VariantProps } from \"class-variance-authority\";\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport const spinnerVariants = cva(\"inline-flex shrink-0 align-middle text-current\", {\n  variants: {\n    size: {\n      sm: \"size-4 [--spinner-ring:2px]\",\n      md: \"size-5 [--spinner-ring:2px]\",\n      lg: \"size-8 [--spinner-ring:3px]\",\n    },\n  },\n  defaultVariants: { size: \"md\" },\n});\n\nexport type SpinnerProps = Omit<ComponentProps<\"span\">, \"children\"> &\n  VariantProps<typeof spinnerVariants> & {\n    /** What is happening, for screen readers. Defaults to \"Loading\". */\n    label?: string;\n  };\n\n/** The ring takes the text colour. Under reduced motion it stands still; the label still announces the wait. */\nexport function Spinner({ className, size, label = \"Loading\", ...props }: SpinnerProps) {\n  return (\n    <span data-slot=\"spinner\" role=\"status\" className={cn(spinnerVariants({ size }), className)} {...props}>\n      <span\n        aria-hidden=\"true\"\n        className=\"size-full animate-spin rounded-full border-(length:--spinner-ring) border-current border-e-transparent motion-reduce:animate-none\"\n      />\n      <span className=\"sr-only\">{label}</span>\n    </span>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "A short wait of unknown length. Inside a button use the button's `loading` prop; when the shape of the content is known use skeleton; when the amount done is known use progress.",
+    "example": "<Spinner />\n<Spinner size=\"lg\" label=\"Loading projects\" />\n<p className=\"flex items-center gap-2\"><Spinner size=\"sm\" label=\"Saving\" /> Saving</p>",
+    "client": false
+  }
+}

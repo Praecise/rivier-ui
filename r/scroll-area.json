@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "scroll-area",
+  "type": "registry:ui",
+  "title": "Scroll Area",
+  "description": "A scrolling region with thin, themed scrollbars that look the same on every platform. Native scrolling underneath.",
+  "dependencies": [
+    "radix-ui"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/scroll-area.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/scroll-area.tsx",
+      "content": "\"use client\";\n/**\n * @name scroll-area\n * @category ui\n * @description A scrolling region with thin, themed scrollbars that look the same on every platform. Native scrolling underneath.\n * @when A bounded list or panel inside a surface: a menu, a sidebar, a log. Give it a height (or a max height). The page itself, and anything that can simply grow, should scroll natively.\n * @example\n * <ScrollArea className=\"h-64 rounded-surface border\" aria-label=\"Changelog\">\n *   <div className=\"p-4 text-sm\">Long content…</div>\n * </ScrollArea>\n * <ScrollArea orientation=\"horizontal\" className=\"w-full\">\n *   <div className=\"flex w-max gap-3 pb-3\">…</div>\n * </ScrollArea>\n */\nimport { ScrollArea as ScrollAreaPrimitive } from \"radix-ui\";\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport type ScrollAreaProps = ComponentProps<typeof ScrollAreaPrimitive.Root> & {\n  /** Which scrollbars to draw. Defaults to \"vertical\". */\n  orientation?: \"vertical\" | \"horizontal\" | \"both\";\n  /** Classes for the scrolling viewport (padding, snap). */\n  viewportClassName?: string;\n};\n\n/** The viewport can be focused, so the region scrolls from the keyboard. */\nexport function ScrollArea({ className, viewportClassName, orientation = \"vertical\", children, ...props }: ScrollAreaProps) {\n  return (\n    <ScrollAreaPrimitive.Root data-slot=\"scroll-area\" className={cn(\"relative overflow-hidden\", className)} {...props}>\n      <ScrollAreaPrimitive.Viewport data-slot=\"scroll-area-viewport\" tabIndex={0} className={cn(\"size-full rounded-[inherit]\", viewportClassName)}>\n        {children}\n      </ScrollAreaPrimitive.Viewport>\n      {orientation !== \"horizontal\" ? <ScrollBar orientation=\"vertical\" /> : null}\n      {orientation !== \"vertical\" ? <ScrollBar orientation=\"horizontal\" /> : null}\n      <ScrollAreaPrimitive.Corner />\n    </ScrollAreaPrimitive.Root>\n  );\n}\n\nexport function ScrollBar({ className, orientation = \"vertical\", ...props }: ComponentProps<typeof ScrollAreaPrimitive.Scrollbar>) {\n  return (\n    <ScrollAreaPrimitive.Scrollbar\n      data-slot=\"scroll-area-scrollbar\"\n      orientation={orientation}\n      className={cn(\n        \"flex touch-none p-0.5 select-none data-[orientation=horizontal]:h-2.5 data-[orientation=horizontal]:flex-col data-[orientation=vertical]:h-full data-[orientation=vertical]:w-2.5\",\n        className,\n      )}\n      {...props}\n    >\n      <ScrollAreaPrimitive.Thumb data-slot=\"scroll-area-thumb\" className=\"relative flex-1 rounded-full bg-border-strong\" />\n    </ScrollAreaPrimitive.Scrollbar>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "A bounded list or panel inside a surface: a menu, a sidebar, a log. Give it a height (or a max height). The page itself, and anything that can simply grow, should scroll natively.",
+    "example": "<ScrollArea className=\"h-64 rounded-surface border\" aria-label=\"Changelog\">\n  <div className=\"p-4 text-sm\">Long content…</div>\n</ScrollArea>\n<ScrollArea orientation=\"horizontal\" className=\"w-full\">\n  <div className=\"flex w-max gap-3 pb-3\">…</div>\n</ScrollArea>",
+    "client": true
+  }
+}

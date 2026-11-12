@@ -1,0 +1,26 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "skeleton",
+  "type": "registry:ui",
+  "title": "Skeleton",
+  "description": "A pulsing block that stands in for content that is loading. It is still under reduced motion.",
+  "dependencies": [],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/skeleton.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/skeleton.tsx",
+      "content": "/**\n * @name skeleton\n * @category ui\n * @description A pulsing block that stands in for content that is loading. It is still under reduced motion.\n * @when Content whose shape is known is on its way: size the block like the thing it replaces so nothing jumps. For an unknown wait use spinner; for a measurable one use progress.\n * @example\n * <div className=\"flex items-center gap-3\" aria-busy=\"true\">\n *   <Skeleton className=\"size-10 rounded-full\" />\n *   <div className=\"flex flex-1 flex-col gap-2\">\n *     <Skeleton className=\"h-4 w-1/2\" />\n *     <Skeleton className=\"h-4 w-3/4\" />\n *   </div>\n * </div>\n */\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\n/** Hidden from assistive technology: mark the region that is loading with `aria-busy` instead. */\nexport function Skeleton({ className, ...props }: ComponentProps<\"div\">) {\n  return (\n    <div\n      data-slot=\"skeleton\"\n      aria-hidden=\"true\"\n      className={cn(\"h-4 w-full animate-pulse rounded-control bg-muted motion-reduce:animate-none\", className)}\n      {...props}\n    />\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "Content whose shape is known is on its way: size the block like the thing it replaces so nothing jumps. For an unknown wait use spinner; for a measurable one use progress.",
+    "example": "<div className=\"flex items-center gap-3\" aria-busy=\"true\">\n  <Skeleton className=\"size-10 rounded-full\" />\n  <div className=\"flex flex-1 flex-col gap-2\">\n    <Skeleton className=\"h-4 w-1/2\" />\n    <Skeleton className=\"h-4 w-3/4\" />\n  </div>\n</div>",
+    "client": false
+  }
+}

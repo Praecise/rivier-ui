@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "aspect",
+  "type": "registry:component",
+  "title": "Aspect",
+  "description": "Holds its content at a fixed width-to-height ratio, so space is reserved before an image, video or canvas loads.",
+  "dependencies": [
+    "radix-ui"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/layout/aspect.tsx",
+      "type": "registry:component",
+      "target": "components/layout/aspect.tsx",
+      "content": "\"use client\";\n/**\n * @name aspect\n * @category layout\n * @description Holds its content at a fixed width-to-height ratio, so space is reserved before an image, video or canvas loads.\n * @when Media whose size is not known until it loads, or a tile that must keep its shape at any width. Make the child fill it (`size-full object-cover`). For plain CSS needs the `aspect-video` utility is enough.\n * @example\n * <Aspect ratio={16 / 9} className=\"rounded-surface border\">\n *   <img src=\"/shots/hero.jpg\" alt=\"The studio\" className=\"size-full object-cover\" />\n * </Aspect>\n * <Aspect ratio={1}><div className=\"size-full bg-muted\" /></Aspect>\n */\nimport { AspectRatio } from \"radix-ui\";\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport type AspectProps = ComponentProps<typeof AspectRatio.Root>;\n\n/** `ratio` is width divided by height. Defaults to 1 (a square). */\nexport function Aspect({ className, ratio = 1, ...props }: AspectProps) {\n  return <AspectRatio.Root data-slot=\"aspect\" ratio={ratio} className={cn(\"overflow-hidden\", className)} {...props} />;\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "layout",
+    "when": "Media whose size is not known until it loads, or a tile that must keep its shape at any width. Make the child fill it (`size-full object-cover`). For plain CSS needs the `aspect-video` utility is enough.",
+    "example": "<Aspect ratio={16 / 9} className=\"rounded-surface border\">\n  <img src=\"/shots/hero.jpg\" alt=\"The studio\" className=\"size-full object-cover\" />\n</Aspect>\n<Aspect ratio={1}><div className=\"size-full bg-muted\" /></Aspect>",
+    "client": true
+  }
+}

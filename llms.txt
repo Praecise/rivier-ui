@@ -1,0 +1,1426 @@
+# Rivier UI
+
+> A component library for AI-native development: React components you copy into a project and own, themed
+> from one place (light or dark, square to round, any highlight colour), covering controls, layout and bento
+> grids, motion and transitions, 3D and charts. Built on Radix, Tailwind CSS, Motion and three.js.
+
+Install an item into a project: `rivier-ui add <name>` (it brings what the item depends on, and the theme).
+Imports in a project: `@/components/<category>/<name>` and `@/lib/cn`.
+Rules for using and writing components: CONVENTIONS.md. Theming: registry/theme/rivier-ui.css.
+
+## Helpers
+
+### cn
+
+Joins class names and resolves Tailwind conflicts, so a class passed in wins over a component's own.
+
+Use it: Every component uses it. Use it wherever classes are combined conditionally.
+
+```tsx
+cn("px-4 py-2", isActive && "bg-primary", className)
+```
+
+### motion
+
+The motion tokens as numbers for the motion package (easing, durations, a pointer spring), the useMotionSafe gate, and the entrance engine the reveal components share.
+
+Use it: Any component animated with the motion package: take timing from here so it matches the CSS tokens, and gate on useMotionSafe so server markup is the final state. For CSS transitions use the duration-* and ease-out utilities instead.
+
+```tsx
+const safe = useMotionSafe();
+return (
+  <motion.div
+    initial={safe ? { opacity: 0 } : false}
+    animate={{ opacity: 1 }}
+    transition={{ duration: DURATION.slow, ease: EASE }}
+  />
+);
+```
+
+### theme-color
+
+Resolves a theme CSS variable such as "--highlight" to an rgb() string that three.js and canvas code can parse, and re-reads it when the theme changes.
+
+Use it: Anything that cannot use a Tailwind class or `var()`: three.js materials, canvas drawing. In markup use the token classes (`bg-primary`, `fill-chart-1`) instead.
+
+```tsx
+const { "--highlight": highlight, "--foreground": ink } = useThemeColors(["--highlight", "--foreground"]);
+material.color.set(highlight);
+
+// Outside React:
+const border = readThemeColor("--border");
+```
+
+### use-size
+
+Measures an element with ResizeObserver and returns its content width and height in whole pixels.
+
+Use it: Drawing to the size of a container: charts, canvases. For layout that only needs to adapt, use container queries (`@container`, `@md:`) instead.
+
+```tsx
+const { ref, width, height } = useSize<HTMLDivElement>();
+return <div ref={ref} className="aspect-video w-full">{width > 0 && <svg width={width} height={height} />}</div>;
+```
+
+## Controls and surfaces
+
+### accordion
+
+Stacked sections whose content opens and closes under its heading.
+
+Use it: Questions and answers, or long settings where people need a few sections out of many. `type="single"` keeps one open (add `collapsible` so it can be closed again); `type="multiple"` lets several be open. For views that replace each other in one place use tabs. Do not hide content everyone needs.
+
+```tsx
+<Accordion type="single" collapsible defaultValue="shipping">
+  <AccordionItem value="shipping">
+    <AccordionTrigger>How long does delivery take?</AccordionTrigger>
+    <AccordionContent>Two to four working days.</AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="returns">
+    <AccordionTrigger>Can I send it back?</AccordionTrigger>
+    <AccordionContent>Yes, within thirty days.</AccordionContent>
+  </AccordionItem>
+</Accordion>
+```
+
+### alert
+
+A message in the page with an icon, a title, a description and an optional action. Four variants: info, success, warning, destructive.
+
+Use it: Telling the reader something about the page or the result of an action, in place. For a message that appears and leaves use a toast; for one that needs an answer use a dialog.
+
+```tsx
+<Alert variant="success">
+  <AlertTitle>Payment received</AlertTitle>
+  <AlertDescription>A receipt is on its way to your inbox.</AlertDescription>
+</Alert>
+<Alert variant="destructive">
+  <AlertTitle>The card was declined</AlertTitle>
+  <AlertDescription>Check the number and the expiry date, then try again.</AlertDescription>
+  <AlertAction><Button size="sm" variant="outline">Try again</Button></AlertAction>
+</Alert>
+```
+
+### avatar
+
+A round picture of a person or a team, with initials shown until the image loads or when it fails, and a group that overlaps.
+
+Use it: Showing who something belongs to. Always give AvatarFallback initials; give AvatarImage an alt (the name), or alt="" when the name is printed next to it.
+
+```tsx
+<Avatar size="lg">
+  <AvatarImage src="/people/hana.jpg" alt="Hana Ito" />
+  <AvatarFallback>HI</AvatarFallback>
+</Avatar>
+<AvatarGroup aria-label="Team">
+  <Avatar><AvatarFallback>AK</AvatarFallback></Avatar>
+  <Avatar><AvatarFallback>BL</AvatarFallback></Avatar>
+  <Avatar><AvatarFallback>+3</AvatarFallback></Avatar>
+</AvatarGroup>
+```
+
+### badge
+
+A small label for a status, a count or a category. Six variants and an optional leading dot.
+
+Use it: Marking a state or a tag next to other content. It is not clickable: for a removable or selectable chip use a button with size "sm".
+
+```tsx
+<Badge>New</Badge>
+<Badge variant="soft">Beta</Badge>
+<Badge variant="success" dot>Live</Badge>
+<Badge variant="outline">Draft</Badge>
+```
+
+### breadcrumb
+
+The path from the top of the site to the current page, as links with separators.
+
+Use it: Pages nested three or more levels deep, above the page title. The last item is the current page: a BreadcrumbPage, not a link. For moving between sibling pages use tabs or the navbar. With a router link, pass it through `asChild`.
+
+```tsx
+<Breadcrumb>
+  <BreadcrumbList>
+    <BreadcrumbItem><BreadcrumbLink href="/">Home</BreadcrumbLink></BreadcrumbItem>
+    <BreadcrumbSeparator />
+    <BreadcrumbItem><BreadcrumbLink href="/projects">Projects</BreadcrumbLink></BreadcrumbItem>
+    <BreadcrumbSeparator />
+    <BreadcrumbItem><BreadcrumbPage>Atlas</BreadcrumbPage></BreadcrumbItem>
+  </BreadcrumbList>
+</Breadcrumb>
+```
+
+### button
+
+A button, or a link that looks like one. Five variants, three sizes, a loading state.
+
+Use it: Any action. One "solid" per view for the main action; "outline" or "ghost" for the rest; "destructive" only for deleting.
+
+```tsx
+<Button>Save</Button>
+<Button variant="outline" size="sm">Cancel</Button>
+<Button asChild><a href="/pricing">See pricing</a></Button>
+<Button loading>Saving</Button>
+```
+
+### card
+
+A flat surface with a hairline edge, and parts for a header, title, description, content and footer.
+
+Use it: Grouping related content: a plan, a stat, a form section. For a grid of unequal cards use bento-grid.
+
+```tsx
+<Card>
+  <CardHeader>
+    <CardTitle>Usage</CardTitle>
+    <CardDescription>This month</CardDescription>
+  </CardHeader>
+  <CardContent>1,204 requests</CardContent>
+  <CardFooter><Button size="sm">Details</Button></CardFooter>
+</Card>
+```
+
+### checkbox
+
+A checkbox with checked, unchecked and indeterminate states.
+
+Use it: Choosing any number of options, or agreeing to something that is submitted with a form. For a setting that applies at once use switch; for exactly one of several use radio-group.
+
+```tsx
+<Label><Checkbox defaultChecked /> Email me product news</Label>
+<Checkbox checked="indeterminate" aria-label="Select all rows" />
+```
+
+### command
+
+A command palette: a search field over a filtered, keyboard-driven list of actions, inline or in a dialog.
+
+Use it: Fast access to many actions or pages by typing (the Ctrl/Cmd+K palette), or a searchable list inside a popover. For a handful of actions use dropdown-menu. CommandDialog is usually opened by a shortcut, with no trigger, so focus has nowhere to return: remember the opener (`opener.current = document.activeElement` before opening) and refocus it in `onCloseAutoFocus={(event) => { event.preventDefault(); opener.current?.focus(); }}`.
+
+```tsx
+const [open, setOpen] = useState(false);
+
+<Button variant="outline" onClick={() => setOpen(true)}>Search</Button>
+<CommandDialog open={open} onOpenChange={setOpen}>
+  <CommandInput placeholder="Type a command" />
+  <CommandList>
+    <CommandEmpty>Nothing found.</CommandEmpty>
+    <CommandGroup heading="Pages">
+      <CommandItem onSelect={() => setOpen(false)}>Dashboard</CommandItem>
+      <CommandItem onSelect={() => setOpen(false)}>Settings <CommandShortcut>Ctrl ,</CommandShortcut></CommandItem>
+    </CommandGroup>
+    <CommandSeparator />
+    <CommandGroup heading="Account">
+      <CommandItem onSelect={() => setOpen(false)}>Sign out</CommandItem>
+    </CommandGroup>
+  </CommandList>
+</CommandDialog>
+```
+
+### context-menu
+
+A menu of actions that opens at the pointer on right-click, and on a long press on touch screens: items, checkbox and radio items, labels, separators, sub-menus and a shortcut slot.
+
+Use it: Shortcuts to actions on a thing in a dense interface (a file, a row, a canvas object). Nothing shows that it exists, so every action in it must also be reachable another way; for a visible button use dropdown-menu.
+
+```tsx
+<ContextMenu>
+  <ContextMenuTrigger className="flex h-32 items-center justify-center rounded-surface border border-dashed text-sm">
+    Right-click, or press and hold
+  </ContextMenuTrigger>
+  <ContextMenuContent>
+    <ContextMenuItem>Open <ContextMenuShortcut>Enter</ContextMenuShortcut></ContextMenuItem>
+    <ContextMenuCheckboxItem checked>Pinned</ContextMenuCheckboxItem>
+    <ContextMenuSub>
+      <ContextMenuSubTrigger>Label</ContextMenuSubTrigger>
+      <ContextMenuSubContent>
+        <ContextMenuRadioGroup value="none">
+          <ContextMenuRadioItem value="none">None</ContextMenuRadioItem>
+          <ContextMenuRadioItem value="urgent">Urgent</ContextMenuRadioItem>
+        </ContextMenuRadioGroup>
+      </ContextMenuSubContent>
+    </ContextMenuSub>
+    <ContextMenuSeparator />
+    <ContextMenuItem variant="destructive">Delete</ContextMenuItem>
+  </ContextMenuContent>
+</ContextMenu>
+```
+
+### dialog
+
+A modal window over a dimmed page, with parts for a header, title, description and footer.
+
+Use it: A short task or a decision that must be finished or dismissed before going on. For a panel from an edge (menus, filters, details) use sheet; for something small attached to a control use popover. Always give it a DialogTitle (add className="sr-only" to hide it). Opened by a DialogTrigger, focus returns to that trigger on close. Opened by state with no trigger (a shortcut, a menu item), Radix has nothing to return to: remember the opener (`opener.current = document.activeElement` before opening) and refocus it in `onCloseAutoFocus={(event) => { event.preventDefault(); opener.current?.focus(); }}` on DialogContent.
+
+```tsx
+<Dialog>
+  <DialogTrigger asChild><Button variant="outline">Rename</Button></DialogTrigger>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Rename project</DialogTitle>
+      <DialogDescription>The address of the project does not change.</DialogDescription>
+    </DialogHeader>
+    <input aria-label="Name" defaultValue="Atlas" className="h-control rounded-control border border-input px-3 text-base" />
+    <DialogFooter>
+      <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
+      <Button>Save</Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+```
+
+### dropdown-menu
+
+A menu of actions that opens from a button: items, checkbox and radio items, labels, separators, sub-menus and a shortcut slot.
+
+Use it: A list of actions or options behind one button (an account menu, "more" on a row). For choosing one value in a form use select; for actions on right-click use context-menu; for free content use popover. An icon-only trigger needs an `aria-label`.
+
+```tsx
+<DropdownMenu>
+  <DropdownMenuTrigger asChild><Button variant="outline">Options</Button></DropdownMenuTrigger>
+  <DropdownMenuContent align="start">
+    <DropdownMenuLabel>Project</DropdownMenuLabel>
+    <DropdownMenuItem>Rename <DropdownMenuShortcut>F2</DropdownMenuShortcut></DropdownMenuItem>
+    <DropdownMenuCheckboxItem checked>Show in sidebar</DropdownMenuCheckboxItem>
+    <DropdownMenuSub>
+      <DropdownMenuSubTrigger>Move to</DropdownMenuSubTrigger>
+      <DropdownMenuSubContent>
+        <DropdownMenuRadioGroup value="work">
+          <DropdownMenuRadioItem value="work">Work</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="archive">Archive</DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
+      </DropdownMenuSubContent>
+    </DropdownMenuSub>
+    <DropdownMenuSeparator />
+    <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
+
+### empty-state
+
+What a list, a table or a search shows when there is nothing in it: an icon, a title, a description and an action.
+
+Use it: An empty list, zero search results, a first run. Say what belongs here and offer the one action that fills it. For a failure use alert; while loading use skeleton.
+
+```tsx
+<EmptyState
+  title="No projects yet"
+  description="Projects you create will appear here."
+  action={<Button>New project</Button>}
+/>
+<EmptyState icon={<SearchX />} title="No results" description="Try a shorter search." bordered={false} />
+```
+
+### field
+
+Lays out a label, a control, a description and an error message, and connects them (htmlFor, id, aria-describedby, aria-invalid) without hand-written ids.
+
+Use it: Every control in a form. Put the control inside FieldControl; render FieldError only when there is a message and the field turns invalid by itself. Use orientation="horizontal" for a checkbox or switch beside its label, and FieldControl group for a radio group, toggle group or slider.
+
+```tsx
+<Field>
+  <FieldLabel>Email</FieldLabel>
+  <FieldControl><Input type="email" /></FieldControl>
+  <FieldDescription>We only use it to reply.</FieldDescription>
+  <FieldError>{error}</FieldError>
+</Field>
+<Field orientation="horizontal">
+  <FieldControl><Switch /></FieldControl>
+  <FieldLabel>Weekly summary</FieldLabel>
+</Field>
+<Field>
+  <FieldLabel>Plan</FieldLabel>
+  <FieldControl group>
+    <RadioGroup defaultValue="pro">
+      <Label><RadioGroupItem value="free" /> Free</Label>
+      <Label><RadioGroupItem value="pro" /> Pro</Label>
+    </RadioGroup>
+  </FieldControl>
+</Field>
+```
+
+### input-group
+
+An input with a leading or trailing icon, text or button inside one shared border.
+
+Use it: A search box with an icon, a URL with a fixed prefix, a field with a unit or an inline action. For a plain input use input. Inside a field, wrap InputGroupInput (not the group) in FieldControl.
+
+```tsx
+<InputGroup>
+  <InputGroupAddon><Search strokeWidth={1.5} /></InputGroupAddon>
+  <InputGroupInput type="search" placeholder="Search" aria-label="Search" />
+</InputGroup>
+<InputGroup size="sm">
+  <InputGroupAddon>https://</InputGroupAddon>
+  <InputGroupInput placeholder="example.com" aria-label="Website" />
+  <InputGroupAddon><InputGroupButton>Check</InputGroupButton></InputGroupAddon>
+</InputGroup>
+```
+
+### input
+
+A single-line text input in three sizes, with an invalid state.
+
+Use it: Short free text: a name, an email, a number. Wrap it in field for a label and an error; use textarea for several lines, select for a fixed list, input-group to add an icon or a button inside the edge.
+
+```tsx
+<Input type="email" placeholder="you@example.com" />
+<Input size="sm" defaultValue="Rivier" />
+<Input aria-invalid="true" aria-label="Email" defaultValue="not-an-email" />
+```
+
+### kbd
+
+A key cap for showing a keyboard key or a shortcut.
+
+Use it: Naming a key the reader can press: in a menu item, a tooltip, a hint under a field. Wrap a combination in KbdGroup, one Kbd per key.
+
+```tsx
+<Kbd>Esc</Kbd>
+<KbdGroup>
+  <Kbd>Ctrl</Kbd>
+  <Kbd>K</Kbd>
+</KbdGroup>
+```
+
+### label
+
+The text name of a control. Clicking it focuses or toggles the control it points to.
+
+Use it: Every control needs one. Point it at a control with htmlFor, or wrap a checkbox, radio or switch in it so the whole row is the hit area. Inside field, use FieldLabel, which wires htmlFor for you.
+
+```tsx
+<Label htmlFor="email">Email</Label>
+<Input id="email" type="email" />
+<Label><Checkbox /> Remember me</Label>
+```
+
+### navbar
+
+A responsive site header: a brand, a row of links and a slot for actions. Below `md` the links move into a menu button that opens them in a sheet.
+
+Use it: The top of a site or app with up to about seven top-level links. The links are written once, as NavbarLink children, and shown in the bar or in the sheet. The sheet closes when a link in it is followed, and focus returns to the menu button. Mark the current page with `current`. With a router link, pass it through `asChild`. For navigation inside a page use tabs; for the path to a page use breadcrumb.
+
+```tsx
+<Navbar
+  brand={<a href="/" className="text-base font-medium">Rivier</a>}
+  actions={<Button size="sm" asChild><a href="/contact">Contact</a></Button>}
+>
+  <NavbarLink href="/work" current>Work</NavbarLink>
+  <NavbarLink href="/studio">Studio</NavbarLink>
+  <NavbarLink href="/about">About</NavbarLink>
+</Navbar>
+```
+
+### pagination
+
+Links to the previous, next and numbered pages of a long list, with the look of buttons.
+
+Use it: A list or table split over pages that people may want to jump within or link to. Each page is a real link, so it works without JavaScript; with a router link, pass it through `asChild`. On the first or last page give PaginationPrevious or PaginationNext `aria-disabled="true"` and no `href`. For a feed with no natural page numbers use a "Load more" button.
+
+```tsx
+<Pagination>
+  <PaginationContent>
+    <PaginationItem><PaginationPrevious href="?page=1" /></PaginationItem>
+    <PaginationItem><PaginationLink href="?page=1">1</PaginationLink></PaginationItem>
+    <PaginationItem><PaginationLink href="?page=2" isActive>2</PaginationLink></PaginationItem>
+    <PaginationItem><PaginationEllipsis /></PaginationItem>
+    <PaginationItem><PaginationLink href="?page=9">9</PaginationLink></PaginationItem>
+    <PaginationItem><PaginationNext href="?page=3" /></PaginationItem>
+  </PaginationContent>
+</Pagination>
+```
+
+### popover
+
+A small floating surface attached to the control that opens it.
+
+Use it: Extra controls or details that belong to one control: a date picker, a share box, quick settings. For a hint of a few words use tooltip; for a list of actions use dropdown-menu; for a task that must block the page use dialog.
+
+```tsx
+<Popover>
+  <PopoverTrigger asChild><Button variant="outline">Share</Button></PopoverTrigger>
+  <PopoverContent align="start">
+    <p className="text-sm font-medium">Share this page</p>
+    <p className="text-sm text-muted-foreground">Anyone with the link can view it.</p>
+  </PopoverContent>
+</Popover>
+```
+
+### progress
+
+A bar that fills as a task completes, or slides back and forth when the amount done is not known.
+
+Use it: A wait that can be measured: an upload, a multi-step job. Leave `value` out (or pass null) for the indeterminate state. For a short unknown wait use spinner. Always label it.
+
+```tsx
+<Progress value={64} aria-label="Uploading" />
+<Progress value={3} max={8} size="sm" aria-label="Step 3 of 8" />
+<Progress aria-label="Connecting" />
+```
+
+### radio-group
+
+A set of radio buttons where exactly one is chosen, with arrow-key movement between them.
+
+Use it: Picking one of two to five options that should all be visible. For a longer list use select; for a compact row of icons or short words use toggle-group; for on or off use switch.
+
+```tsx
+<RadioGroup defaultValue="monthly" aria-label="Billing period">
+  <Label><RadioGroupItem value="monthly" /> Monthly</Label>
+  <Label><RadioGroupItem value="yearly" /> Yearly</Label>
+</RadioGroup>
+```
+
+### scroll-area
+
+A scrolling region with thin, themed scrollbars that look the same on every platform. Native scrolling underneath.
+
+Use it: A bounded list or panel inside a surface: a menu, a sidebar, a log. Give it a height (or a max height). The page itself, and anything that can simply grow, should scroll natively.
+
+```tsx
+<ScrollArea className="h-64 rounded-surface border" aria-label="Changelog">
+  <div className="p-4 text-sm">Long content…</div>
+</ScrollArea>
+<ScrollArea orientation="horizontal" className="w-full">
+  <div className="flex w-max gap-3 pb-3">…</div>
+</ScrollArea>
+```
+
+### select
+
+A themed dropdown for choosing one value from a list, with groups, labels and separators. Never a native select.
+
+Use it: Picking one of more than about five options, or when space is tight. For two to five visible options use radio-group; for a short row of icons use toggle-group.
+
+```tsx
+<Select defaultValue="eur">
+  <SelectTrigger aria-label="Currency" className="w-48">
+    <SelectValue placeholder="Currency" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectGroup>
+      <SelectLabel>Europe</SelectLabel>
+      <SelectItem value="eur">Euro</SelectItem>
+      <SelectItem value="sek">Swedish krona</SelectItem>
+    </SelectGroup>
+    <SelectSeparator />
+    <SelectGroup>
+      <SelectLabel>Americas</SelectLabel>
+      <SelectItem value="usd">US dollar</SelectItem>
+      <SelectItem value="cad" disabled>Canadian dollar</SelectItem>
+    </SelectGroup>
+  </SelectContent>
+</Select>
+```
+
+### separator
+
+A hairline between two pieces of content, horizontal or vertical, with an optional label in the middle.
+
+Use it: Dividing groups inside a surface or a toolbar. Between page sections use section spacing instead, and inside a list prefer a border on the rows.
+
+```tsx
+<Separator />
+<Separator>or continue with</Separator>
+<div className="flex h-5 items-center gap-3">
+  <span>Docs</span>
+  <Separator orientation="vertical" />
+  <span>Blog</span>
+</div>
+```
+
+### sheet
+
+A modal panel that slides in from an edge of the screen, with parts for a header, title, description and footer.
+
+Use it: Navigation, filters, details or a longer form beside the page. `side` is "end" by default ("start" and "end" follow the reading direction; "left" and "right" do not); on phones "bottom" is the natural choice, because it is within reach of the thumb. For a short decision in the middle of the screen use dialog. Always give it a SheetTitle (add className="sr-only" to hide it). Opened by state with no SheetTrigger, focus does not return on close: remember the opener (`opener.current = document.activeElement`) and refocus it in `onCloseAutoFocus={(event) => { event.preventDefault(); opener.current?.focus(); }}` on SheetContent.
+
+```tsx
+<Sheet>
+  <SheetTrigger asChild><Button variant="outline">Filters</Button></SheetTrigger>
+  <SheetContent side="bottom">
+    <SheetHeader>
+      <SheetTitle>Filters</SheetTitle>
+      <SheetDescription>Narrow the list of projects.</SheetDescription>
+    </SheetHeader>
+    <div className="px-5">…</div>
+    <SheetFooter>
+      <SheetClose asChild><Button>Show results</Button></SheetClose>
+    </SheetFooter>
+  </SheetContent>
+</Sheet>
+```
+
+### skeleton
+
+A pulsing block that stands in for content that is loading. It is still under reduced motion.
+
+Use it: Content whose shape is known is on its way: size the block like the thing it replaces so nothing jumps. For an unknown wait use spinner; for a measurable one use progress.
+
+```tsx
+<div className="flex items-center gap-3" aria-busy="true">
+  <Skeleton className="size-10 rounded-full" />
+  <div className="flex flex-1 flex-col gap-2">
+    <Skeleton className="h-4 w-1/2" />
+    <Skeleton className="h-4 w-3/4" />
+  </div>
+</div>
+```
+
+### slider
+
+A slider for one value, or a range with two thumbs.
+
+Use it: Choosing a number where the rough position matters more than the exact figure: volume, a price range. When the exact number matters use an input with type="number".
+
+```tsx
+<Slider defaultValue={[40]} max={100} step={5} aria-label="Volume" />
+<Slider defaultValue={[200, 800]} min={0} max={1000} step={50} thumbLabels={["Lowest price", "Highest price"]} />
+```
+
+### spinner
+
+A turning ring that says something is in progress, announced to assistive technology by its label.
+
+Use it: A short wait of unknown length. Inside a button use the button's `loading` prop; when the shape of the content is known use skeleton; when the amount done is known use progress.
+
+```tsx
+<Spinner />
+<Spinner size="lg" label="Loading projects" />
+<p className="flex items-center gap-2"><Spinner size="sm" label="Saving" /> Saving</p>
+```
+
+### stat
+
+A number tile: a label, a value, an optional change with its direction, and a slot for a sparkline.
+
+Use it: A headline figure on a dashboard or in a bento cell. Pass `change` as a magnitude ("12%"): the sign and the arrow are added from `direction`. For several figures compared over time use a chart or a table.
+
+```tsx
+<Stat label="Revenue" value="€48,200" change="12%" direction="up" changeLabel="vs last month" />
+<Stat label="Churn" value="2.1%" change="0.4 pts" direction="up" tone="negative" />
+<Stat
+  label="Uptime"
+  value="99.98%"
+  chart={
+    <svg viewBox="0 0 100 24" preserveAspectRatio="none" className="h-8 w-full" aria-hidden="true">
+      <polyline points="0,18 20,14 40,16 60,8 80,10 100,4" fill="none" strokeWidth="1.5" className="stroke-chart-1" />
+    </svg>
+  }
+/>
+```
+
+### switch
+
+An on/off switch.
+
+Use it: A setting that takes effect as soon as it is flipped. For a choice that is submitted with a form use checkbox; for a pressed/unpressed toolbar button use toggle.
+
+```tsx
+<Label><Switch defaultChecked /> Weekly summary</Label>
+<Switch aria-label="Dark mode" checked={dark} onCheckedChange={setDark} />
+```
+
+### table
+
+A semantic table with styled parts, inside a wrapper that scrolls sideways so it never overflows a narrow screen.
+
+Use it: Rows of the same kind of thing compared across columns. For sorting, filtering and paging build on these parts. For two or three facts per item use cards; for one number use stat.
+
+```tsx
+<Table>
+  <TableCaption>Invoices this quarter</TableCaption>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Invoice</TableHead>
+      <TableHead>Status</TableHead>
+      <TableHead numeric>Amount</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow>
+      <TableCell>INV-001</TableCell>
+      <TableCell>Paid</TableCell>
+      <TableCell numeric>€250.00</TableCell>
+    </TableRow>
+  </TableBody>
+  <TableFooter>
+    <TableRow>
+      <TableCell colSpan={2}>Total</TableCell>
+      <TableCell numeric>€250.00</TableCell>
+    </TableRow>
+  </TableFooter>
+</Table>
+```
+
+### tabs
+
+Panels that share one place, switched by a row of tabs. Two looks: an underline, or a segmented pill.
+
+Use it: Views of the same thing that people switch between without leaving the page. `variant="underline"` (the default) for sections of a page; `variant="pill"` for a compact switch between two to four views. For moving between pages use links (navbar, breadcrumb); for stacked sections that can be open together use accordion.
+
+```tsx
+<Tabs defaultValue="overview">
+  <TabsList aria-label="Project">
+    <TabsTrigger value="overview">Overview</TabsTrigger>
+    <TabsTrigger value="activity">Activity</TabsTrigger>
+  </TabsList>
+  <TabsContent value="overview">The overview.</TabsContent>
+  <TabsContent value="activity">The activity.</TabsContent>
+</Tabs>
+
+<Tabs defaultValue="month">
+  <TabsList variant="pill" aria-label="Billing period">
+    <TabsTrigger value="month">Monthly</TabsTrigger>
+    <TabsTrigger value="year">Yearly</TabsTrigger>
+  </TabsList>
+  <TabsContent value="month">Billed every month.</TabsContent>
+  <TabsContent value="year">Billed once a year.</TabsContent>
+</Tabs>
+```
+
+### textarea
+
+A multi-line text input that grows with its content, with an invalid state.
+
+Use it: Free text of more than one line: a message, a note, a description. Wrap it in field for a label and an error; use input for a single line.
+
+```tsx
+<Textarea placeholder="Tell us about the project" rows={4} />
+<Textarea aria-invalid="true" aria-label="Message" defaultValue="Too short" />
+```
+
+### theme-provider
+
+Holds the theme (light or dark, roundness, highlight colour), applies it to the page, remembers the visitor's choice, and avoids a flash of the wrong theme.
+
+Use it: Once, around the app in the root layout, when visitors or the product can change the theme. For a fixed theme, skip it and set the attributes on <html> by hand.
+
+```tsx
+// app/layout.tsx
+<html lang="en" suppressHydrationWarning>
+  <head><ThemeScript defaults={{ mode: "system", radius: "md", accent: "blue" }} /></head>
+  <body>
+    <ThemeProvider defaults={{ mode: "system", radius: "md", accent: "blue" }}>{children}</ThemeProvider>
+  </body>
+</html>
+
+// anywhere below
+const { theme, setTheme } = useTheme();
+setTheme({ mode: "dark" });
+setTheme({ accent: { hue: 262, chroma: 0.19 } });
+```
+
+### toaster
+
+The place where toasts appear: sonner's Toaster drawn with the theme's tokens, and its `toast` function.
+
+Use it: Short confirmations and errors that need no decision ("Saved", "Could not connect"). Render one Toaster in the root layout, then call `toast` from anywhere on the client. For something that must be answered use dialog; for a message that belongs to a field or a section, show it there.
+
+```tsx
+// app/layout.tsx
+<body>
+  {children}
+  <Toaster />
+</body>
+
+// any client component
+<Button onClick={() => toast.success("Saved", { description: "Your changes are live." })}>Save</Button>
+```
+
+### toggle-group
+
+A joined row of toggles where one (type="single") or several (type="multiple") are on.
+
+Use it: A compact choice between a few short options or icons: alignment, a view switcher, text styles. For options with longer labels use radio-group (one) or checkboxes (several); for switching panels use tabs.
+
+```tsx
+<ToggleGroup type="single" defaultValue="grid" aria-label="View" variant="outline">
+  <ToggleGroupItem value="grid">Grid</ToggleGroupItem>
+  <ToggleGroupItem value="list">List</ToggleGroupItem>
+</ToggleGroup>
+<ToggleGroup type="multiple" aria-label="Text style" size="sm">
+  <ToggleGroupItem value="italic" aria-label="Italic"><Italic strokeWidth={1.5} /></ToggleGroupItem>
+  <ToggleGroupItem value="underline" aria-label="Underline"><Underline strokeWidth={1.5} /></ToggleGroupItem>
+</ToggleGroup>
+```
+
+### toggle
+
+A button that stays pressed: on or off.
+
+Use it: A toolbar state such as bold, mute or pin. For a setting use switch; for several toggles that belong together, or a pick-one row, use toggle-group.
+
+```tsx
+<Toggle aria-label="Italic"><Italic strokeWidth={1.5} /></Toggle>
+<Toggle variant="outline" size="sm" defaultPressed>Pinned</Toggle>
+```
+
+### tooltip
+
+A few words that appear beside a control on hover or keyboard focus.
+
+Use it: Naming an icon-only button or adding a short hint. It does not open on touch, so never put anything needed there: the control keeps its own `aria-label`. For content people interact with use popover. Put one TooltipProvider around the app (root layout); every Tooltip must be inside one.
+
+```tsx
+<TooltipProvider>
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <Button variant="ghost" size="icon" aria-label="Copy link"><Link2 /></Button>
+    </TooltipTrigger>
+    <TooltipContent>Copy link</TooltipContent>
+  </Tooltip>
+</TooltipProvider>
+```
+
+## Layout
+
+### aspect
+
+Holds its content at a fixed width-to-height ratio, so space is reserved before an image, video or canvas loads.
+
+Use it: Media whose size is not known until it loads, or a tile that must keep its shape at any width. Make the child fill it (`size-full object-cover`). For plain CSS needs the `aspect-video` utility is enough.
+
+```tsx
+<Aspect ratio={16 / 9} className="rounded-surface border">
+  <img src="/shots/hero.jpg" alt="The studio" className="size-full object-cover" />
+</Aspect>
+<Aspect ratio={1}><div className="size-full bg-muted" /></Aspect>
+```
+
+### bento-grid
+
+A grid of flat cards of unequal sizes. One column on a phone, two on a tablet, then 2, 3, 4 or 6: decided by the grid's own width, so it works inside any container.
+
+Use it: Showing several features, figures or pieces of media as one composed block. Cells take `span` and `rowSpan`; spans are clamped to the columns there are. For equal cards use grid; for a single surface use card.
+
+```tsx
+// Feature block: one wide lead cell, two small ones, a full-width strip.
+<BentoGrid columns={3}>
+  <BentoCell span={2} rowSpan={2}>
+    <BentoCellHeader>
+      <BentoCellTitle>Themable from one place</BentoCellTitle>
+      <BentoCellDescription>Light or dark, square to round, any highlight colour.</BentoCellDescription>
+    </BentoCellHeader>
+    <BentoCellMedia><img src="/shots/theme.png" alt="" /></BentoCellMedia>
+  </BentoCell>
+  <BentoCell><BentoCellHeader><BentoCellTitle>Accessible</BentoCellTitle></BentoCellHeader></BentoCell>
+  <BentoCell><BentoCellHeader><BentoCellTitle>Fast</BentoCellTitle></BentoCellHeader></BentoCell>
+  <BentoCell span="full"><BentoCellHeader><BentoCellTitle>Yours to edit</BentoCellTitle></BentoCellHeader></BentoCell>
+</BentoGrid>
+
+// Dashboard: four figures on top, a wide chart beside a tall list.
+<BentoGrid columns={4} rowHeight="8rem">
+  <BentoCell><Stat label="Revenue" value="€48k" className="border-0" /></BentoCell>
+  <BentoCell><Stat label="Orders" value="1,204" className="border-0" /></BentoCell>
+  <BentoCell><Stat label="Visitors" value="18.2k" className="border-0" /></BentoCell>
+  <BentoCell><Stat label="Refunds" value="12" className="border-0" /></BentoCell>
+  <BentoCell span={3} rowSpan={3}>…chart…</BentoCell>
+  <BentoCell rowSpan={3}>…recent activity…</BentoCell>
+</BentoGrid>
+
+// Link mosaic: six columns, mixed sizes, gaps back-filled, every cell a link.
+<BentoGrid columns={6} dense>
+  <BentoCell span={4} rowSpan={2} interactive asChild><a href="/work/atlas">…</a></BentoCell>
+  <BentoCell span={2} interactive asChild><a href="/work/north">…</a></BentoCell>
+  <BentoCell span={2} interactive asChild><a href="/work/field">…</a></BentoCell>
+  <BentoCell span={3} interactive asChild><a href="/work/tide">…</a></BentoCell>
+  <BentoCell span={3} interactive asChild><a href="/work/loom">…</a></BentoCell>
+</BentoGrid>
+```
+
+### container
+
+Centres content at the page width with the page gutter on both sides. Four sizes: narrow, page, wide, full.
+
+Use it: Around the content of every page band so edges line up down the page. "narrow" for reading text, "wide" for galleries and dashboards, "full" to keep only the gutter. Section already wraps its children in one.
+
+```tsx
+<Container>
+  <h1>Pricing</h1>
+</Container>
+<Container size="narrow" asChild>
+  <article>Long-form text…</article>
+</Container>
+```
+
+### grid
+
+A responsive grid of equal columns that fits as many as the width allows, from a minimum column width. No breakpoints.
+
+Use it: A set of like items: cards, logos, stats, thumbnails. It reflows inside any width, including a sidebar. For tiles of different sizes use bento-grid; for two fixed columns use split.
+
+```tsx
+<Grid min="16rem" gap="md">
+  <Card>…</Card>
+  <Card>…</Card>
+  <Card>…</Card>
+</Grid>
+<Grid min="9rem" gap="sm" fit="fill">{logos}</Grid>
+```
+
+### marquee
+
+A row that scrolls sideways without end. It pauses on hover and on keyboard focus, and under reduced motion it is an ordinary wrapped row.
+
+Use it: A strip of logos, short quotes or tags where no single item must be read. Not for content the reader needs: everything is also in the markup once, but it moves. For a few items that fit, use stack or grid.
+
+```tsx
+<Marquee aria-label="Clients" speed="slow">
+  <img src="/logos/atlas.svg" alt="Atlas" className="h-8 w-auto" />
+  <img src="/logos/north.svg" alt="North" className="h-8 w-auto" />
+  <img src="/logos/field.svg" alt="Field" className="h-8 w-auto" />
+</Marquee>
+<Marquee direction="right" speed={25} gap="1rem" fade={false}>
+  <Badge variant="outline">Design</Badge>
+  <Badge variant="outline">Build</Badge>
+  <Badge variant="outline">Launch</Badge>
+</Marquee>
+```
+
+### section
+
+A band of a page with consistent vertical rhythm, an optional eyebrow, title and description, and three tones: default, muted, inverse.
+
+Use it: Every top-level block of a marketing or content page. "inverse" makes a dark band on a light page and re-themes everything inside it. Inside an app screen use stack and card instead.
+
+```tsx
+<Section eyebrow="Features" title="Everything in one place" description="Built on the same tokens.">
+  <BentoGrid>…</BentoGrid>
+</Section>
+<Section tone="inverse" align="center" title="Ready to start?">
+  <Button>Get in touch</Button>
+</Section>
+<Section tone="muted" spacing="sm" container="narrow">Plain content, no header.</Section>
+```
+
+### split
+
+Two columns, usually media beside text, that stack into one on a narrow width. A ratio between the columns and a reverse option.
+
+Use it: A feature row, a hero with an image, a form beside its explanation. Give it exactly two children. Alternate `reverse` down a page for a zigzag. For more than two columns use grid.
+
+```tsx
+<Split ratio="3:2">
+  <SplitMedia><img src="/shots/dashboard.png" alt="The dashboard" /></SplitMedia>
+  <SplitContent>
+    <h2 className="text-3xl font-medium">See everything at once</h2>
+    <p className="text-muted-foreground">One screen for the whole week.</p>
+  </SplitContent>
+</Split>
+<Split reverse align="start" gap="lg">
+  <SplitMedia>…</SplitMedia>
+  <SplitContent>…</SplitContent>
+</Split>
+```
+
+### stack
+
+A flex row or column with a gap from a fixed scale, and props for alignment, distribution and wrapping.
+
+Use it: Spacing a run of siblings evenly: form fields, a button row, a header with actions. For columns that reflow by width use grid; for unequal tiles use bento-grid.
+
+```tsx
+<Stack gap="lg">
+  <h2>Title</h2>
+  <p>Body</p>
+</Stack>
+<Stack direction="horizontal" gap="sm" align="center" justify="between" wrap>
+  <span>Plan</span>
+  <Button size="sm">Change</Button>
+</Stack>
+<Stack asChild gap="xs"><ul><li>One</li><li>Two</li></ul></Stack>
+```
+
+## Motion and transitions
+
+### layout-transition
+
+A shared element that animates from one place to another: render Morph with the same layoutId in two places and it travels between them.
+
+Use it: A tabs or navigation indicator that slides to the active item, a card that grows into its detail view, a selection highlight. Both places must be in the same React tree. Between pages use view-transition; for content that only appears and disappears use presence.
+
+```tsx
+const [active, setActive] = useState("overview");
+<MorphGroup id="section-tabs">
+  <div className="flex gap-1">
+    {["overview", "pricing", "docs"].map((tab) => (
+      <button key={tab} onClick={() => setActive(tab)} className="relative h-control rounded-control px-4 text-sm">
+        {active === tab ? <Morph layoutId="indicator" className="absolute inset-0 rounded-control bg-accent" /> : null}
+        <span className="relative capitalize">{tab}</span>
+      </button>
+    ))}
+  </div>
+</MorphGroup>
+```
+
+### magnetic
+
+A wrapper whose child is gently pulled toward the pointer while it is hovered, and springs back when the pointer leaves.
+
+Use it: The one main call to action on a marketing page, or an icon button that should feel alive. Not for every button, not inside dense interfaces, and it does nothing on touch screens.
+
+```tsx
+<Magnetic>
+  <Button size="lg">Start a project</Button>
+</Magnetic>
+<Magnetic strength={0.5}>
+  <Button variant="outline" size="icon" aria-label="Play"><Play /></Button>
+</Magnetic>
+```
+
+### number-ticker
+
+A number that counts up to its value when it scrolls into view, formatted with Intl.NumberFormat.
+
+Use it: A headline statistic: customers, revenue, a percentage. Not for values that update live (render those directly), and not for more than a few on one screen.
+
+```tsx
+<NumberTicker value={12480} />
+<NumberTicker value={0.9997} options={{ style: "percent", maximumFractionDigits: 2 }} />
+<NumberTicker value={48000} locale="de-DE" options={{ style: "currency", currency: "EUR", maximumFractionDigits: 0 }} />
+```
+
+### page-transition
+
+Wraps page content and plays a short enter (a fade and a small rise) each time the route changes.
+
+Use it: The content area of an app or site, once, in the layout. The first page load is not animated. Where the browser supports it and elements should morph between pages, use view-transition instead; do not use both.
+
+```tsx
+// app/template.tsx (Next.js). A template is re-created on navigation; the pathname is the key.
+"use client";
+import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
+import { PageTransition } from "@/components/motion/page-transition";
+
+export default function Template({ children }: { children: ReactNode }) {
+  return <PageTransition routeKey={usePathname()}>{children}</PageTransition>;
+}
+```
+
+### parallax
+
+A clipped frame whose layer moves at a different speed from the page as it scrolls past.
+
+Use it: A background image or a decorative layer behind a section. The frame needs a height of its own (an aspect ratio or a fixed height). Not for text that must be read while it moves; for a pinned, scroll-told sequence use scroll-scene.
+
+```tsx
+<Parallax speed={0.3} className="aspect-video rounded-surface">
+  <img src="/landscape.jpg" alt="" className="size-full object-cover" />
+</Parallax>
+```
+
+### presence
+
+Animates its children in when they are shown and out before they are removed.
+
+Use it: Conditional UI that is not a Radix primitive: an inline notice, a revealed panel, a step that swaps. Radix dialogs, popovers and menus already animate with their own classes; for content entering on scroll use reveal.
+
+```tsx
+const [open, setOpen] = useState(false);
+<Button onClick={() => setOpen((value) => !value)}>Toggle</Button>
+<Presence show={open} preset="slide-up" className="mt-4 rounded-surface border p-4">
+  Saved. Your changes are live.
+</Presence>
+```
+
+### reveal
+
+Fades and moves its content into place when it scrolls into view.
+
+Use it: A section, card or image that should arrive as the page is read. For a list revealed one after another use stagger; for a heading use text-reveal; for conditional UI that mounts and unmounts use presence.
+
+```tsx
+<Reveal>
+  <h2 className="text-2xl font-medium">Built to be owned</h2>
+</Reveal>
+<Reveal direction="start" distance={40} delay={0.1} once={false}>
+  <img src="/studio.jpg" alt="The studio" className="rounded-surface" />
+</Reveal>
+```
+
+### scroll-progress
+
+A thin bar fixed to the top of the viewport that fills as the page, or one element, is scrolled through.
+
+Use it: Long reading pages: an article, documentation, a case study. Pass `target` to follow the article rather than the whole page. Not a loading indicator (use a progress control for that).
+
+```tsx
+<ScrollProgress />
+
+const article = useRef<HTMLElement>(null);
+<ScrollProgress target={article} className="h-1" />
+<article ref={article}>…</article>
+```
+
+### scroll-scene
+
+A tall section with a pinned viewport whose children are driven by scroll progress from 0 to 1, for scroll-told sequences.
+
+Use it: A product story told as the visitor scrolls: steps that replace each other, a device that turns, a diagram that builds. Use sparingly, one or two per page. For a simple entrance use reveal; for a drifting background use parallax.
+
+```tsx
+<ScrollScene length={3}>
+  <ScrollSceneStep from={0} to={0.33} className="grid place-items-center p-6">
+    <h2 className="text-3xl font-medium">Design</h2>
+  </ScrollSceneStep>
+  <ScrollSceneStep from={0.33} to={0.66} className="grid place-items-center p-6">
+    <h2 className="text-3xl font-medium">Build</h2>
+  </ScrollSceneStep>
+  <ScrollSceneStep from={0.66} to={1} className="grid place-items-center p-6">
+    <h2 className="text-3xl font-medium">Launch</h2>
+  </ScrollSceneStep>
+</ScrollScene>
+
+<ScrollScene length={2}>
+  {(progress, active) => <Dial progress={progress} still={!active} />}
+</ScrollScene>
+
+function Dial({ progress, still }: { progress: MotionValue<number>; still: boolean }) {
+  const rotate = useTransform(progress, [0, 1], [0, 180]);
+  return <motion.div className="size-40 border" style={{ rotate: still ? 0 : rotate }} />;
+}
+```
+
+### spotlight
+
+A surface on which a soft light in the highlight colour follows the pointer.
+
+Use it: A hero panel, a feature card or a call-to-action band that should respond to the pointer. Give it a border and a background like any surface. Decoration only: it does nothing on touch screens, so never rely on it to show something.
+
+```tsx
+<Spotlight className="rounded-surface border bg-card p-8">
+  <h3 className="text-xl font-medium">Made to be changed</h3>
+  <p className="text-muted-foreground">Every component is yours to edit.</p>
+</Spotlight>
+<Spotlight size={640} className="rounded-surface border p-12">…</Spotlight>
+```
+
+### stagger
+
+A container whose items fade and move into place one after another when it scrolls into view.
+
+Use it: A grid of cards, a feature list, a row of logos. For one block use reveal; for the words of a heading use text-reveal.
+
+```tsx
+<Stagger className="grid gap-4 sm:grid-cols-3" interval={0.08}>
+  <StaggerItem><Card>Design</Card></StaggerItem>
+  <StaggerItem><Card>Build</Card></StaggerItem>
+  <StaggerItem><Card>Launch</Card></StaggerItem>
+</Stagger>
+```
+
+### text-reveal
+
+Reveals a heading word by word, or line by line, when it scrolls into view.
+
+Use it: A headline or a short statement. Not for paragraphs of body text (use reveal on the block), and not for text that changes while it is shown.
+
+```tsx
+<TextReveal as="h1" className="text-4xl font-medium" playOnLoad>
+  Websites, apps and systems that last
+</TextReveal>
+<TextReveal as="p" by="line" interval={0.12} className="max-w-prose text-xl">
+  We design the brand, build the product and stay to run it.
+</TextReveal>
+```
+
+### tilt
+
+A wrapper that tilts its content in 3D toward the pointer on hover and springs back, with an optional glare.
+
+Use it: A featured card, a product shot, a pricing plan worth lifting off the page. One or a few per view; not for forms or anything read at length, and it does nothing on touch screens.
+
+```tsx
+<Tilt max={8} glare className="max-w-sm">
+  <Card>
+    <CardHeader>
+      <CardTitle>Studio plan</CardTitle>
+      <CardDescription>Everything, for one team</CardDescription>
+    </CardHeader>
+  </Card>
+</Tilt>
+```
+
+### view-transition
+
+Helpers for the browser's View Transitions API: run an update as a transition, name an element so it morphs between states or pages, and a link that navigates inside a transition.
+
+Use it: Moving between pages or between two states of a view, where the browser can cross-fade the page and morph elements that share a name. It needs no library and degrades to an instant change. For a shared element inside one React tree (a tabs indicator) use layout-transition; for a simple enter on route change use page-transition.
+
+```tsx
+// A link that navigates inside a view transition. In Next.js pass router.push:
+const router = useRouter();
+<TransitionLink href="/work/atlas" navigate={router.push}>Atlas</TransitionLink>
+
+// The same name on the list page and on the detail page: the image morphs from one to the other.
+<ViewTransitionName name="work-atlas-cover" asChild>
+  <img src="/atlas.jpg" alt="Atlas" />
+</ViewTransitionName>
+<img src="/atlas.jpg" alt="Atlas" style={viewTransitionName("work-atlas-cover")} />
+
+// A state change in place. flushSync (from react-dom) makes React apply it before the browser's snapshot.
+<Button onClick={() => startViewTransition(() => flushSync(() => setLayout("grid")))}>Grid</Button>
+```
+
+## 3D
+
+### floating-shapes
+
+A few simple solids (icosahedron, torus, box, octahedron) floating and turning slowly, flat-shaded or wireframe, coloured from theme variables.
+
+Use it: An abstract, geometric accent for a hero or a feature section. Use it inside scene. For a single soft object use orb; to show a real object use model-stage.
+
+```tsx
+<Scene aspect={16 / 9}>
+  <FloatingShapes />
+</Scene>
+
+<Scene aspect={2}>
+  <FloatingShapes
+    shapes={[
+      { kind: "torus", position: [-1.5, 0, 0], color: "--highlight" },
+      { kind: "box", position: [1.5, 0.4, -1], size: 0.8, color: "--foreground", wireframe: true },
+    ]}
+  />
+</Scene>
+```
+
+### globe
+
+A dotted globe that turns slowly and can be dragged to spin, with optional highlighted markers by latitude and longitude.
+
+Use it: Showing reach or places at a glance: offices, regions, where requests come from. Use it inside scene. For exact values per place use a table or bar-chart; the globe is not a chart.
+
+```tsx
+<Scene aspect={1} className="max-w-lg" label="A globe with markers on Amsterdam, Kochi and San Francisco">
+  <Globe
+    markers={[
+      { lat: 52.37, lon: 4.9 },
+      { lat: 9.93, lon: 76.27 },
+      { lat: 37.77, lon: -122.42 },
+    ]}
+  />
+</Scene>
+```
+
+### model-stage
+
+A turntable for any mesh or group: centres and fits it, turns it slowly, and lets the pointer orbit it within limits.
+
+Use it: Showing one object: a product, a loaded model, a shape of your own. Use it inside scene. For decoration without a subject use orb or floating-shapes.
+
+```tsx
+<Scene aspect={4 / 3} label="A turning torus knot">
+  <ModelStage>
+    <mesh>
+      <torusKnotGeometry args={[1, 0.32, 128, 16]} />
+      <meshStandardMaterial flatShading />
+    </mesh>
+  </ModelStage>
+</Scene>
+```
+
+### orb
+
+A softly morphing sphere in the highlight colour, lit at its rim so it reads on light and dark grounds, leaning gently toward the pointer.
+
+Use it: A calm focal object for a hero or an empty state. Use it inside scene. For many small elements use particle-field; for a product or object of your own use model-stage.
+
+```tsx
+<Scene aspect={1} className="max-w-md">
+  <Orb />
+</Scene>
+
+<Scene aspect={16 / 9}>
+  <Orb color="--chart-2" speed={0.6} distortion={0.5} detail={32} />
+</Scene>
+```
+
+### particle-field
+
+A field of small round points drifting slowly, with depth that shifts as the pointer moves.
+
+Use it: A quiet moving ground behind a hero or a section. Use it inside scene and keep text on top readable. For one focal object use orb; for data use the viz components, never particles.
+
+```tsx
+<Scene className="absolute inset-0">
+  <ParticleField />
+</Scene>
+
+<Scene aspect={2}>
+  <ParticleField count={400} color="--foreground" size={0.03} spread={10} />
+</Scene>
+```
+
+### scene
+
+The wrapper every 3D component is used inside: a transparent WebGL canvas that mounts late, pauses off screen and falls back to a static block.
+
+Use it: Around orb, particle-field, floating-shapes, globe, model-stage or your own react-three-fiber content. Give it a size through the parent or `aspect`. For a decorative background that needs no 3D, use a plain token-coloured block.
+
+```tsx
+<Scene aspect={16 / 9} label="A slowly morphing sphere">
+  <Orb />
+</Scene>
+
+<div className="h-80">
+  <Scene fallback={<img src="/globe.png" alt="" className="size-full object-contain" />}>
+    <Globe markers={[{ lat: 52.37, lon: 4.9 }]} />
+  </Scene>
+</div>
+```
+
+## Visualisation
+
+### area-chart
+
+A line chart with the space under each line filled flat at low opacity, optionally stacked so the series add up to a total.
+
+Use it: One series over time whose volume matters, or a few series that add up to a whole (`stacked`). To compare series that cross each other use line-chart: overlapping fills hide one another.
+
+```tsx
+<AreaChart
+  label="Storage used per month, by kind"
+  data={[
+    { month: new Date("2026-01-01"), images: 12, video: 30 },
+    { month: new Date("2026-02-01"), images: 18, video: 42 },
+    { month: new Date("2026-03-01"), images: 22, video: 61 },
+  ]}
+  x="month"
+  series={[
+    { key: "images", label: "Images" },
+    { key: "video", label: "Video" },
+  ]}
+  stacked
+/>
+```
+
+### bar-chart
+
+A bar chart, vertical or horizontal, grouped or stacked, always measured from zero, with a tooltip on hover and arrow-key reading.
+
+Use it: Comparing amounts across categories. Use `orientation="horizontal"` for long names or a ranking, `stacked` when the series add up to a total. For change over many points in time use line-chart; for a single number use a stat, not one bar.
+
+```tsx
+<BarChart
+  label="Orders by channel per quarter"
+  data={[
+    { quarter: "Q1", web: 320, app: 210 },
+    { quarter: "Q2", web: 410, app: 290 },
+    { quarter: "Q3", web: 380, app: 350 },
+  ]}
+  x="quarter"
+  series={[
+    { key: "web", label: "Web" },
+    { key: "app", label: "App" },
+  ]}
+  showValues
+/>
+```
+
+### chart
+
+The shared parts every chart is built from: a container that measures itself and carries the text alternative, an SVG root, a tooltip, a legend, series styles, and axis and format helpers.
+
+Use it: Building a chart of your own that should match the others. For the common forms use line-chart, area-chart, bar-chart, donut-chart, sparkline, heatmap or radial-progress directly.
+
+```tsx
+<ChartContainer aspect={2} table={{ caption: "Signups", columns: ["Day", "Signups"], rows: [["Mon", 4], ["Tue", 9]] }}>
+  {({ width, height }) => (
+    <ChartSvg label="Signups by day" width={width} height={height}>
+      <rect x={0} y={height - 40} width={width / 3} height={40} className={chartSeries(0).fill} />
+      <rect x={width / 2} y={height - 90} width={width / 3} height={90} className={chartSeries(0).fill} />
+    </ChartSvg>
+  )}
+</ChartContainer>
+<ChartLegend items={[{ label: "Signups", index: 0 }]} mark="rect" />
+```
+
+### donut-chart
+
+A ring showing how one whole splits into at most five parts, with a label in the centre and each part's value and share in the legend.
+
+Use it: Parts of a whole at a glance, when there are few parts and they differ clearly. To compare parts that are close in size, or more than five, use bar-chart with `orientation="horizontal"`; for one ratio against a limit use radial-progress.
+
+```tsx
+<DonutChart
+  label="Traffic by source"
+  data={[
+    { source: "Search", visits: 5200 },
+    { source: "Direct", visits: 3100 },
+    { source: "Referral", visits: 1400 },
+  ]}
+  name="source"
+  value="visits"
+  centerLabel="Visits"
+/>
+```
+
+### heatmap
+
+A matrix of cells (day by hour, for example) coloured on one-hue scale from faint to the highlight colour, with a tooltip, arrow-key reading and a scale legend.
+
+Use it: Spotting patterns across two categories at once: when it is busy, which pairs stand out. To compare exact amounts use bar-chart; for one row of values over time use line-chart.
+
+```tsx
+<Heatmap
+  label="Sessions by day and hour"
+  data={[
+    { day: "Mon", hour: "09", sessions: 12 },
+    { day: "Mon", hour: "10", sessions: 30 },
+    { day: "Tue", hour: "09", sessions: 8 },
+    { day: "Tue", hour: "10", sessions: 21 },
+  ]}
+  x="hour"
+  y="day"
+  value="sessions"
+/>
+```
+
+### line-chart
+
+A line chart of one or more series over a numeric or time x, with a crosshair tooltip, arrow-key reading and labels at the line ends.
+
+Use it: Change over time or along a number, for up to about five series on one shared scale. For a single series whose volume matters use area-chart; for separate categories use bar-chart; never plot two different units against two y axes, use two charts.
+
+```tsx
+<LineChart
+  label="Requests and errors per day"
+  data={[
+    { day: new Date("2026-03-01"), requests: 120, errors: 4 },
+    { day: new Date("2026-03-02"), requests: 180, errors: 9 },
+    { day: new Date("2026-03-03"), requests: 150, errors: 3 },
+  ]}
+  x="day"
+  series={[
+    { key: "requests", label: "Requests" },
+    { key: "errors", label: "Errors" },
+  ]}
+/>
+```
+
+### radial-progress
+
+A ring gauge for one value against a limit, with the value and a label in the centre.
+
+Use it: One ratio: a quota used, a score, a goal reached. Size it with a width class (`w-32` by default). For several ratios side by side use a list of bars (bar-chart horizontal), not a ring each; for parts of a whole use donut-chart.
+
+```tsx
+<RadialProgress value={72} label="Storage used" />
+<RadialProgress value={3} max={5} label="Steps done" formatValue={(value) => `${value} of 5`} className="w-40" />
+```
+
+### sparkline
+
+A tiny line, area or bar chart with no axes, for a stat tile or a table cell, described in words for assistive technology.
+
+Use it: The shape of a trend beside a number that carries the value. Size it with classes (`h-8 w-24` by default). When the reader needs to read values off it, use line-chart or bar-chart.
+
+```tsx
+<Sparkline data={[4, 6, 5, 9, 12, 10, 14]} label="Signups, last 7 days" />
+<Sparkline data={[3, 8, 2, 7, 5]} type="bar" className="h-6 w-16" />
+```

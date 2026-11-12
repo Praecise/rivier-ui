@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "use-size",
+  "type": "registry:lib",
+  "title": "Use Size",
+  "description": "Measures an element with ResizeObserver and returns its content width and height in whole pixels.",
+  "dependencies": [],
+  "registryDependencies": [
+    "@rivier-ui/theme"
+  ],
+  "files": [
+    {
+      "path": "registry/lib/use-size.ts",
+      "type": "registry:lib",
+      "target": "lib/use-size.ts",
+      "content": "\"use client\";\n/**\n * @name use-size\n * @category lib\n * @description Measures an element with ResizeObserver and returns its content width and height in whole pixels.\n * @when Drawing to the size of a container: charts, canvases. For layout that only needs to adapt, use container queries (`@container`, `@md:`) instead.\n * @example\n * const { ref, width, height } = useSize<HTMLDivElement>();\n * return <div ref={ref} className=\"aspect-video w-full\">{width > 0 && <svg width={width} height={height} />}</div>;\n */\nimport { useEffect, useState } from \"react\";\n\nexport type Size = { width: number; height: number };\n\nconst EMPTY: Size = { width: 0, height: 0 };\n\n/**\n * `ref` goes on the element to measure. Width and height are 0 on the server and until the first\n * measurement, so give the element its size in CSS (an aspect ratio or a height) and draw only when\n * `width > 0`: the layout then never shifts.\n */\nexport function useSize<T extends Element = HTMLDivElement>(): Size & { ref: (node: T | null) => void } {\n  const [node, setNode] = useState<T | null>(null);\n  const [size, setSize] = useState<Size>(EMPTY);\n\n  useEffect(() => {\n    if (!node || typeof ResizeObserver === \"undefined\") return;\n    const observer = new ResizeObserver((entries) => {\n      const rect = entries[0]?.contentRect;\n      if (!rect) return;\n      const width = Math.round(rect.width);\n      const height = Math.round(rect.height);\n      setSize((previous) => (previous.width === width && previous.height === height ? previous : { width, height }));\n    });\n    observer.observe(node);\n    return () => observer.disconnect();\n  }, [node]);\n\n  return { ref: setNode, width: size.width, height: size.height };\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "lib",
+    "when": "Drawing to the size of a container: charts, canvases. For layout that only needs to adapt, use container queries (`@container`, `@md:`) instead.",
+    "example": "const { ref, width, height } = useSize<HTMLDivElement>();\nreturn <div ref={ref} className=\"aspect-video w-full\">{width > 0 && <svg width={width} height={height} />}</div>;",
+    "client": true
+  }
+}

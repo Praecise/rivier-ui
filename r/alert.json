@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "alert",
+  "type": "registry:ui",
+  "title": "Alert",
+  "description": "A message in the page with an icon, a title, a description and an optional action. Four variants: info, success, warning, destructive.",
+  "dependencies": [
+    "class-variance-authority",
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/alert.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/alert.tsx",
+      "content": "/**\n * @name alert\n * @category ui\n * @description A message in the page with an icon, a title, a description and an optional action. Four variants: info, success, warning, destructive.\n * @when Telling the reader something about the page or the result of an action, in place. For a message that appears and leaves use a toast; for one that needs an answer use a dialog.\n * @example\n * <Alert variant=\"success\">\n *   <AlertTitle>Payment received</AlertTitle>\n *   <AlertDescription>A receipt is on its way to your inbox.</AlertDescription>\n * </Alert>\n * <Alert variant=\"destructive\">\n *   <AlertTitle>The card was declined</AlertTitle>\n *   <AlertDescription>Check the number and the expiry date, then try again.</AlertDescription>\n *   <AlertAction><Button size=\"sm\" variant=\"outline\">Try again</Button></AlertAction>\n * </Alert>\n */\nimport { cva, type VariantProps } from \"class-variance-authority\";\nimport { CircleCheck, CircleExclamationPoint, Info, TriangleExclamationPoint } from \"lucide-react\";\nimport type { ComponentProps, ReactNode } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport const alertVariants = cva(\"flex w-full items-start gap-3 rounded-surface border bg-card p-4 text-sm text-card-foreground [&>svg]:mt-0.5 [&>svg]:size-4 [&>svg]:shrink-0\", {\n  variants: {\n    variant: {\n      info: \"[&>svg]:text-foreground\",\n      success: \"border-success [&>svg]:text-success\",\n      warning: \"border-warning [&>svg]:text-warning\",\n      destructive: \"border-destructive [&>svg]:text-destructive\",\n    },\n  },\n  defaultVariants: { variant: \"info\" },\n});\n\ntype AlertVariant = NonNullable<VariantProps<typeof alertVariants>[\"variant\"]>;\n\nconst ICONS: Record<AlertVariant, typeof Info> = {\n  info: Info,\n  success: CircleCheck,\n  warning: TriangleExclamationPoint,\n  destructive: CircleExclamationPoint,\n};\n\nexport type AlertProps = ComponentProps<\"div\"> &\n  VariantProps<typeof alertVariants> & {\n    /** Replaces the variant's icon. Pass `null` for no icon. */\n    icon?: ReactNode;\n    /** Interrupts a screen reader at once (`role=\"alert\"`). On by default for \"destructive\" only; everything else is announced politely (`role=\"status\"`). */\n    urgent?: boolean;\n  };\n\nexport function Alert({ className, variant, icon, urgent, children, ...props }: AlertProps) {\n  const kind: AlertVariant = variant ?? \"info\";\n  const Icon = ICONS[kind];\n  const interrupts = urgent ?? kind === \"destructive\";\n  return (\n    <div data-slot=\"alert\" data-variant={kind} role={interrupts ? \"alert\" : \"status\"} className={cn(alertVariants({ variant: kind }), className)} {...props}>\n      {icon === undefined ? <Icon aria-hidden=\"true\" strokeWidth={1.5} /> : icon}\n      <div data-slot=\"alert-content\" className=\"flex min-w-0 flex-1 flex-col gap-1\">\n        {children}\n      </div>\n    </div>\n  );\n}\n\n/** A div, not a heading: an alert can appear anywhere, so it must not change the page outline. */\nexport function AlertTitle({ className, ...props }: ComponentProps<\"div\">) {\n  return <div data-slot=\"alert-title\" className={cn(\"font-medium leading-snug\", className)} {...props} />;\n}\n\nexport function AlertDescription({ className, ...props }: ComponentProps<\"div\">) {\n  return <div data-slot=\"alert-description\" className={cn(\"text-muted-foreground [&_a]:text-foreground [&_a]:underline [&_a]:underline-offset-4\", className)} {...props} />;\n}\n\n/** A row for one or two small buttons under the text. */\nexport function AlertAction({ className, ...props }: ComponentProps<\"div\">) {\n  return <div data-slot=\"alert-action\" className={cn(\"mt-2 flex flex-wrap items-center gap-2\", className)} {...props} />;\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "Telling the reader something about the page or the result of an action, in place. For a message that appears and leaves use a toast; for one that needs an answer use a dialog.",
+    "example": "<Alert variant=\"success\">\n  <AlertTitle>Payment received</AlertTitle>\n  <AlertDescription>A receipt is on its way to your inbox.</AlertDescription>\n</Alert>\n<Alert variant=\"destructive\">\n  <AlertTitle>The card was declined</AlertTitle>\n  <AlertDescription>Check the number and the expiry date, then try again.</AlertDescription>\n  <AlertAction><Button size=\"sm\" variant=\"outline\">Try again</Button></AlertAction>\n</Alert>",
+    "client": false
+  }
+}

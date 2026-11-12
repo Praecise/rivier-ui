@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "input-group",
+  "type": "registry:ui",
+  "title": "Input Group",
+  "description": "An input with a leading or trailing icon, text or button inside one shared border.",
+  "dependencies": [
+    "class-variance-authority"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/button",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/input-group.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/input-group.tsx",
+      "content": "\"use client\";\n/**\n * @name input-group\n * @category ui\n * @description An input with a leading or trailing icon, text or button inside one shared border.\n * @when A search box with an icon, a URL with a fixed prefix, a field with a unit or an inline action. For a plain input use input. Inside a field, wrap InputGroupInput (not the group) in FieldControl.\n * @example\n * <InputGroup>\n *   <InputGroupAddon><Search strokeWidth={1.5} /></InputGroupAddon>\n *   <InputGroupInput type=\"search\" placeholder=\"Search\" aria-label=\"Search\" />\n * </InputGroup>\n * <InputGroup size=\"sm\">\n *   <InputGroupAddon>https://</InputGroupAddon>\n *   <InputGroupInput placeholder=\"example.com\" aria-label=\"Website\" />\n *   <InputGroupAddon><InputGroupButton>Check</InputGroupButton></InputGroupAddon>\n * </InputGroup>\n */\nimport { cva, type VariantProps } from \"class-variance-authority\";\nimport type { ComponentProps, MouseEvent } from \"react\";\nimport { Button } from \"@/components/ui/button\";\nimport { cn } from \"@/lib/cn\";\n\nexport const inputGroupVariants = cva(\n  \"flex w-full min-w-0 items-center rounded-control border border-input bg-background text-sm text-foreground outline-offset-2 outline-ring transition-[border-color,opacity] duration-instant ease-out has-[[data-slot=input-group-control]:focus-visible]:outline-2 has-[[data-slot=input-group-control]:disabled]:pointer-events-none has-[[data-slot=input-group-control]:disabled]:opacity-50 has-[[data-slot=input-group-control][aria-invalid=true]]:border-destructive motion-reduce:transition-none\",\n  {\n    variants: {\n      size: {\n        sm: \"h-control-sm\",\n        md: \"h-control\",\n        lg: \"h-control-lg text-base\",\n      },\n    },\n    defaultVariants: { size: \"md\" },\n  },\n);\n\nexport type InputGroupProps = ComponentProps<\"div\"> & VariantProps<typeof inputGroupVariants>;\n\n/** The shared border. Children in order: addons before and/or after one InputGroupInput. */\nexport function InputGroup({ className, size, ...props }: InputGroupProps) {\n  return <div data-slot=\"input-group\" role=\"group\" className={cn(inputGroupVariants({ size }), className)} {...props} />;\n}\n\n/** The input itself. It has no border of its own: the group draws the edge and the focus ring. */\nexport function InputGroupInput({ className, type = \"text\", ...props }: ComponentProps<\"input\">) {\n  return (\n    <input\n      data-slot=\"input-group-control\"\n      type={type}\n      className={cn(\n        \"h-full min-w-0 flex-1 rounded-control bg-transparent px-3 text-inherit placeholder:text-muted-foreground focus-visible:outline-none disabled:pointer-events-none\",\n        className,\n      )}\n      {...props}\n    />\n  );\n}\n\n/** An icon, short text or a button at either end. Place it before the input to lead, after it to trail. */\nexport function InputGroupAddon({ className, onClick, ...props }: ComponentProps<\"div\">) {\n  function focusControl(event: MouseEvent<HTMLDivElement>) {\n    onClick?.(event);\n    if (event.defaultPrevented) return;\n    if (event.target instanceof Element && event.target.closest(\"button, a, input, select, textarea\")) return;\n    event.currentTarget.parentElement?.querySelector<HTMLElement>(\"[data-slot=input-group-control]\")?.focus();\n  }\n  return (\n    <div\n      data-slot=\"input-group-addon\"\n      onClick={focusControl}\n      className={cn(\n        \"flex h-full shrink-0 items-center gap-2 whitespace-nowrap text-muted-foreground select-none first:ps-3 first:-me-1 last:pe-3 last:-ms-1 first:has-[button]:ps-1 last:has-[button]:pe-1 [&_svg]:size-4 [&_svg]:shrink-0\",\n        className,\n      )}\n      {...props}\n    />\n  );\n}\n\n/**\n * A button that fits inside the group's edge: its height follows the group, so it takes no `size`. Ghost by\n * default; an invisible margin keeps its touch target 40px tall. Icon-only needs an `aria-label`.\n */\nexport function InputGroupButton({ className, variant = \"ghost\", type = \"button\", ...props }: Omit<ComponentProps<typeof Button>, \"size\">) {\n  return (\n    <Button\n      data-slot=\"input-group-button\"\n      type={type}\n      variant={variant}\n      size={null}\n      className={cn(\"relative h-[calc(100%-0.375rem)] min-w-7 px-2.5 after:absolute after:inset-x-0 after:-inset-y-2\", className)}\n      {...props}\n    />\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "A search box with an icon, a URL with a fixed prefix, a field with a unit or an inline action. For a plain input use input. Inside a field, wrap InputGroupInput (not the group) in FieldControl.",
+    "example": "<InputGroup>\n  <InputGroupAddon><Search strokeWidth={1.5} /></InputGroupAddon>\n  <InputGroupInput type=\"search\" placeholder=\"Search\" aria-label=\"Search\" />\n</InputGroup>\n<InputGroup size=\"sm\">\n  <InputGroupAddon>https://</InputGroupAddon>\n  <InputGroupInput placeholder=\"example.com\" aria-label=\"Website\" />\n  <InputGroupAddon><InputGroupButton>Check</InputGroupButton></InputGroupAddon>\n</InputGroup>",
+    "client": true
+  }
+}
