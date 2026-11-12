@@ -358,3 +358,12 @@
     stroke-dashoffset: var(--rui-ring-length);
   }
 }
+/* Shared elements (components/ui/lightbox, components/motion/view-transition): named groups move on the theme's timing, like the page. */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: var(--duration-slow);
+    animation-timing-function: var(--ease);
+  }
+}
