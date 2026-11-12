@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Aspect",
   "description": "Holds its content at a fixed width-to-height ratio, so space is reserved before an image, video or canvas loads.",
+  "categories": [
+    "layout"
+  ],
   "dependencies": [
     "radix-ui"
   ],

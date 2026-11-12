@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "direction",
+  "type": "registry:lib",
+  "title": "Direction",
+  "description": "Tells whether an element reads right to left, and turns \"start\" and \"end\" arrow keys and offsets the right way round for it.",
+  "categories": [
+    "lib"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@rivier-ui/theme"
+  ],
+  "files": [
+    {
+      "path": "registry/lib/direction.ts",
+      "type": "registry:lib",
+      "target": "lib/direction.ts",
+      "content": "/**\n * @name direction\n * @category lib\n * @description Tells whether an element reads right to left, and turns \"start\" and \"end\" arrow keys and offsets the right way round for it.\n * @when A component handles Left and Right arrow keys, or moves something sideways with a transform, and must work in right-to-left pages. Layout itself needs no code: use logical utilities (ps-, ms-, start-, text-start). To set a direction for part of a page use direction-provider.\n * @example\n * function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {\n *   const step = inlineStep(event.key, event.currentTarget); // +1 towards the end, -1 towards the start, 0 otherwise\n *   if (step !== 0) move(step);\n * }\n */\n\n/** Whether the element's computed writing direction is right to left. Call it in a handler or an effect. */\nexport function isRtl(element: Element): boolean {\n  return getComputedStyle(element).direction === \"rtl\";\n}\n\n/**\n * For \"ArrowLeft\" and \"ArrowRight\": +1 when the key points towards the end of the line for this element,\n * -1 when it points towards the start, 0 for any other key. In a right-to-left page ArrowLeft is +1.\n */\nexport function inlineStep(key: string, element: Element): -1 | 0 | 1 {\n  if (key !== \"ArrowLeft\" && key !== \"ArrowRight\") return 0;\n  const towardsRight = key === \"ArrowRight\";\n  return towardsRight !== isRtl(element) ? 1 : -1;\n}\n\n/** The sign that turns a distance \"towards the end\" into a horizontal pixel offset for this element: 1, or -1 right to left. */\nexport function inlineSign(element: Element): -1 | 1 {\n  return isRtl(element) ? -1 : 1;\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "lib",
+    "when": "A component handles Left and Right arrow keys, or moves something sideways with a transform, and must work in right-to-left pages. Layout itself needs no code: use logical utilities (ps-, ms-, start-, text-start). To set a direction for part of a page use direction-provider.",
+    "example": "function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {\n  const step = inlineStep(event.key, event.currentTarget); // +1 towards the end, -1 towards the start, 0 otherwise\n  if (step !== 0) move(step);\n}",
+    "client": false
+  }
+}

@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Toggle",
   "description": "A button that stays pressed: on or off.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "class-variance-authority",
     "radix-ui"

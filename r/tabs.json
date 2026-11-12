@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Tabs",
   "description": "Panels that share one place, switched by a row of tabs. Two looks: an underline, or a segmented pill.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "class-variance-authority",
     "radix-ui"

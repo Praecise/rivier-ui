@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Heatmap",
   "description": "A matrix of cells (day by hour, for example) coloured on one-hue scale from faint to the highlight colour, with a tooltip, arrow-key reading and a scale legend.",
+  "categories": [
+    "viz"
+  ],
   "dependencies": [
     "d3-scale"
   ],

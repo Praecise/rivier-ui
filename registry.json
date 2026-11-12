@@ -25,10 +25,39 @@
       }
     },
     {
+      "name": "announce",
+      "type": "registry:lib",
+      "title": "Announce",
+      "description": "Says a message to screen-reader users through one shared live region, politely or at once, without moving focus.",
+      "categories": [
+        "lib"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme"
+      ],
+      "files": [
+        {
+          "path": "registry/lib/announce.ts",
+          "type": "registry:lib",
+          "target": "lib/announce.ts"
+        }
+      ],
+      "meta": {
+        "category": "lib",
+        "when": "Something changed that a sighted person can see but no focus change will read out: an item was moved, a filter applied, a total changed, a reply finished. Not for content the person is about to read anyway, and not for errors on a field (use the field's own message). A component that is already a live region (status-line, toaster) does not need it.",
+        "example": "announce(\"Lunch moved to position 2 of 5\");\nannounce(\"The connection was lost\", \"assertive\");",
+        "client": false
+      }
+    },
+    {
       "name": "cn",
       "type": "registry:lib",
       "title": "Cn",
       "description": "Joins class names and resolves Tailwind conflicts, so a class passed in wins over a component's own.",
+      "categories": [
+        "lib"
+      ],
       "dependencies": [
         "clsx",
         "tailwind-merge"
@@ -51,10 +80,39 @@
       }
     },
     {
+      "name": "direction",
+      "type": "registry:lib",
+      "title": "Direction",
+      "description": "Tells whether an element reads right to left, and turns \"start\" and \"end\" arrow keys and offsets the right way round for it.",
+      "categories": [
+        "lib"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme"
+      ],
+      "files": [
+        {
+          "path": "registry/lib/direction.ts",
+          "type": "registry:lib",
+          "target": "lib/direction.ts"
+        }
+      ],
+      "meta": {
+        "category": "lib",
+        "when": "A component handles Left and Right arrow keys, or moves something sideways with a transform, and must work in right-to-left pages. Layout itself needs no code: use logical utilities (ps-, ms-, start-, text-start). To set a direction for part of a page use direction-provider.",
+        "example": "function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {\n  const step = inlineStep(event.key, event.currentTarget); // +1 towards the end, -1 towards the start, 0 otherwise\n  if (step !== 0) move(step);\n}",
+        "client": false
+      }
+    },
+    {
       "name": "motion",
       "type": "registry:lib",
       "title": "Motion",
       "description": "The motion tokens as numbers for the motion package (easing, durations, a pointer spring), the useMotionSafe gate, and the entrance engine the reveal components share.",
+      "categories": [
+        "lib"
+      ],
       "dependencies": [
         "motion"
       ],
@@ -80,6 +138,9 @@
       "type": "registry:lib",
       "title": "Theme Color",
       "description": "Resolves a theme CSS variable such as \"--highlight\" to an rgb() string that three.js and canvas code can parse, and re-reads it when the theme changes.",
+      "categories": [
+        "lib"
+      ],
       "dependencies": [],
       "registryDependencies": [
         "@rivier-ui/theme"
@@ -99,10 +160,66 @@
       }
     },
     {
+      "name": "use-controllable-state",
+      "type": "registry:lib",
+      "title": "Use Controllable State",
+      "description": "State that a parent may control: it follows `value` when one is given and keeps its own from `defaultValue` when not, calling `onChange` either way.",
+      "categories": [
+        "lib"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme"
+      ],
+      "files": [
+        {
+          "path": "registry/lib/use-controllable-state.ts",
+          "type": "registry:lib",
+          "target": "lib/use-controllable-state.ts"
+        }
+      ],
+      "meta": {
+        "category": "lib",
+        "when": "Writing a component that should work both controlled (`value` + `onValueChange`) and uncontrolled (`defaultValue`), which every input-like component in the library does. Radix primitives already do this for their own state; use this for state the library adds on top.",
+        "example": "function Stepper({ value, defaultValue = 0, onValueChange }: { value?: number; defaultValue?: number; onValueChange?: (value: number) => void }) {\n  const [count, setCount] = useControllableState({ value, defaultValue, onChange: onValueChange });\n  return <button onClick={() => setCount(count + 1)}>{count}</button>;\n}",
+        "client": true
+      }
+    },
+    {
+      "name": "use-media",
+      "type": "registry:lib",
+      "title": "Use Media",
+      "description": "Follows an audio or video element (playing, time, duration, buffered, volume, rate, text tracks, waiting, error) as React state, with the actions to drive it, the context player parts share, and time formatting through Intl.",
+      "categories": [
+        "lib"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/lib/use-media.ts",
+          "type": "registry:lib",
+          "target": "lib/use-media.ts"
+        }
+      ],
+      "meta": {
+        "category": "lib",
+        "when": "Building player parts around a `<video>` or `<audio>` element the project renders. video-player, audio-player, captions and scene-strip are built on it; use it directly for a control they do not have. The element stays the source of truth: sources, HLS and DRM are attached to it by the project, and nothing here loads or decodes media.",
+        "example": "function Elapsed() {\n  const { state, locale } = useMediaContext(\"Elapsed\");\n  return <span>{formatMediaTime(state.time, locale)}</span>;\n}\n\n// Without a player around it\nconst [audio, setAudio] = useState<HTMLAudioElement | null>(null);\nconst state = useMediaState(audio);\n<audio ref={setAudio} src=\"/note.mp3\" />\n<Button onClick={() => mediaActions(audio).toggle()}>{state.playing ? \"Pause\" : \"Play\"}</Button>",
+        "client": true
+      }
+    },
+    {
       "name": "use-size",
       "type": "registry:lib",
       "title": "Use Size",
       "description": "Measures an element with ResizeObserver and returns its content width and height in whole pixels.",
+      "categories": [
+        "lib"
+      ],
       "dependencies": [],
       "registryDependencies": [
         "@rivier-ui/theme"
@@ -126,6 +243,9 @@
       "type": "registry:ui",
       "title": "Accordion",
       "description": "Stacked sections whose content opens and closes under its heading.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "lucide-react",
         "radix-ui"
@@ -153,6 +273,9 @@
       "type": "registry:ui",
       "title": "Alert",
       "description": "A message in the page with an icon, a title, a description and an optional action. Four variants: info, success, warning, destructive.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "class-variance-authority",
         "lucide-react"
@@ -176,10 +299,44 @@
       }
     },
     {
+      "name": "audio-player",
+      "type": "registry:ui",
+      "title": "Audio Player",
+      "description": "The parts of a sound player around an `<audio>` element: play, a waveform that is also the time bar, time, speed and mute.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-media"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/audio-player.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/audio-player.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "A voice note, a recording, a clip of music or narration a person plays and seeks in. The project gives the element its source and, for the waveform, the peaks (computed ahead of time, or with computePeaks for a short clip); without peaks the bar is a flat line of the same size. Offer a Transcript (from captions) for anything spoken. Nothing plays by itself. For video use video-player; for a plain time bar without a waveform use scrubber.",
+        "example": "<AudioPlayer aria-label=\"Voice note from Ana\">\n  <AudioPlayerAudio src=\"/note.mp3\" />\n  <AudioPlayerPlay />\n  <AudioPlayerWaveform peaks={peaks} />\n  <AudioPlayerTime />\n  <AudioPlayerRate />\n  <AudioPlayerMute />\n</AudioPlayer>\n\n// Peaks for a short clip, in the browser\nconst peaks = await computePeaks(await (await fetch(\"/note.mp3\")).arrayBuffer(), 64);",
+        "client": true
+      }
+    },
+    {
       "name": "avatar",
       "type": "registry:ui",
       "title": "Avatar",
       "description": "A round picture of a person or a team, with initials shown until the image loads or when it fails, and a group that overlaps.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "class-variance-authority",
         "radix-ui"
@@ -207,6 +364,9 @@
       "type": "registry:ui",
       "title": "Badge",
       "description": "A small label for a status, a count or a category. Six variants and an optional leading dot.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "class-variance-authority"
       ],
@@ -229,10 +389,43 @@
       }
     },
     {
+      "name": "bottom-sheet",
+      "type": "registry:ui",
+      "title": "Bottom Sheet",
+      "description": "A panel that rises from the bottom edge, rests at one of several heights (snap points), and can be dragged between them or down to dismiss, with a keyboard handle that does the same.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/bottom-sheet.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/bottom-sheet.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Phones first: details, filters, a picker or a secondary task that should stay within reach of the thumb and may be peeked at before it is opened fully. With `modal={false}` it stays open while the page behind is used (a player, a route summary). For a panel from a side edge, or one with no snap points on a desktop, use sheet; for a short decision use dialog; beside the content on wide screens use dock. Always give it a BottomSheetTitle (add className=\"sr-only\" to hide it). Opened by state with no BottomSheetTrigger, focus does not return on close: refocus the opener in `onCloseAutoFocus` on BottomSheetContent.",
+        "example": "<BottomSheet snapPoints={[0.4, 0.9]}>\n  <BottomSheetTrigger asChild><Button variant=\"outline\">Details</Button></BottomSheetTrigger>\n  <BottomSheetContent>\n    <BottomSheetHandle />\n    <BottomSheetHeader>\n      <BottomSheetTitle>Saturday</BottomSheetTitle>\n      <BottomSheetDescription>Three things planned.</BottomSheetDescription>\n    </BottomSheetHeader>\n    <BottomSheetBody>…</BottomSheetBody>\n    <BottomSheetFooter>\n      <BottomSheetClose asChild><Button>Done</Button></BottomSheetClose>\n    </BottomSheetFooter>\n  </BottomSheetContent>\n</BottomSheet>\n\n// Controlled, in pixels and rems, staying open while the page is used\n<BottomSheet open={open} onOpenChange={setOpen} snapPoints={[\"6rem\", \"320px\", 1]} snap={snap} onSnapChange={setSnap} modal={false} dismissible={false}>\n  …\n</BottomSheet>",
+        "client": true
+      }
+    },
+    {
       "name": "breadcrumb",
       "type": "registry:ui",
       "title": "Breadcrumb",
       "description": "The path from the top of the site to the current page, as links with separators.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "lucide-react",
         "radix-ui"
@@ -260,6 +453,9 @@
       "type": "registry:ui",
       "title": "Button",
       "description": "A button, or a link that looks like one. Five variants, three sizes, a loading state.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "class-variance-authority",
         "radix-ui"
@@ -283,10 +479,73 @@
       }
     },
     {
+      "name": "calendar",
+      "type": "registry:ui",
+      "title": "Calendar",
+      "description": "A month grid for choosing a day, several days or a range of days, with days that can be unavailable for a stated reason and days that carry a mark. Days are plain \"YYYY-MM-DD\" strings, so no time zone can move them.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn",
+        "@rivier-ui/direction",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/calendar.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/calendar.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Choosing dates where seeing the month matters: a booking, a stay, a deadline. It stays on the page; to open it from a field use date-picker. Never use the browser's native date input beside it. For a date far in the past that the person knows by heart (a birthday) three plain fields are quicker. Pass `locale` (the page's language) so that names, numerals and the first day of the week are right; without it the calendar is in English.",
+        "example": "// One day (uncontrolled), with days that cannot be chosen and days that carry a word\n<Calendar\n  locale=\"en-GB\"\n  defaultValue=\"2026-11-14\"\n  min=\"2026-11-01\"\n  disabled={(day) => (closed.has(day) ? \"nothing open\" : false)}\n  marks={(day) => (busy.has(day) ? \"busy\" : undefined)}\n/>\n\n// A range (controlled), two months where there is room\nconst [stay, setStay] = useState<CalendarRange>({ start: null, end: null });\n<Calendar mode=\"range\" value={stay} onValueChange={setStay} numberOfMonths={2} locale=\"en-GB\" />\n\n// Several days, and its own layout with a footer\n<Calendar mode=\"multiple\" defaultValue={[\"2026-11-03\", \"2026-11-05\"]}>\n  <CalendarPrevious />\n  <CalendarNext />\n  <CalendarMonths />\n  <p className=\"px-1 pt-2 text-sm text-muted-foreground\">A dot marks a busy day.</p>\n</Calendar>",
+        "client": true
+      }
+    },
+    {
+      "name": "captions",
+      "type": "registry:ui",
+      "title": "Captions",
+      "description": "Captions drawn by the page instead of the browser, on a solid ground that reads on any picture, and a transcript: every line of a clip as a list that can be pressed to go there.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-media"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/captions.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/captions.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Inside video-player (Captions sits above the controls and moves with them) or beside audio-player (Transcript, or Captions with `inline`). Captions are for people who cannot hear the sound; a Transcript is also the alternative for people who cannot see or play it, so offer one for anything spoken. The lines come from a caption track of the media element (`<track kind=\"captions\">`), or from `cues` the project passes. Not a live region: with the sound on, a screen reader would talk over it.",
+        "example": "// In a video player: the lines of the element's caption track\n<VideoPlayer aria-label=\"Loading the kiln\" defaultCaptions>\n  <VideoPlayerVideo src=\"/kiln.mp4\"><track kind=\"captions\" src=\"/kiln.en.vtt\" srcLang=\"en\" label=\"English\" /></VideoPlayerVideo>\n  <Captions />\n  <VideoPlayerControls>…</VideoPlayerControls>\n</VideoPlayer>\n\n// Beside an audio player: cues from the project, as a transcript\nconst cues = [{ start: 0, end: 4, text: \"Welcome.\" }, { start: 4, end: 9, text: \"This is the yard.\" }];\n<AudioPlayer aria-label=\"A walk through the yard\">\n  <AudioPlayerAudio src=\"/yard.mp3\" />\n  <AudioPlayerPlay /> <AudioPlayerWaveform peaks={peaks} />\n  <Transcript cues={cues} aria-label=\"Transcript\" lang=\"en\" />\n</AudioPlayer>",
+        "client": true
+      }
+    },
+    {
       "name": "card",
       "type": "registry:ui",
       "title": "Card",
       "description": "A flat surface with a hairline edge, and parts for a header, title, description, content and footer.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [],
       "registryDependencies": [
         "@rivier-ui/theme",
@@ -311,6 +570,9 @@
       "type": "registry:ui",
       "title": "Checkbox",
       "description": "A checkbox with checked, unchecked and indeterminate states.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "lucide-react",
         "radix-ui"
@@ -334,10 +596,76 @@
       }
     },
     {
+      "name": "chip",
+      "type": "registry:ui",
+      "title": "Chip",
+      "description": "A small pill for one short value: a filter that is on and can be removed, a suggestion to press, or one of a set of choices that can be switched on and off.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "class-variance-authority",
+        "lucide-react",
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/chip.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/chip.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Filters in effect above a list (Chip with ChipRemove), suggested replies or refinements under a message or a search (ChipButton), and choosing one or several short options such as moods, tags or times of day (ChipGroup). For a status that cannot be pressed use badge; for two to five views of the same thing use segmented-control; for long labels use checkboxes or radio-group.",
+        "example": "// Filters in effect\n<Chip>Under 50 <ChipRemove aria-label=\"Remove the filter: under 50\" onClick={clearPrice} /></Chip>\n\n// Suggestions\n<ChipButton onClick={() => ask(\"Only this weekend\")}>Only this weekend</ChipButton>\n\n// A set of choices: several can be on (type=\"multiple\") or one (type=\"single\")\n<ChipGroup type=\"multiple\" defaultValue={[\"calm\"]} aria-label=\"Mood\">\n  <ChipGroupItem value=\"calm\">Calm</ChipGroupItem>\n  <ChipGroupItem value=\"lively\">Lively</ChipGroupItem>\n</ChipGroup>",
+        "client": true
+      }
+    },
+    {
+      "name": "combobox",
+      "type": "registry:ui",
+      "title": "Combobox",
+      "description": "A select with a search field: a button that shows the choice and opens a list that narrows as one types.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/command",
+        "@rivier-ui/popover",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/combobox.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/combobox.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Choosing one value from a list too long to scan: a country, a city, a person, a product. Under about eight options use select (or radio-group, or segmented-control for two to five); for running actions rather than choosing a value use command; for several values use chip or checkboxes. Name the trigger with a Label (`htmlFor` its `id`) or `aria-label`. Each item's `value` is what is stored; what is typed is matched against the item's text.",
+        "example": "const CITIES = [{ value: \"lis\", label: \"Lisbon\" }, { value: \"opo\", label: \"Porto\" }];\nconst [city, setCity] = useState(\"\");\n\n<Combobox value={city} onValueChange={setCity} name=\"city\">\n  <ComboboxTrigger aria-label=\"City\" className=\"w-56\">\n    <ComboboxValue placeholder=\"Choose a city\">{CITIES.find((item) => item.value === city)?.label}</ComboboxValue>\n  </ComboboxTrigger>\n  <ComboboxContent aria-label=\"Cities\">\n    <ComboboxInput placeholder=\"Search cities\" />\n    <ComboboxList>\n      <ComboboxEmpty>No city found.</ComboboxEmpty>\n      {CITIES.map((item) => (\n        <ComboboxItem key={item.value} value={item.value}>{item.label}</ComboboxItem>\n      ))}\n    </ComboboxList>\n  </ComboboxContent>\n</Combobox>",
+        "client": true
+      }
+    },
+    {
       "name": "command",
       "type": "registry:ui",
       "title": "Command",
       "description": "A command palette: a search field over a filtered, keyboard-driven list of actions, inline or in a dialog.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "cmdk",
         "lucide-react"
@@ -362,10 +690,106 @@
       }
     },
     {
+      "name": "compare-table",
+      "type": "registry:ui",
+      "title": "Compare Table",
+      "description": "Two to four things side by side, attribute by attribute: a table whose first column (the attribute names) stays in view while the things scroll sideways inside it on narrow screens.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/compare-table.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/compare-table.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Helping someone choose between a few similar things: plans, products, places, quotes. Give every thing the same rows, in the same order. For plain rows of data use table; for more than four things let people pick which to compare first; for one thing's details use a description list or card.",
+        "example": "<CompareTable label=\"Compare the two plans\" columns={2} onlyDifferences={onlyDifferences}>\n  <CompareHeader corner=\"Plan\">\n    <CompareColumn><CompareColumnTitle>Starter</CompareColumnTitle><Button size=\"sm\">Choose</Button></CompareColumn>\n    <CompareColumn><CompareColumnTitle>Team</CompareColumnTitle><Button size=\"sm\">Choose</Button></CompareColumn>\n  </CompareHeader>\n  <CompareGroup title=\"Basics\">\n    <CompareRow label=\"Price a month\">\n      <CompareCell value={12} best>€12</CompareCell>\n      <CompareCell value={29}>€29</CompareCell>\n    </CompareRow>\n    <CompareRow label=\"Support\">\n      <CompareCell value=\"email\">By email</CompareCell>\n      <CompareCell value=\"email\">By email</CompareCell>\n    </CompareRow>\n  </CompareGroup>\n</CompareTable>",
+        "client": false
+      }
+    },
+    {
+      "name": "composer",
+      "type": "registry:ui",
+      "title": "Composer",
+      "description": "The box a person writes a message in: a field that grows with the text, a list of attachments, and a toolbar with slots for an attach button, a voice button and send (which becomes stop while a reply is on its way).",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react",
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chip",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/composer.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/composer.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Under a thread, or anywhere a person sends free text to an assistant or to other people. It owns the text and the keys (Enter sends, Shift+Enter makes a new line, nothing is sent while an input method is composing); the project owns the files, the microphone and the sending. For one line with no attachments (a search box) use input-group; for a long form field use textarea.",
+        "example": "<Composer onSubmit={send} busy={replying} onStop={stop}>\n  <ComposerAttachments aria-label=\"Attachments\">\n    {files.map((file) => (\n      <ComposerAttachment key={file.name} onRemove={() => remove(file)} removeLabel={`Remove ${file.name}`}>{file.name}</ComposerAttachment>\n    ))}\n  </ComposerAttachments>\n  <ComposerInput aria-label=\"Message\" placeholder=\"Ask anything\" />\n  <ComposerToolbar>\n    <ComposerAttachButton aria-label=\"Attach a file\" onFiles={add} accept=\"image/*\" multiple />\n    <ComposerVoiceButton pressed={listening} onPressedChange={setListening} />\n    <ComposerSubmit />\n  </ComposerToolbar>\n</Composer>",
+        "client": true
+      }
+    },
+    {
+      "name": "consent",
+      "type": "registry:ui",
+      "title": "Consent",
+      "description": "Asks permission before something is switched on or shared: what is asked for, item by item, each optional one with its own switch that starts off, and two equal buttons to allow or decline. As a sheet (ConsentSheet) or in the page (ConsentPanel).",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react",
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/button",
+        "@rivier-ui/cn",
+        "@rivier-ui/sheet",
+        "@rivier-ui/switch",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/consent.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/consent.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Before sharing a person's data with another party, connecting an account, turning on an assistant or a feature that reads their content, or using a device permission. One consent per purpose, in plain words, at the moment it is needed. Nothing is pre-ticked and declining is as easy as allowing. For a yes or no about an action the person just started (delete, leave) use dialog; for a cookie notice use the same parts in a ConsentPanel.",
+        "example": "<ConsentSheet side=\"bottom\" defaultValue={[]} onAccept={(granted) => connect(granted)} onDecline={skip} onDismiss={skip}>\n  <ConsentTrigger asChild><Button>Connect calendar</Button></ConsentTrigger>\n  <ConsentContent>\n    <ConsentHeader>\n      <ConsentTitle>Let the planner see your calendar?</ConsentTitle>\n      <ConsentDescription>It is used to avoid times when you are busy. You can stop this in Settings at any time.</ConsentDescription>\n    </ConsentHeader>\n    <ConsentScopes>\n      <ConsentScope value=\"busy\" title=\"Busy times\" description=\"When you are busy, without what the events are.\" required requiredLabel=\"Always needed\" />\n      <ConsentScope value=\"titles\" title=\"Event names\" description=\"So that suggestions can mention what you have planned.\" />\n    </ConsentScopes>\n    <ConsentDetails summary=\"How this is stored\">Kept for 30 days, never sold, deleted when you disconnect.</ConsentDetails>\n    <ConsentFooter>\n      <ConsentDecline>Do not allow</ConsentDecline>\n      <ConsentAccept>Allow</ConsentAccept>\n    </ConsentFooter>\n  </ConsentContent>\n</ConsentSheet>",
+        "client": true
+      }
+    },
+    {
       "name": "context-menu",
       "type": "registry:ui",
       "title": "Context Menu",
       "description": "A menu of actions that opens at the pointer on right-click, and on a long press on touch screens: items, checkbox and radio items, labels, separators, sub-menus and a shortcut slot.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "lucide-react",
         "radix-ui"
@@ -389,10 +813,74 @@
       }
     },
     {
+      "name": "countdown",
+      "type": "registry:ui",
+      "title": "Countdown",
+      "description": "The time left until a moment, as text that counts down (\"4 min 12 s\"), announced to screen-reader users only at the moments the project lists.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/countdown.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/countdown.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Something the person holds for a limited time: a reserved seat, a price that is kept, a code that expires, a session about to end. Say what happens at the end and offer a way to get more time beside it. Not for decoration or pressure: a countdown that restarts or means nothing is a dark pattern. For progress through a known amount of work use progress.",
+        "example": "<p>\n  Your seats are held for{\" \"}\n  <Countdown\n    to={hold.expiresAt}\n    locale=\"en\"\n    thresholds={[300, 60]}\n    announceAt={(_, left) => `${left} left to finish booking`}\n    onExpire={release}\n    expiredLabel=\"no longer: the hold has ended\"\n  />\n</p>",
+        "client": true
+      }
+    },
+    {
+      "name": "date-picker",
+      "type": "registry:ui",
+      "title": "Date Picker",
+      "description": "A button that shows a date, or a range of dates, and opens a calendar in a popover to choose it. Values are \"YYYY-MM-DD\" strings.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/button",
+        "@rivier-ui/calendar",
+        "@rivier-ui/cn",
+        "@rivier-ui/popover",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/date-picker.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/date-picker.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "A date or a stay inside a form or a toolbar, where a calendar that is always open would take too much room. When the calendar is the main thing on the screen use calendar itself. Never the browser's native date input. Name the button by passing `aria-labelledby` with the id of its visible label: the chosen date is added to the name.",
+        "example": "// One day, uncontrolled, submitted with a form as \"date\"\n<p id=\"date-label\">Date</p>\n<DatePicker defaultValue=\"2026-11-14\" name=\"date\" locale=\"en-GB\">\n  <DatePickerTrigger aria-labelledby=\"date-label\" placeholder=\"Choose a date\" />\n  <DatePickerCalendar min=\"2026-11-01\" disabled={(day) => (closed.has(day) ? \"nothing open\" : false)} />\n</DatePicker>\n\n// A range, controlled, two months where there is room\nconst [stay, setStay] = useState<CalendarRange>({ start: null, end: null });\n<DateRangePicker value={stay} onValueChange={setStay} startName=\"from\" endName=\"to\" locale=\"en-GB\">\n  <DatePickerTrigger aria-label=\"Stay\" placeholder=\"Arrival – departure\" />\n  <DatePickerCalendar numberOfMonths={2} />\n</DateRangePicker>",
+        "client": true
+      }
+    },
+    {
       "name": "dialog",
       "type": "registry:ui",
       "title": "Dialog",
       "description": "A modal window over a dimmed page, with parts for a header, title, description and footer.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "lucide-react",
         "radix-ui"
@@ -416,10 +904,72 @@
       }
     },
     {
+      "name": "direction-provider",
+      "type": "registry:ui",
+      "title": "Direction Provider",
+      "description": "Sets the reading direction (left to right, or right to left) for everything inside it: the `dir` attribute for layout and text, and the context Radix-based components read for arrow keys and placement.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/direction-provider.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/direction-provider.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Once around the app, with the direction of the current language, in any product that has or may get a right-to-left language (Arabic, Hebrew, Persian, Urdu, Dhivehi). Also around one part of a page in the other direction. A product in one left-to-right language does not need it. Put `dir` on <html> as well (the provider's own element covers only what is inside it; menus and dialogs are portalled to <body>). For people's own words in an unknown language use `dir=\"auto\"` on that element instead.",
+        "example": "// app/layout.tsx\nconst dir = directionOf(locale); // \"rtl\" for \"ar\", \"he\", \"fa\", \"ur\", \"dv\" …\n<html lang={locale} dir={dir}>\n  <body>\n    <DirectionProvider dir={dir}>{children}</DirectionProvider>\n  </body>\n</html>\n\n// anywhere below\nconst dir = useDirection();",
+        "client": true
+      }
+    },
+    {
+      "name": "dock",
+      "type": "registry:ui",
+      "title": "Dock",
+      "description": "A layout of main content with a panel docked beside it that stays while the person works: the panel can be resized with a splitter, collapsed to a slim bar, and on narrow containers gives way to a bar at the bottom.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/direction",
+        "@rivier-ui/use-controllable-state",
+        "@rivier-ui/use-size"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/dock.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/dock.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "A working surface that belongs beside the content and is not modal: a plan next to a conversation, an inspector next to a canvas, details next to a list. For a panel that covers the page for a moment use sheet; for two fixed columns with no resizing use split. Write the parts in reading order: DockMain, DockResizer, DockPanel for a panel at the end; DockPanel, DockResizer, DockMain with side=\"start\". Below 42rem of its own width the panel and splitter are hidden and DockBar shows at the bottom: open the panel's content in a bottom-sheet from `onOpenStacked`. Give the Dock a height (it fills its parent).",
+        "example": "<Dock defaultSize={32} minSize={24} maxSize={50} className=\"h-[32rem]\">\n  <DockMain>…the conversation…</DockMain>\n  <DockResizer aria-label=\"Resize the plan\" />\n  <DockPanel aria-label=\"Plan\">\n    <DockCollapse aria-label=\"Hide the plan\"><PanelRightClose /></DockCollapse>\n    …the plan…\n  </DockPanel>\n  <DockBar onOpenStacked={() => setSheetOpen(true)}>Plan · 3 stops</DockBar>\n</Dock>\n\n// Controlled, in pixels, at the start\n<Dock side=\"start\" unit=\"px\" size={width} onSizeChange={setWidth} minSize={240} maxSize={480} collapsed={hidden} onCollapsedChange={setHidden}>…</Dock>",
+        "client": true
+      }
+    },
+    {
       "name": "dropdown-menu",
       "type": "registry:ui",
       "title": "Dropdown Menu",
       "description": "A menu of actions that opens from a button: items, checkbox and radio items, labels, separators, sub-menus and a shortcut slot.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "lucide-react",
         "radix-ui"
@@ -443,10 +993,45 @@
       }
     },
     {
+      "name": "dropzone",
+      "type": "registry:ui",
+      "title": "Dropzone",
+      "description": "A place to choose files to upload, by dropping them, pasting them or pressing a button, and the rows that show each file's progress with slots for pause, resume, retry and remove.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/button",
+        "@rivier-ui/cn",
+        "@rivier-ui/progress"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/dropzone.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/dropzone.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Adding pictures, documents or other files where progress matters: a listing's photos, attachments, an import. It contains no upload engine: the project uploads (plain, or resumable such as tus) and tells each row its state and progress. For one small file in a form, an input with type=\"file\" is enough. Name the dropzone with `aria-label` or `aria-labelledby`, and word rejected files yourself from the reason given to `onReject`.",
+        "example": "<Dropzone accept=\"image/*\" maxSize={10_000_000} onFiles={start} onReject={explain} aria-label=\"Add pictures\">\n  <DropzoneHint>Drop pictures here, or</DropzoneHint>\n  <DropzoneButton>Choose pictures</DropzoneButton>\n</Dropzone>\n<UploadList aria-label=\"Pictures being added\">\n  {uploads.map((upload) => (\n    <UploadItem key={upload.id} name={upload.file.name} size={upload.file.size} state={upload.state}>\n      <UploadProgress value={upload.percent} />\n      <UploadActions>\n        {upload.state === \"uploading\" ? <UploadPause onClick={() => pause(upload.id)} /> : null}\n        {upload.state === \"paused\" ? <UploadResume onClick={() => resume(upload.id)} /> : null}\n        {upload.state === \"failed\" ? <UploadRetry onClick={() => retry(upload.id)} /> : null}\n        <UploadRemove onClick={() => remove(upload.id)} />\n      </UploadActions>\n    </UploadItem>\n  ))}\n</UploadList>",
+        "client": true
+      }
+    },
+    {
       "name": "empty-state",
       "type": "registry:ui",
       "title": "Empty State",
       "description": "What a list, a table or a search shows when there is nothing in it: an icon, a title, a description and an action.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "lucide-react"
       ],
@@ -469,10 +1054,46 @@
       }
     },
     {
+      "name": "fact-row",
+      "type": "registry:ui",
+      "title": "Fact Row",
+      "description": "One thing the system knows or remembers about a person or a record, shown with where it came from and what the person can do about it: correct it in place, say it is no longer true, or have it removed.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/button",
+        "@rivier-ui/cn",
+        "@rivier-ui/input",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/fact-row.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/fact-row.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Showing people what is held about them and letting them control it: remembered preferences, profile details filled in by an assistant, imported data, settings inferred from use. Every fact gets a source and at least one action. The words of the actions are the project's (the component names none). For plain label and value pairs nobody can change use a description list; for a form use field.",
+        "example": "<FactList aria-label=\"What we remember\">\n  <FactRow removed={forgotten} removedMessage=\"Diet was forgotten\" restoredMessage=\"Diet was restored\">\n    <FactLabel>Diet</FactLabel>\n    <FactValue>{diet}</FactValue>\n    <FactSource>\n      <SourceChip icon={<MessageSquare />}>You said this on 3 May</SourceChip>\n    </FactSource>\n    <FactActions aria-label=\"Diet\">\n      <FactEditTrigger>Edit</FactEditTrigger>\n      <FactAction onClick={endDiet}>Not true any more</FactAction>\n      <FactAction onClick={() => setForgotten(true)}>Forget this</FactAction>\n    </FactActions>\n    <FactEditor aria-label=\"Diet\" defaultValue={diet} onSave={setDiet} savedMessage=\"Diet was changed\" />\n    <FactRemoved>\n      Diet was forgotten. <FactUndo onClick={() => setForgotten(false)}>Undo</FactUndo>\n    </FactRemoved>\n  </FactRow>\n</FactList>",
+        "client": true
+      }
+    },
+    {
       "name": "field",
       "type": "registry:ui",
       "title": "Field",
       "description": "Lays out a label, a control, a description and an error message, and connects them (htmlFor, id, aria-describedby, aria-invalid) without hand-written ids.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "radix-ui"
       ],
@@ -496,10 +1117,72 @@
       }
     },
     {
+      "name": "gallery",
+      "type": "registry:ui",
+      "title": "Gallery",
+      "description": "A set of picture tiles that open a full-screen viewer: a mosaic of one large and several small, an even grid, or a row that scrolls sideways.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/lightbox"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/gallery.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/gallery.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Showing several pictures of one thing where each can be looked at closely: a place, a product, a piece of work. GalleryLightbox takes a list of pictures and does everything; Gallery, GalleryItem and GalleryImage are the parts, to put inside your own Lightbox or to use with no viewer at all. For pictures that are decoration, use plain images in a grid; for one picture use aspect.",
+        "example": "<GalleryLightbox\n  title=\"Photos of the studio\"\n  layout=\"mosaic\"\n  items={[\n    { src: \"/studio-1.jpg\", alt: \"The studio from the street\" },\n    { src: \"/studio-2.jpg\", alt: \"The workbench\", caption: \"The workbench, built in 1962\" },\n  ]}\n/>\n\n// The parts, in your own lightbox\n<Lightbox count={photos.length}>\n  <Gallery layout=\"grid\" aria-label=\"Photos\">\n    {photos.map((photo, index) => (\n      <LightboxTrigger key={photo.src} index={index} asChild>\n        <GalleryItem><GalleryImage src={photo.src} alt={photo.alt} /></GalleryItem>\n      </LightboxTrigger>\n    ))}\n  </Gallery>\n  <LightboxContent>…</LightboxContent>\n</Lightbox>",
+        "client": true
+      }
+    },
+    {
+      "name": "hotspots",
+      "type": "registry:ui",
+      "title": "Hotspots",
+      "description": "Named buttons placed over a picture or a video at a point, each present only between two moments of the clip, with the same choices as a plain list for people who cannot point at the picture.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-media"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/hotspots.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/hotspots.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Something in the frame can be asked about or chosen while it is on screen: an object in a scene, a place on a still, a choice in a story. Put Hotspots inside the frame (VideoPlayer, or any `relative` box over a picture) and HotspotList after it; both take the same `hotspots`. A hotspot that appears is announced, because nothing else would tell a screen-reader user it is there. For a point on a map use the map's own markers; for marks on the time bar use the scrubber's `marks`.",
+        "example": "const spots = [\n  { id: \"kiln\", x: 32, y: 55, start: 4, end: 12, label: \"The kiln door\" },\n  { id: \"shelf\", x: 70, y: 30, start: 9, end: 20, label: \"Drying shelf\" },\n];\n<VideoPlayerProvider>\n  <VideoPlayer aria-label=\"Inside the workshop\">\n    <VideoPlayerVideo src=\"/workshop.mp4\" />\n    <Hotspots hotspots={spots} onSelect={(spot) => openCard(spot.id)} />\n    <VideoPlayerControls>…</VideoPlayerControls>\n  </VideoPlayer>\n  <HotspotList hotspots={spots} onSelect={(spot) => openCard(spot.id)} aria-label=\"In this scene\" />\n</VideoPlayerProvider>",
+        "client": true
+      }
+    },
+    {
       "name": "input-group",
       "type": "registry:ui",
       "title": "Input Group",
       "description": "An input with a leading or trailing icon, text or button inside one shared border.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "class-variance-authority"
       ],
@@ -527,6 +1210,9 @@
       "type": "registry:ui",
       "title": "Input",
       "description": "A single-line text input in three sizes, with an invalid state.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "class-variance-authority"
       ],
@@ -553,6 +1239,9 @@
       "type": "registry:ui",
       "title": "Kbd",
       "description": "A key cap for showing a keyboard key or a shortcut.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [],
       "registryDependencies": [
         "@rivier-ui/theme",
@@ -577,6 +1266,9 @@
       "type": "registry:ui",
       "title": "Label",
       "description": "The text name of a control. Clicking it focuses or toggles the control it points to.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "radix-ui"
       ],
@@ -599,10 +1291,110 @@
       }
     },
     {
+      "name": "language-switcher",
+      "type": "registry:ui",
+      "title": "Language Switcher",
+      "description": "A menu for choosing the interface language: each language under its own name in its own script, the current one marked, no flags.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/button",
+        "@rivier-ui/cn",
+        "@rivier-ui/direction-provider",
+        "@rivier-ui/dropdown-menu",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/language-switcher.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/language-switcher.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "A product in more than one language: in the header or footer, and in settings. It only reports the choice (`onValueChange`): the project navigates to the translated page or stores the preference. A flag stands for a country, not a language, so none is shown. It is a menu of radio items and not a select, because choosing a language is an action that reloads or navigates: a select that changes the page as its value changes surprises keyboard and screen-reader users. For choosing a language as data in a form (a document's language) use select.",
+        "example": "<LanguageSwitcher value={locale} onValueChange={(next) => router.replace(pathname, { locale: next })} label=\"Language\" languages={[\"en\", \"fr\", \"ar\", \"ja\"]} />\n\n// With its own parts: names in the current language as a second line, and a name the project supplies\n<LanguageSwitcher defaultValue=\"en\" label=\"Language\" displayLocale=\"en\">\n  <LanguageSwitcherTrigger />\n  <LanguageSwitcherContent align=\"end\">\n    <LanguageSwitcherItem value=\"en\" />\n    <LanguageSwitcherItem value=\"ar\" />\n    <LanguageSwitcherItem value=\"dv\" name=\"ދިވެހި\" />\n  </LanguageSwitcherContent>\n</LanguageSwitcher>",
+        "client": true
+      }
+    },
+    {
+      "name": "lightbox",
+      "type": "registry:ui",
+      "title": "Lightbox",
+      "description": "A full-screen viewer for a set of pictures (or any media the project renders): swipe or arrow between slides, zoom and pan, a counter, captions, thumbnails, and the picture growing out of the thumbnail that opened it.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react",
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn",
+        "@rivier-ui/direction",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/lightbox.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/lightbox.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Looking closely at pictures that are shown small on the page: a listing's photos, a portfolio, attachments. It is a modal dialog, so focus is held inside and returns to the thumbnail of the picture shown when it closes. For a grid of thumbnails that opens it use gallery (GalleryLightbox does both). For one picture with text beside it use dialog; for a row of cards that scroll in the page use a scroll-snap row, not a lightbox. Always give it a LightboxTitle (className=\"sr-only\" hides it) and say how many slides there are with `count`.",
+        "example": "<Lightbox count={photos.length}>\n  {photos.map((photo, index) => (\n    <LightboxTrigger key={photo.src} index={index} aria-label={`Open picture: ${photo.alt}`}>\n      <img src={photo.thumb} alt=\"\" className=\"size-24 rounded-control object-cover\" />\n    </LightboxTrigger>\n  ))}\n  <LightboxContent>\n    <LightboxHeader>\n      <LightboxTitle className=\"sr-only\">Photos</LightboxTitle>\n      <LightboxCounter />\n      <LightboxZoom className=\"ms-auto\" />\n      <LightboxClose />\n    </LightboxHeader>\n    <LightboxStage>\n      <LightboxViewport>\n        {photos.map((photo, index) => (\n          <LightboxSlide key={photo.src} index={index}>\n            <img src={photo.src} alt={photo.alt} className=\"max-h-full max-w-full object-contain\" />\n          </LightboxSlide>\n        ))}\n      </LightboxViewport>\n      <LightboxPrevious />\n      <LightboxNext />\n    </LightboxStage>\n  </LightboxContent>\n</Lightbox>",
+        "client": true
+      }
+    },
+    {
+      "name": "message",
+      "type": "registry:ui",
+      "title": "Message",
+      "description": "One message in a conversation, from the person, the assistant or the system, with parts for an avatar, the words, the time and sending state, a toolbar of actions, and suggested replies.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react",
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chip",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/message.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/message.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Inside a thread, one per message. The person's own messages sit at the end side in a bubble; the assistant's read as plain text at the start. For words that are still arriving put streaming-text inside MessageContent; for a structured piece of a reply (a plan, a form) use part-frame beside it. Not for comments under an article or a notification list: those are plain lists.",
+        "example": "<Message from=\"user\">\n  <MessageBody>\n    <MessageContent>Somewhere quiet for lunch on Saturday?</MessageContent>\n    <MessageMeta time={sentAt} status=\"failed\" />\n  </MessageBody>\n</Message>\n\n<Message from=\"assistant\">\n  <MessageAvatar><Avatar size=\"sm\"><AvatarFallback>AI</AvatarFallback></Avatar></MessageAvatar>\n  <MessageBody>\n    <MessageContent>Three places are open then.</MessageContent>\n    <MessageActions aria-label=\"Actions for this reply\">\n      <MessageAction aria-label=\"Copy\" onClick={copy}><Copy /></MessageAction>\n      <MessageAction aria-label=\"Try again\" onClick={retry}><RotateCcw /></MessageAction>\n    </MessageActions>\n    <MessageSuggestions aria-label=\"Suggested replies\">\n      <MessageSuggestion onClick={() => send(\"Only outdoors\")}>Only outdoors</MessageSuggestion>\n    </MessageSuggestions>\n  </MessageBody>\n</Message>",
+        "client": true
+      }
+    },
+    {
       "name": "navbar",
       "type": "registry:ui",
       "title": "Navbar",
       "description": "A responsive site header: a brand, a row of links and a slot for actions. Below `md` the links move into a menu button that opens them in a sheet.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "lucide-react",
         "radix-ui"
@@ -628,10 +1420,43 @@
       }
     },
     {
+      "name": "number-stepper",
+      "type": "registry:ui",
+      "title": "Number Stepper",
+      "description": "A number with a button either side to take one away or add one, that can also be typed: a spin button.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/number-stepper.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/number-stepper.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "A small whole number that is usually changed by a step or two: people in a party, a quantity, nights. For a number where the rough position matters use slider; for a free number (a price, a year) use input with type=\"number\". Name it with a Label (pass the same `id`) or `aria-label`.",
+        "example": "<Label htmlFor=\"adults\">Adults</Label>\n<NumberStepper id=\"adults\" defaultValue={2} min={1} max={12} />\n\n// Controlled, with its own parts and translated button names\n<NumberStepper value={nights} onValueChange={setNights} min={1} aria-label=\"Nights\">\n  <NumberStepperDecrement aria-label=\"One night fewer\" />\n  <NumberStepperInput />\n  <NumberStepperIncrement aria-label=\"One night more\" />\n</NumberStepper>",
+        "client": true
+      }
+    },
+    {
       "name": "pagination",
       "type": "registry:ui",
       "title": "Pagination",
       "description": "Links to the previous, next and numbered pages of a long list, with the look of buttons.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "class-variance-authority",
         "lucide-react",
@@ -657,10 +1482,45 @@
       }
     },
     {
+      "name": "part-frame",
+      "type": "registry:ui",
+      "title": "Part Frame",
+      "description": "A card for one structured piece of a conversation (a plan, a result, a form) that has a life: loading, live, saving a change, replaced by a newer one, or final.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn",
+        "@rivier-ui/dialog",
+        "@rivier-ui/skeleton"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/part-frame.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/part-frame.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "An assistant's reply contains something to look at or work in, not only words, and that thing changes over the conversation. The frame holds its size while it loads, says \"Saving\" in words while a change is on its way, shrinks to a one-line stub when a newer frame replaces it, and can open its content full screen. For a static card use card; for words use message; for a flow of steps put steps or a wizard inside it.",
+        "example": "<PartFrame state={plan.state} replacementRef={newerPlan}>\n  <PartFrameHeader>\n    <PartFrameTitle>Plan for Saturday</PartFrameTitle>\n    <PartFrameExpand title=\"Plan for Saturday\"><PlanEditor plan={plan} roomy /></PartFrameExpand>\n  </PartFrameHeader>\n  <PartFrameContent className=\"min-h-40\"><PlanEditor plan={plan} /></PartFrameContent>\n  <PartFrameFooter><Button size=\"sm\">Confirm</Button></PartFrameFooter>\n</PartFrame>\n\n// Replaced by a newer one: a stub that says so and points to it\n<PartFrame state=\"superseded\" supersededBy={<a href=\"#plan-2\">See the new plan</a>}>\n  <PartFrameHeader><PartFrameTitle>Plan for Saturday</PartFrameTitle></PartFrameHeader>\n  <PartFrameContent>…</PartFrameContent>\n</PartFrame>",
+        "client": true
+      }
+    },
+    {
       "name": "popover",
       "type": "registry:ui",
       "title": "Popover",
       "description": "A small floating surface attached to the control that opens it.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "radix-ui"
       ],
@@ -683,10 +1543,41 @@
       }
     },
     {
+      "name": "price-breakdown",
+      "type": "registry:ui",
+      "title": "Price Breakdown",
+      "description": "What a price is made of, line by line, and the total: labels at the start, amounts in aligned figures at the end.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/price-breakdown.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/price-breakdown.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "A quote, a basket summary, a receipt, a booking's cost before paying. Every amount the total includes gets a line, discounts and fees too. For one figure with a label use stat; for many records in rows and columns use table.",
+        "example": "<PriceBreakdown currency=\"EUR\" locale=\"en-IE\" announceTotal={(total) => `Total is now ${total}`}>\n  <PriceLine label=\"2 adults\" note=\"€46 each\" amount={92} />\n  <PriceLine label=\"Service fee\" amount={6} />\n  <PriceLine label=\"Early booking\" amount={-10} discount />\n  <PriceTotal label=\"Total\" note=\"Taxes included\" amount={88} />\n</PriceBreakdown>",
+        "client": true
+      }
+    },
+    {
       "name": "progress",
       "type": "registry:ui",
       "title": "Progress",
       "description": "A bar that fills as a task completes, or slides back and forth when the amount done is not known.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "class-variance-authority",
         "radix-ui"
@@ -714,6 +1605,9 @@
       "type": "registry:ui",
       "title": "Radio Group",
       "description": "A set of radio buttons where exactly one is chosen, with arrow-key movement between them.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "radix-ui"
       ],
@@ -736,10 +1630,44 @@
       }
     },
     {
+      "name": "scene-strip",
+      "type": "registry:ui",
+      "title": "Scene Strip",
+      "description": "A row of the scenes or chapters of a clip, each with a picture, a name and a length, that scrolls sideways, marks the one that is playing and goes to a scene when it is pressed.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/direction",
+        "@rivier-ui/use-media"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/scene-strip.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/scene-strip.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Under or beside a player whose clip has named parts: chapters of a lesson, scenes of a film, steps of a recipe. It reads the time from the player it is inside (wrap the player and the strip in VideoPlayerProvider, or put it inside AudioPlayer), or from `time` and `onSeek`. For marks on the time bar itself use the scrubber's `marks`; for the spoken lines use Transcript.",
+        "example": "<VideoPlayerProvider>\n  <VideoPlayer aria-label=\"A day at the pottery\">…</VideoPlayer>\n  <SceneStrip\n    aria-label=\"Scenes\"\n    scenes={[\n      { start: 0, label: \"Wedging the clay\", picture: <img src=\"/scene-1.jpg\" alt=\"\" /> },\n      { start: 42, label: \"On the wheel\", picture: <img src=\"/scene-2.jpg\" alt=\"\" /> },\n    ]}\n  />\n</VideoPlayerProvider>",
+        "client": true
+      }
+    },
+    {
       "name": "scroll-area",
       "type": "registry:ui",
       "title": "Scroll Area",
       "description": "A scrolling region with thin, themed scrollbars that look the same on every platform. Native scrolling underneath.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "radix-ui"
       ],
@@ -762,10 +1690,75 @@
       }
     },
     {
+      "name": "scrubber",
+      "type": "registry:ui",
+      "title": "Scrubber",
+      "description": "The time bar of a player: a slider over the length of a clip that shows what has played and what has loaded, marks chapters, and can show the time and a picture for the moment under the pointer.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state",
+        "@rivier-ui/use-media"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/scrubber.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/scrubber.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Seeking in audio, video or any timeline measured in seconds. video-player and audio-player already contain one bound to their media; use this directly for a custom player or a timeline. For choosing a number that is not a time use slider. Time runs left to right in every language (as on players everywhere: the bar is a picture of time, like a clock face, not a line of text), so the bar and its arrow keys are not mirrored in right-to-left pages; pass `dir=\"rtl\"` if a product decides otherwise, and the keys follow what is drawn.",
+        "example": "// Uncontrolled\n<Scrubber duration={200} defaultValue={65} aria-label=\"Seek\" onValueCommit={(time) => player.seek(time)} />\n\n// Controlled by the player's clock, with chapters and a preview picture from a sprite sheet\n<Scrubber\n  value={time}\n  duration={duration}\n  buffered={[[0, 90]]}\n  marks={[{ time: 0, label: \"Opening\" }, { time: 60, label: \"The climb\" }]}\n  onValueCommit={seek}\n  aria-label=\"Seek\"\n>\n  <ScrubberTrack />\n  <ScrubberThumb />\n  <ScrubberPreview thumbnail={{ url: \"/sprite.jpg\", columns: 10, rows: 10, interval: 2 }} />\n</Scrubber>",
+        "client": true
+      }
+    },
+    {
+      "name": "segmented-control",
+      "type": "registry:ui",
+      "title": "Segmented Control",
+      "description": "A row of two to five segments where exactly one is chosen, with a marker that slides to the choice.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/layout-transition",
+        "@rivier-ui/motion"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/segmented-control.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/segmented-control.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Switching one setting between a few short, equal options that take effect at once: a view (list or map), a unit, a period (day, week, month). It is a radio group, so one option is always chosen. For switching panels of content use tabs; for options that can each be on or off use toggle-group or chip; for more than five options use select.",
+        "example": "<SegmentedControl defaultValue=\"list\" aria-label=\"View\">\n  <SegmentedControlItem value=\"list\">List</SegmentedControlItem>\n  <SegmentedControlItem value=\"map\">Map</SegmentedControlItem>\n</SegmentedControl>\n\n// Controlled, full width, with icons\n<SegmentedControl value={period} onValueChange={setPeriod} aria-label=\"Period\" className=\"w-full\">\n  <SegmentedControlItem value=\"day\"><Sun /> Day</SegmentedControlItem>\n  <SegmentedControlItem value=\"week\"><Calendar /> Week</SegmentedControlItem>\n</SegmentedControl>",
+        "client": true
+      }
+    },
+    {
       "name": "select",
       "type": "registry:ui",
       "title": "Select",
       "description": "A themed dropdown for choosing one value from a list, with groups, labels and separators. Never a native select.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "class-variance-authority",
         "lucide-react",
@@ -794,6 +1787,9 @@
       "type": "registry:ui",
       "title": "Separator",
       "description": "A hairline between two pieces of content, horizontal or vertical, with an optional label in the middle.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "radix-ui"
       ],
@@ -820,6 +1816,9 @@
       "type": "registry:ui",
       "title": "Sheet",
       "description": "A modal panel that slides in from an edge of the screen, with parts for a header, title, description and footer.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "class-variance-authority",
         "lucide-react",
@@ -847,7 +1846,10 @@
       "name": "skeleton",
       "type": "registry:ui",
       "title": "Skeleton",
-      "description": "A pulsing block that stands in for content that is loading. It is still under reduced motion.",
+      "description": "A pulsing block that stands in for content that is loading: a bare block sized by hand, lines of text, or a wrapper that takes the exact size of the real content. It is still under reduced motion.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [],
       "registryDependencies": [
         "@rivier-ui/theme",
@@ -862,8 +1864,8 @@
       ],
       "meta": {
         "category": "ui",
-        "when": "Content whose shape is known is on its way: size the block like the thing it replaces so nothing jumps. For an unknown wait use spinner; for a measurable one use progress.",
-        "example": "<div className=\"flex items-center gap-3\" aria-busy=\"true\">\n  <Skeleton className=\"size-10 rounded-full\" />\n  <div className=\"flex flex-1 flex-col gap-2\">\n    <Skeleton className=\"h-4 w-1/2\" />\n    <Skeleton className=\"h-4 w-3/4\" />\n  </div>\n</div>",
+        "when": "Content whose shape is known is on its way. Nothing may jump when it arrives: either size the block like the thing it replaces, or wrap the real component (rendered with placeholder data) in `<Skeleton loading>` so the box is exactly its final size. Mark the region that is loading with `aria-busy=\"true\"`: the placeholders themselves are hidden from assistive technology. For an unknown wait use spinner; for a measurable one use progress.",
+        "example": "<div className=\"flex items-center gap-3\" aria-busy=\"true\">\n  <Skeleton className=\"size-10 rounded-full\" />\n  <SkeletonText lines={2} className=\"flex-1\" />\n</div>\n\n// Holds the final size: the card is laid out, invisible and inert, under the placeholder\n<section aria-busy={isLoading}>\n  <Skeleton loading={isLoading}>\n    <PriceCard price={price ?? PLACEHOLDER_PRICE} />\n  </Skeleton>\n</section>",
         "client": false
       }
     },
@@ -872,6 +1874,9 @@
       "type": "registry:ui",
       "title": "Slider",
       "description": "A slider for one value, or a range with two thumbs.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "radix-ui"
       ],
@@ -894,10 +1899,76 @@
       }
     },
     {
+      "name": "slot-picker",
+      "type": "registry:ui",
+      "title": "Slot Picker",
+      "description": "Offered times as a set of pills to choose one from, optionally under named groups, each able to carry a note and to be unavailable for a stated reason.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react",
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/slot-picker.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/slot-picker.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "The times are a short list that someone else decides: appointment slots, sittings, departures. One is chosen, so it is a radio group. For any time of the person's own choosing use time-picker; for more than about twenty slots, narrow them first (by day, by part of the day) or use select.",
+        "example": "<SlotPicker defaultValue=\"10:00\" aria-label=\"Time\" locale=\"en-GB\">\n  <SlotPickerGroup label=\"Morning\">\n    <SlotPickerItem value=\"09:30\" />\n    <SlotPickerItem value=\"10:00\" note=\"2 places left\" />\n    <SlotPickerItem value=\"11:30\" unavailable=\"Full\" />\n  </SlotPickerGroup>\n  <SlotPickerGroup label=\"Afternoon\">\n    <SlotPickerItem value=\"14:00\" />\n  </SlotPickerGroup>\n</SlotPicker>\n\n// Controlled, with its own labels, and nothing on offer\n<SlotPicker value={slot} onValueChange={setSlot} aria-label=\"Sitting\">\n  {sittings.length === 0 ? <SlotPickerEmpty>Nothing is open on this day.</SlotPickerEmpty> : null}\n  {sittings.map((sitting) => <SlotPickerItem key={sitting.id} value={sitting.id}>{sitting.name}</SlotPickerItem>)}\n</SlotPicker>",
+        "client": true
+      }
+    },
+    {
+      "name": "sortable-list",
+      "type": "registry:ui",
+      "title": "Sortable List",
+      "description": "A list whose order the person sets, three ways: dragging a row by its handle (mouse, pen or touch), lifting it with the keyboard and moving it with the arrow keys, or pressing \"Move up\" and \"Move down\" buttons. Every move is read out.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react",
+        "motion"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn",
+        "@rivier-ui/motion",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/sortable-list.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/sortable-list.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "The order itself is the data: the stops of a plan, priorities, pictures in a gallery, columns to show. Always give the rows SortableMoveButtons or a SortableHandle (both is best): dragging alone leaves out people who cannot drag (WCAG 2.5.7). It is one vertical list; it does not move rows between lists or sort a grid. For a list sorted by a rule (newest first) use a select for the rule instead; for choosing rather than ordering use chip or checkboxes.",
+        "example": "const [stops, setStops] = useState([\"market\", \"lunch\", \"museum\"]);\n<SortableList values={stops} onValuesChange={setStops} aria-label=\"Stops, in order\">\n  {stops.map((id) => (\n    <SortableItem key={id} value={id} label={NAMES[id]}>\n      <SortableHandle />\n      <span className=\"min-w-0 flex-1 truncate\">{NAMES[id]}</span>\n      <SortableMoveButtons />\n    </SortableItem>\n  ))}\n</SortableList>\n\n// Uncontrolled: the list keeps the order and gives it to its children\n<SortableList defaultValues={[\"a\", \"b\", \"c\"]} aria-label=\"Priorities\">\n  {(order) => order.map((id) => <SortableItem key={id} value={id} label={id}>…</SortableItem>)}\n</SortableList>",
+        "client": true
+      }
+    },
+    {
       "name": "spinner",
       "type": "registry:ui",
       "title": "Spinner",
       "description": "A turning ring that says something is in progress, announced to assistive technology by its label.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "class-variance-authority"
       ],
@@ -924,6 +1995,9 @@
       "type": "registry:ui",
       "title": "Stat",
       "description": "A number tile: a label, a value, an optional change with its direction, and a slot for a sparkline.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "lucide-react"
       ],
@@ -946,10 +2020,97 @@
       }
     },
     {
+      "name": "status-line",
+      "type": "registry:ui",
+      "title": "Status Line",
+      "description": "One line that says in words what is happening now (\"Searching\", \"Writing a reply\", \"Done\"), read out politely by screen readers, with an optional moving mark and a slot for a stop button.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/status-line.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/status-line.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Beside a thread or any surface where work goes on that the person waits for: it is the one polite live region of that surface. Render it from the start, empty, and change its text: a region that appears together with its text is often not announced. It keeps its height when empty, so nothing jumps. For a wait with no words use spinner; for a measurable one use progress; for a result that must outlive the moment use alert or toaster.",
+        "example": "<StatusLine working={busy} action={busy ? <StatusLineAction onClick={stop}>Stop</StatusLineAction> : null}>\n  {busy ? \"Searching three sources\" : \"\"}\n</StatusLine>",
+        "client": false
+      }
+    },
+    {
+      "name": "steps",
+      "type": "registry:ui",
+      "title": "Steps",
+      "description": "A rail that shows where one is in a sequence of steps: a row of thin segments, or numbered markers with titles, each step with a state (done, filled in for you, current, not started, skipped, blocked).",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/steps.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/steps.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Showing progress through a known, ordered set of steps: a booking, a sign-up, an import, a checklist that runs in order. Use \"segments\" above a card where space is short and \"labelled\" where the step names help. Pair it with StepsCount (\"Step 2 of 5\"), which says the same in words. For a measured amount of one task use progress; for the whole guided task with its buttons use wizard, which draws this rail itself; for moving between unordered views use tabs.",
+        "example": "<StepsCount current={2} total={4} />\n<Steps aria-label=\"Booking progress\">\n  <Step state=\"done\">Dates</Step>\n  <Step state=\"current\">People</Step>\n  <Step state=\"upcoming\">Extras</Step>\n  <Step state=\"upcoming\">Review</Step>\n</Steps>\n\n// Numbered markers with titles; a finished step can be a button that goes back to it\n<Steps variant=\"labelled\" aria-label=\"Import\">\n  <Step state=\"done\" onClick={() => goTo(\"file\")}>Choose a file</Step>\n  <Step state=\"assumed\" note=\"Taken from the file's first row\">Match the columns</Step>\n  <Step state=\"current\" description=\"About a minute\">Check the rows</Step>\n  <Step state=\"skipped\">Add notes</Step>\n</Steps>",
+        "client": true
+      }
+    },
+    {
+      "name": "streaming-text",
+      "type": "registry:ui",
+      "title": "Streaming Text",
+      "description": "Text that grows as it arrives, with a caret while it is arriving, that is never read out word by word: it is announced once, when it is finished.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/streaming-text.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/streaming-text.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "A reply from a model, a transcript or a log line that streams in. Pass the text so far and whether more is coming. It must not sit inside a live region (a thread is `aria-live=\"off\"`); say \"Writing a reply\" through a status-line while it streams. For text that is already complete use a plain element; for a headline that animates in use text-reveal.",
+        "example": "<MessageContent>\n  <StreamingText text={reply} streaming={isStreaming} announceWhenDone onDone={saveReply} />\n</MessageContent>\n\n// A shorter spoken form, and words that fade in as they land\n<StreamingText text={reply} streaming={isStreaming} reveal=\"word\" announceWhenDone=\"Three places found. The nearest is ten minutes away.\" />\n\n// The project's own renderer (Markdown, for example)\n<StreamingText text={reply} streaming={isStreaming}>{(text) => <Markdown>{text}</Markdown>}</StreamingText>",
+        "client": true
+      }
+    },
+    {
       "name": "switch",
       "type": "registry:ui",
       "title": "Switch",
       "description": "An on/off switch.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "radix-ui"
       ],
@@ -976,6 +2137,9 @@
       "type": "registry:ui",
       "title": "Table",
       "description": "A semantic table with styled parts, inside a wrapper that scrolls sideways so it never overflows a narrow screen.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [],
       "registryDependencies": [
         "@rivier-ui/theme",
@@ -1000,6 +2164,9 @@
       "type": "registry:ui",
       "title": "Tabs",
       "description": "Panels that share one place, switched by a row of tabs. Two looks: an underline, or a segmented pill.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "class-variance-authority",
         "radix-ui"
@@ -1027,6 +2194,9 @@
       "type": "registry:ui",
       "title": "Textarea",
       "description": "A multi-line text input that grows with its content, with an invalid state.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [],
       "registryDependencies": [
         "@rivier-ui/theme",
@@ -1051,6 +2221,9 @@
       "type": "registry:ui",
       "title": "Theme Provider",
       "description": "Holds the theme (light or dark, roundness, highlight colour), applies it to the page, remembers the visitor's choice, and avoids a flash of the wrong theme.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [],
       "registryDependencies": [
         "@rivier-ui/theme"
@@ -1070,10 +2243,130 @@
       }
     },
     {
+      "name": "thread",
+      "type": "registry:ui",
+      "title": "Thread",
+      "description": "The scrolling log of a conversation: it follows the newest content while the person is at the bottom, stops the moment they scroll up, and offers a way back down.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/thread.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/thread.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "A conversation with an assistant or between people, where messages arrive over time. It holds no messages and no transport: render them inside it (message, streaming-text, part-frame). The log is deliberately silent (`aria-live=\"off\"`): say what is happening through one status-line beside it, and the finished reply once through streaming-text's `announceWhenDone`. For a list that does not grow at the bottom use scroll-area.",
+        "example": "<Thread aria-label=\"Conversation with the assistant\" className=\"h-[32rem]\">\n  <ThreadContent>\n    {messages.length === 0 ? <ThreadEmpty>Ask anything to begin.</ThreadEmpty> : null}\n    {messages.map((message) => (\n      <ThreadTurn key={message.id} label={message.from === \"user\" ? \"You\" : \"Assistant\"}>\n        <Message from={message.from}>\n          <MessageBody><MessageContent>{message.text}</MessageContent></MessageBody>\n        </Message>\n      </ThreadTurn>\n    ))}\n  </ThreadContent>\n  <ThreadJump>Jump to latest</ThreadJump>\n</Thread>\n\n// Always show what the person just sent, even if they had scrolled up\n<Thread aria-label=\"Conversation\" resumeKey={lastOwnMessageId}>…</Thread>",
+        "client": true
+      }
+    },
+    {
+      "name": "tile-group",
+      "type": "registry:ui",
+      "title": "Tile Group",
+      "description": "A grid of large tiles, each a picture or an icon with a word, where one or several are chosen.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react",
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/tile-group.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/tile-group.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "A choice that is easier to make by looking than by reading: moods, styles, room types, plans. Each tile must carry a visible word; the picture alone is never the label. For short text-only options use chip (ChipGroup); for a compact switch between a few views use segmented-control; for a long list use select or combobox.",
+        "example": "<TileGroup type=\"multiple\" defaultValue={[\"quiet\"]} aria-label=\"What kind of day?\">\n  <Tile value=\"quiet\">\n    <TileMedia><img src=\"/quiet.jpg\" alt=\"\" /></TileMedia>\n    <TileLabel>Quiet</TileLabel>\n    <TileDescription>Gardens, reading rooms, slow walks</TileDescription>\n  </Tile>\n  <Tile value=\"lively\">\n    <TileMedia><img src=\"/lively.jpg\" alt=\"\" /></TileMedia>\n    <TileLabel>Lively</TileLabel>\n  </Tile>\n</TileGroup>",
+        "client": true
+      }
+    },
+    {
+      "name": "time-picker",
+      "type": "registry:ui",
+      "title": "Time Picker",
+      "description": "A time field made of an hour and a minute that are each stepped with the arrow keys or typed, with an AM/PM part where the locale uses a 12-hour clock. The value is a 24-hour \"HH:mm\" string.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/direction",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/time-picker.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/time-picker.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Any time of the person's own choosing: an opening hour, a reminder, an arrival. When the times on offer are a fixed list use slot-picker. Never the browser's native time input. Name it with `aria-label` or `aria-labelledby`.",
+        "example": "<p id=\"opens-label\">Opens at</p>\n<TimePicker aria-labelledby=\"opens-label\" defaultValue=\"09:30\" minuteStep={5} name=\"opens\" locale=\"en-GB\" />\n\n// Controlled, limited, 12-hour whatever the locale, with translated names\n<TimePicker\n  value={time}\n  onValueChange={setTime}\n  min=\"08:00\"\n  max=\"18:00\"\n  hourCycle={12}\n  aria-label=\"Pick-up time\"\n  labels={{ hour: \"Hour\", minute: \"Minute\", period: \"Morning or afternoon\", empty: \"Not set\" }}\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "timeline",
+      "type": "registry:ui",
+      "title": "Timeline",
+      "description": "An ordered list of numbered rows joined by a line: each with an optional time, a title and content, and a state (done, current, upcoming).",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/timeline.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/timeline.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Things that happen in an order: the parts of a day, the stages of an order or a delivery, a history of changes, the steps of a plan. The number and the state are read out with each row. For the steps of a form the person is filling in use steps; for rows people reorder use sortable-list; for unordered items use a plain list.",
+        "example": "<Timeline aria-label=\"Saturday\">\n  <TimelineItem state=\"done\">\n    <TimelineTime dateTime=\"2026-03-14T09:30\">09:30</TimelineTime>\n    <TimelineTitle>Market walk</TimelineTitle>\n    <TimelineContent>Meet at the north gate.</TimelineContent>\n  </TimelineItem>\n  <TimelineItem state=\"current\">\n    <TimelineTime dateTime=\"2026-03-14T12:30\">12:30</TimelineTime>\n    <TimelineTitle>Lunch</TimelineTitle>\n  </TimelineItem>\n  <TimelineItem>\n    <TimelineTitle>Free afternoon</TimelineTitle>\n  </TimelineItem>\n</Timeline>",
+        "client": false
+      }
+    },
+    {
       "name": "toaster",
       "type": "registry:ui",
       "title": "Toaster",
       "description": "The place where toasts appear: sonner's Toaster drawn with the theme's tokens, and its `toast` function.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "lucide-react",
         "sonner"
@@ -1101,6 +2394,9 @@
       "type": "registry:ui",
       "title": "Toggle Group",
       "description": "A joined row of toggles where one (type=\"single\") or several (type=\"multiple\") are on.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "class-variance-authority",
         "radix-ui"
@@ -1129,6 +2425,9 @@
       "type": "registry:ui",
       "title": "Toggle",
       "description": "A button that stays pressed: on or off.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "class-variance-authority",
         "radix-ui"
@@ -1156,6 +2455,9 @@
       "type": "registry:ui",
       "title": "Tooltip",
       "description": "A few words that appear beside a control on hover or keyboard focus.",
+      "categories": [
+        "ui"
+      ],
       "dependencies": [
         "radix-ui"
       ],
@@ -1178,10 +2480,110 @@
       }
     },
     {
+      "name": "undo-line",
+      "type": "registry:ui",
+      "title": "Undo Line",
+      "description": "A line that stays where something was just done, says what it was, and offers to undo it.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/button",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/undo-line.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/undo-line.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "After an action that can be taken back, inside the place it happened: a row removed from a plan, a message archived, a change applied by an assistant. It stays until it is dismissed or the next action replaces it, so it is not missed the way a toast is by someone using a screen reader, a magnifier or a slow hand. For news that needs no answer and is unrelated to one place use toaster; for a decision before the action use dialog.",
+        "example": "{removed ? (\n  <UndoLine>\n    <UndoLineMessage>Lunch was removed from Saturday.</UndoLineMessage>\n    <UndoLineAction onClick={restore}>Undo</UndoLineAction>\n    <UndoLineDismiss aria-label=\"Dismiss\" onClick={() => setRemoved(null)} />\n  </UndoLine>\n) : null}",
+        "client": true
+      }
+    },
+    {
+      "name": "video-player",
+      "type": "registry:ui",
+      "title": "Video Player",
+      "description": "The parts of a video player around a `<video>` element the project renders: a frame that keeps its shape, controls that step back while it plays, play, mute, volume, time, a scrubber, captions, speed, full screen, and words for loading and failure.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react",
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn",
+        "@rivier-ui/dropdown-menu",
+        "@rivier-ui/scrubber",
+        "@rivier-ui/spinner",
+        "@rivier-ui/use-media"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/video-player.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/video-player.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Any video a person controls: a clip on a page, a lesson, a recording. The project gives the element its sources (a file, or HLS attached to the element); the parts only drive it, so compose the ones the clip needs. Nothing plays by itself: for a silent, looping decoration use a plain `<video muted loop>` with its own pause control. For sound alone use audio-player; for a picture viewer use lightbox.",
+        "example": "<VideoPlayer aria-label=\"How the kiln is loaded\" defaultCaptions>\n  <VideoPlayerVideo src=\"/kiln.mp4\" poster=\"/kiln.jpg\">\n    <track kind=\"captions\" src=\"/kiln.en.vtt\" srcLang=\"en\" label=\"English\" />\n  </VideoPlayerVideo>\n  <VideoPlayerLoading />\n  <VideoPlayerError />\n  <Captions />\n  <VideoPlayerControls>\n    <VideoPlayerScrubber />\n    <VideoPlayerControlsRow>\n      <VideoPlayerPlay />\n      <VideoPlayerMute />\n      <VideoPlayerVolume />\n      <VideoPlayerTime />\n      <VideoPlayerCaptionsButton className=\"ms-auto\" />\n      <VideoPlayerRate />\n      <VideoPlayerFullscreen />\n    </VideoPlayerControlsRow>\n  </VideoPlayerControls>\n</VideoPlayer>",
+        "client": true
+      }
+    },
+    {
+      "name": "wizard",
+      "type": "registry:ui",
+      "title": "Wizard",
+      "description": "The shell of a guided task done one step at a time inside a card: a title with \"Step 2 of 5\", a rail of the steps, the current step, and Back, Skip and a main button named after what the step does.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/button",
+        "@rivier-ui/cn",
+        "@rivier-ui/steps",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/wizard.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/wizard.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "A task that is easier one question at a time and has a known order: a booking, a set-up, an application. It keeps where one is (controlled or not), moves focus to each new step's heading, and blocks the main button with a stated reason while a step is not answered. For a short form show all the fields at once (field); for the rail alone use steps; for unordered sections use tabs or accordion. What each step contains is yours: the wizard holds no answers.",
+        "example": "const [people, setPeople] = useState(0);\n<Wizard\n  steps={[\n    { id: \"dates\", label: \"Dates\" },\n    { id: \"people\", label: \"People\", canContinue: people > 0, blockedReason: \"Say how many people are coming.\" },\n    { id: \"extras\", label: \"Extras\", optional: true },\n    { id: \"review\", label: \"Review\" },\n  ]}\n  defaultStep=\"dates\"\n  onComplete={book}\n>\n  <WizardHeader>Book a table</WizardHeader>\n  <WizardRail />\n  <WizardStep id=\"dates\" title=\"Which day?\">…</WizardStep>\n  <WizardStep id=\"people\" title=\"How many people?\">…</WizardStep>\n  <WizardStep id=\"extras\" title=\"Anything to add?\">…</WizardStep>\n  <WizardStep id=\"review\" title=\"Check and confirm\">…</WizardStep>\n  <WizardFooter>\n    <WizardBack>Back</WizardBack>\n    <WizardSkip>Skip</WizardSkip>\n    <WizardNext>{step === \"review\" ? \"Confirm\" : \"Continue\"}</WizardNext>\n  </WizardFooter>\n</Wizard>",
+        "client": true
+      }
+    },
+    {
       "name": "aspect",
       "type": "registry:component",
       "title": "Aspect",
       "description": "Holds its content at a fixed width-to-height ratio, so space is reserved before an image, video or canvas loads.",
+      "categories": [
+        "layout"
+      ],
       "dependencies": [
         "radix-ui"
       ],
@@ -1208,6 +2610,9 @@
       "type": "registry:component",
       "title": "Bento Grid",
       "description": "A grid of flat cards of unequal sizes. One column on a phone, two on a tablet, then 2, 3, 4 or 6: decided by the grid's own width, so it works inside any container.",
+      "categories": [
+        "layout"
+      ],
       "dependencies": [
         "radix-ui"
       ],
@@ -1234,6 +2639,9 @@
       "type": "registry:component",
       "title": "Container",
       "description": "Centres content at the page width with the page gutter on both sides. Four sizes: narrow, page, wide, full.",
+      "categories": [
+        "layout"
+      ],
       "dependencies": [
         "class-variance-authority",
         "radix-ui"
@@ -1261,6 +2669,9 @@
       "type": "registry:component",
       "title": "Grid",
       "description": "A responsive grid of equal columns that fits as many as the width allows, from a minimum column width. No breakpoints.",
+      "categories": [
+        "layout"
+      ],
       "dependencies": [
         "class-variance-authority",
         "radix-ui"
@@ -1284,10 +2695,44 @@
       }
     },
     {
+      "name": "map-frame",
+      "type": "registry:component",
+      "title": "Map Frame",
+      "description": "The frame around a map, not a map: it holds the map's size, shows a still until the person asks for the map, keeps a text list beside it, and takes the map to full screen and back. The map engine is yours.",
+      "categories": [
+        "layout"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/layout/map-frame.tsx",
+          "type": "registry:component",
+          "target": "components/layout/map-frame.tsx"
+        }
+      ],
+      "meta": {
+        "category": "layout",
+        "when": "Any page that shows a map from any engine (MapLibre, Leaflet, a hosted maps script). It gives the map what an engine does not: no request to a third party before the person presses the button (put the line about that in MapFrameNotice), no layout shift, the same information as a list (MapFrameList) so that the map is never the only way to it, a way to skip past the map with the keyboard, and full screen that behaves as a modal. For a still picture of a place with no interaction use an image in aspect.",
+        "example": "<MapFrame aria-label=\"Map of the three stops\">\n  <MapFrameStage className=\"aspect-video\">\n    <MapFramePlaceholder>\n      <MapFrameActivate>Show the map</MapFrameActivate>\n      <MapFrameNotice>The map is loaded from Example Maps, which will see your address.</MapFrameNotice>\n    </MapFramePlaceholder>\n    <MapFrameCanvas><MyMapEngine stops={stops} /></MapFrameCanvas>\n    <MapFrameToolbar>\n      <MapFrameFullscreen />\n    </MapFrameToolbar>\n  </MapFrameStage>\n  <MapFrameList>\n    <ol>{stops.map((stop) => <li key={stop.id}>{stop.name}, {stop.address}</li>)}</ol>\n  </MapFrameList>\n</MapFrame>",
+        "client": true
+      }
+    },
+    {
       "name": "marquee",
       "type": "registry:component",
       "title": "Marquee",
       "description": "A row that scrolls sideways without end. It pauses on hover and on keyboard focus, and under reduced motion it is an ordinary wrapped row.",
+      "categories": [
+        "layout"
+      ],
       "dependencies": [],
       "registryDependencies": [
         "@rivier-ui/theme",
@@ -1312,6 +2757,9 @@
       "type": "registry:component",
       "title": "Section",
       "description": "A band of a page with consistent vertical rhythm, an optional eyebrow, title and description, and three tones: default, muted, inverse.",
+      "categories": [
+        "layout"
+      ],
       "dependencies": [
         "class-variance-authority"
       ],
@@ -1339,6 +2787,9 @@
       "type": "registry:component",
       "title": "Split",
       "description": "Two columns, usually media beside text, that stack into one on a narrow width. A ratio between the columns and a reverse option.",
+      "categories": [
+        "layout"
+      ],
       "dependencies": [],
       "registryDependencies": [
         "@rivier-ui/theme",
@@ -1363,6 +2814,9 @@
       "type": "registry:component",
       "title": "Stack",
       "description": "A flex row or column with a gap from a fixed scale, and props for alignment, distribution and wrapping.",
+      "categories": [
+        "layout"
+      ],
       "dependencies": [
         "class-variance-authority",
         "radix-ui"
@@ -1390,6 +2844,9 @@
       "type": "registry:component",
       "title": "Layout Transition",
       "description": "A shared element that animates from one place to another: render Morph with the same layoutId in two places and it travels between them.",
+      "categories": [
+        "motion"
+      ],
       "dependencies": [
         "motion"
       ],
@@ -1417,6 +2874,9 @@
       "type": "registry:component",
       "title": "Magnetic",
       "description": "A wrapper whose child is gently pulled toward the pointer while it is hovered, and springs back when the pointer leaves.",
+      "categories": [
+        "motion"
+      ],
       "dependencies": [
         "motion"
       ],
@@ -1444,6 +2904,9 @@
       "type": "registry:component",
       "title": "Number Ticker",
       "description": "A number that counts up to its value when it scrolls into view, formatted with Intl.NumberFormat.",
+      "categories": [
+        "motion"
+      ],
       "dependencies": [
         "motion"
       ],
@@ -1471,6 +2934,9 @@
       "type": "registry:component",
       "title": "Page Transition",
       "description": "Wraps page content and plays a short enter (a fade and a small rise) each time the route changes.",
+      "categories": [
+        "motion"
+      ],
       "dependencies": [
         "motion"
       ],
@@ -1498,6 +2964,9 @@
       "type": "registry:component",
       "title": "Parallax",
       "description": "A clipped frame whose layer moves at a different speed from the page as it scrolls past.",
+      "categories": [
+        "motion"
+      ],
       "dependencies": [
         "motion"
       ],
@@ -1525,6 +2994,9 @@
       "type": "registry:component",
       "title": "Presence",
       "description": "Animates its children in when they are shown and out before they are removed.",
+      "categories": [
+        "motion"
+      ],
       "dependencies": [
         "motion"
       ],
@@ -1552,6 +3024,9 @@
       "type": "registry:component",
       "title": "Reveal",
       "description": "Fades and moves its content into place when it scrolls into view.",
+      "categories": [
+        "motion"
+      ],
       "dependencies": [],
       "registryDependencies": [
         "@rivier-ui/theme",
@@ -1577,6 +3052,9 @@
       "type": "registry:component",
       "title": "Scroll Progress",
       "description": "A thin bar fixed to the top of the viewport that fills as the page, or one element, is scrolled through.",
+      "categories": [
+        "motion"
+      ],
       "dependencies": [
         "motion"
       ],
@@ -1604,6 +3082,9 @@
       "type": "registry:component",
       "title": "Scroll Scene",
       "description": "A tall section with a pinned viewport whose children are driven by scroll progress from 0 to 1, for scroll-told sequences.",
+      "categories": [
+        "motion"
+      ],
       "dependencies": [
         "motion"
       ],
@@ -1631,6 +3112,9 @@
       "type": "registry:component",
       "title": "Spotlight",
       "description": "A surface on which a soft light in the highlight colour follows the pointer.",
+      "categories": [
+        "motion"
+      ],
       "dependencies": [
         "motion"
       ],
@@ -1658,6 +3142,9 @@
       "type": "registry:component",
       "title": "Stagger",
       "description": "A container whose items fade and move into place one after another when it scrolls into view.",
+      "categories": [
+        "motion"
+      ],
       "dependencies": [],
       "registryDependencies": [
         "@rivier-ui/theme",
@@ -1683,6 +3170,9 @@
       "type": "registry:component",
       "title": "Text Reveal",
       "description": "Reveals a heading word by word, or line by line, when it scrolls into view.",
+      "categories": [
+        "motion"
+      ],
       "dependencies": [],
       "registryDependencies": [
         "@rivier-ui/theme",
@@ -1708,6 +3198,9 @@
       "type": "registry:component",
       "title": "Tilt",
       "description": "A wrapper that tilts its content in 3D toward the pointer on hover and springs back, with an optional glare.",
+      "categories": [
+        "motion"
+      ],
       "dependencies": [
         "motion"
       ],
@@ -1734,7 +3227,10 @@
       "name": "view-transition",
       "type": "registry:component",
       "title": "View Transition",
-      "description": "Helpers for the browser's View Transitions API: run an update as a transition, name an element so it morphs between states or pages, and a link that navigates inside a transition.",
+      "description": "View transitions two ways: wrappers over React's own <ViewTransition> (a shared element that morphs between two places, a boundary that cross-fades what changes inside it), and helpers for the browser's API (run an update as a transition, name an element, a link that navigates inside a transition).",
+      "categories": [
+        "motion"
+      ],
       "dependencies": [
         "radix-ui"
       ],
@@ -1751,8 +3247,8 @@
       ],
       "meta": {
         "category": "motion",
-        "when": "Moving between pages or between two states of a view, where the browser can cross-fade the page and morph elements that share a name. It needs no library and degrades to an instant change. For a shared element inside one React tree (a tabs indicator) use layout-transition; for a simple enter on route change use page-transition.",
-        "example": "// A link that navigates inside a view transition. In Next.js pass router.push:\nconst router = useRouter();\n<TransitionLink href=\"/work/atlas\" navigate={router.push}>Atlas</TransitionLink>\n\n// The same name on the list page and on the detail page: the image morphs from one to the other.\n<ViewTransitionName name=\"work-atlas-cover\" asChild>\n  <img src=\"/atlas.jpg\" alt=\"Atlas\" />\n</ViewTransitionName>\n<img src=\"/atlas.jpg\" alt=\"Atlas\" style={viewTransitionName(\"work-atlas-cover\")} />\n\n// A state change in place. flushSync (from react-dom) makes React apply it before the browser's snapshot.\n<Button onClick={() => startViewTransition(() => flushSync(() => setLayout(\"grid\")))}>Grid</Button>",
+        "when": "Moving between pages or between two states of a view, where an element in the old view should become one in the new. Use the React wrappers (SharedElement, TransitionBoundary) when the change is a React transition: a state update inside startTransition, a Suspense boundary revealing, a navigation by a router that uses transitions (Next.js). React then starts the browser's transition itself. Use the browser helpers (startViewTransition, ViewTransitionName, TransitionLink) when nothing in the tree uses React's component: a synchronous update, a router that does not use transitions, an element that stays mounted while the view around it changes. Do not mix the two for one update: React's documentation says not to call document.startViewTransition yourself around an update it is already animating. Both degrade to an instant change where the API is missing, and the theme switches them off under reduced motion. For a shared element that must be interrupted mid-way use layout-transition; for a simple enter on route change use page-transition.",
+        "example": "// React's way: the same name in two places; the update runs in a transition.\nconst [open, setOpen] = useState(false);\n{open ? (\n  <SharedElement name=\"atlas-cover\"><img src=\"/atlas.jpg\" alt=\"Atlas\" className=\"w-full\" /></SharedElement>\n) : (\n  <button onClick={() => startTransition(() => setOpen(true))}>\n    <SharedElement name=\"atlas-cover\"><img src=\"/atlas.jpg\" alt=\"Atlas\" className=\"size-24\" /></SharedElement>\n  </button>\n)}\n\n// The browser's way. A link that navigates inside a view transition; in Next.js pass router.push:\n<TransitionLink href=\"/work/atlas\" navigate={router.push}>Atlas</TransitionLink>\n// The same name on the list page and on the detail page: the image morphs from one to the other.\n<ViewTransitionName name=\"work-atlas-cover\" asChild>\n  <img src=\"/atlas.jpg\" alt=\"Atlas\" />\n</ViewTransitionName>\n// A state change in place. flushSync (from react-dom) makes React apply it before the browser's snapshot.\n<Button onClick={() => startViewTransition(() => flushSync(() => setLayout(\"grid\")))}>Grid</Button>",
         "client": true
       }
     },
@@ -1761,6 +3257,9 @@
       "type": "registry:component",
       "title": "Floating Shapes",
       "description": "A few simple solids (icosahedron, torus, box, octahedron) floating and turning slowly, flat-shaded or wireframe, coloured from theme variables.",
+      "categories": [
+        "three"
+      ],
       "dependencies": [
         "@react-three/fiber",
         "three"
@@ -1788,6 +3287,9 @@
       "type": "registry:component",
       "title": "Globe",
       "description": "A dotted globe that turns slowly and can be dragged to spin, with optional highlighted markers by latitude and longitude.",
+      "categories": [
+        "three"
+      ],
       "dependencies": [
         "@react-three/fiber",
         "three"
@@ -1815,6 +3317,9 @@
       "type": "registry:component",
       "title": "Model Stage",
       "description": "A turntable for any mesh or group: centres and fits it, turns it slowly, and lets the pointer orbit it within limits.",
+      "categories": [
+        "three"
+      ],
       "dependencies": [
         "@react-three/fiber",
         "three"
@@ -1841,6 +3346,9 @@
       "type": "registry:component",
       "title": "Orb",
       "description": "A softly morphing sphere in the highlight colour, lit at its rim so it reads on light and dark grounds, leaning gently toward the pointer.",
+      "categories": [
+        "three"
+      ],
       "dependencies": [
         "@react-three/fiber",
         "three"
@@ -1868,6 +3376,9 @@
       "type": "registry:component",
       "title": "Particle Field",
       "description": "A field of small round points drifting slowly, with depth that shifts as the pointer moves.",
+      "categories": [
+        "three"
+      ],
       "dependencies": [
         "@react-three/fiber",
         "three"
@@ -1895,6 +3406,9 @@
       "type": "registry:component",
       "title": "Scene",
       "description": "The wrapper every 3D component is used inside: a transparent WebGL canvas that mounts late, pauses off screen and falls back to a static block.",
+      "categories": [
+        "three"
+      ],
       "dependencies": [
         "@react-three/fiber"
       ],
@@ -1921,6 +3435,9 @@
       "type": "registry:component",
       "title": "Area Chart",
       "description": "A line chart with the space under each line filled flat at low opacity, optionally stacked so the series add up to a total.",
+      "categories": [
+        "viz"
+      ],
       "dependencies": [],
       "registryDependencies": [
         "@rivier-ui/theme",
@@ -1945,6 +3462,9 @@
       "type": "registry:component",
       "title": "Bar Chart",
       "description": "A bar chart, vertical or horizontal, grouped or stacked, always measured from zero, with a tooltip on hover and arrow-key reading.",
+      "categories": [
+        "viz"
+      ],
       "dependencies": [
         "d3-scale"
       ],
@@ -1972,6 +3492,9 @@
       "type": "registry:component",
       "title": "Chart",
       "description": "The shared parts every chart is built from: a container that measures itself and carries the text alternative, an SVG root, a tooltip, a legend, series styles, and axis and format helpers.",
+      "categories": [
+        "viz"
+      ],
       "dependencies": [
         "d3-shape"
       ],
@@ -1999,6 +3522,9 @@
       "type": "registry:component",
       "title": "Donut Chart",
       "description": "A ring showing how one whole splits into at most five parts, with a label in the centre and each part's value and share in the legend.",
+      "categories": [
+        "viz"
+      ],
       "dependencies": [
         "d3-shape"
       ],
@@ -2026,6 +3552,9 @@
       "type": "registry:component",
       "title": "Heatmap",
       "description": "A matrix of cells (day by hour, for example) coloured on one-hue scale from faint to the highlight colour, with a tooltip, arrow-key reading and a scale legend.",
+      "categories": [
+        "viz"
+      ],
       "dependencies": [
         "d3-scale"
       ],
@@ -2053,6 +3582,9 @@
       "type": "registry:component",
       "title": "Line Chart",
       "description": "A line chart of one or more series over a numeric or time x, with a crosshair tooltip, arrow-key reading and labels at the line ends.",
+      "categories": [
+        "viz"
+      ],
       "dependencies": [
         "d3-scale",
         "d3-shape"
@@ -2081,6 +3613,9 @@
       "type": "registry:component",
       "title": "Radial Progress",
       "description": "A ring gauge for one value against a limit, with the value and a label in the centre.",
+      "categories": [
+        "viz"
+      ],
       "dependencies": [],
       "registryDependencies": [
         "@rivier-ui/theme",
@@ -2106,6 +3641,9 @@
       "type": "registry:component",
       "title": "Sparkline",
       "description": "A tiny line, area or bar chart with no axes, for a stat tile or a table cell, described in words for assistive technology.",
+      "categories": [
+        "viz"
+      ],
       "dependencies": [
         "d3-scale",
         "d3-shape"

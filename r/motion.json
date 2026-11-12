@@ -4,6 +4,9 @@
   "type": "registry:lib",
   "title": "Motion",
   "description": "The motion tokens as numbers for the motion package (easing, durations, a pointer spring), the useMotionSafe gate, and the entrance engine the reveal components share.",
+  "categories": [
+    "lib"
+  ],
   "dependencies": [
     "motion"
   ],

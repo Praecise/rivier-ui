@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Command",
   "description": "A command palette: a search field over a filtered, keyboard-driven list of actions, inline or in a dialog.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "cmdk",
     "lucide-react"

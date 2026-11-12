@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "announce",
+  "type": "registry:lib",
+  "title": "Announce",
+  "description": "Says a message to screen-reader users through one shared live region, politely or at once, without moving focus.",
+  "categories": [
+    "lib"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@rivier-ui/theme"
+  ],
+  "files": [
+    {
+      "path": "registry/lib/announce.ts",
+      "type": "registry:lib",
+      "target": "lib/announce.ts",
+      "content": "/**\n * @name announce\n * @category lib\n * @description Says a message to screen-reader users through one shared live region, politely or at once, without moving focus.\n * @when Something changed that a sighted person can see but no focus change will read out: an item was moved, a filter applied, a total changed, a reply finished. Not for content the person is about to read anyway, and not for errors on a field (use the field's own message). A component that is already a live region (status-line, toaster) does not need it.\n * @example\n * announce(\"Lunch moved to position 2 of 5\");\n * announce(\"The connection was lost\", \"assertive\");\n */\n\nexport type Politeness = \"polite\" | \"assertive\";\n\nconst REGION_ID = \"rui-announcer\";\n/** How long a message stays in the region, in milliseconds: long enough to be read, short enough not to be found again by browsing. */\nconst LIFETIME = 7000;\n\nfunction region(politeness: Politeness): HTMLElement | null {\n  if (typeof document === \"undefined\") return null;\n  let root = document.getElementById(REGION_ID);\n  if (!root) {\n    root = document.createElement(\"div\");\n    root.id = REGION_ID;\n    root.dataset[\"slot\"] = \"announcer\";\n    // Visually hidden, still read. Inline because the region lives outside any component's markup.\n    Object.assign(root.style, {\n      position: \"absolute\",\n      width: \"1px\",\n      height: \"1px\",\n      margin: \"-1px\",\n      padding: \"0\",\n      border: \"0\",\n      overflow: \"hidden\",\n      clipPath: \"inset(50%)\",\n      whiteSpace: \"nowrap\",\n    });\n    for (const level of [\"polite\", \"assertive\"] as const) {\n      const log = document.createElement(\"div\");\n      // role=\"log\" appends: a second message does not cut off the first.\n      log.setAttribute(\"role\", \"log\");\n      log.setAttribute(\"aria-live\", level);\n      log.setAttribute(\"aria-relevant\", \"additions\");\n      log.dataset[\"politeness\"] = level;\n      root.append(log);\n    }\n    document.body.append(root);\n  }\n  return root.querySelector<HTMLElement>(`[data-politeness=\"${politeness}\"]`);\n}\n\n/**\n * Adds `message` to the page's live region. \"polite\" (default) waits for the screen reader to finish what\n * it is saying; \"assertive\" interrupts, so keep it for what cannot wait. Safe to call on the server (it does\n * nothing there). Call it from an event handler or an effect, never during render.\n */\nexport function announce(message: string, politeness: Politeness = \"polite\"): void {\n  const log = region(politeness);\n  if (!log || message.trim() === \"\") return;\n  const node = document.createElement(\"div\");\n  node.textContent = message;\n  log.append(node);\n  window.setTimeout(() => node.remove(), LIFETIME);\n}\n\n/** Prepares the live region ahead of the first message: some screen readers ignore a region's first change if the region itself is new. */\nexport function prepareAnnouncer(): void {\n  region(\"polite\");\n}\n\n/** Removes every message that has not been read yet. */\nexport function clearAnnouncements(): void {\n  if (typeof document === \"undefined\") return;\n  for (const log of document.querySelectorAll(`#${REGION_ID} [role=\"log\"]`)) log.replaceChildren();\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "lib",
+    "when": "Something changed that a sighted person can see but no focus change will read out: an item was moved, a filter applied, a total changed, a reply finished. Not for content the person is about to read anyway, and not for errors on a field (use the field's own message). A component that is already a live region (status-line, toaster) does not need it.",
+    "example": "announce(\"Lunch moved to position 2 of 5\");\nannounce(\"The connection was lost\", \"assertive\");",
+    "client": false
+  }
+}

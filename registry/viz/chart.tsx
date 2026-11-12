@@ -210,10 +210,10 @@ export type ChartContainerProps = Omit<ComponentProps<"div">, "children"> & {
 };
 
 export function ChartContainer({ aspect = 16 / 9, height, table, announcement, className, style, children, ...props }: ChartContainerProps) {
-  const size = useSize<HTMLDivElement>();
+  const { ref, width, height: measuredHeight } = useSize<HTMLDivElement>();
   return (
     <div
-      ref={size.ref}
+      ref={ref}
       data-slot="chart"
       className={cn("relative w-full min-w-0", className)}
       style={{ ...(height === undefined ? { aspectRatio: String(aspect) } : { height }), ...style }}
@@ -224,9 +224,9 @@ export function ChartContainer({ aspect = 16 / 9, height, table, announcement, c
         taller than the box (rounding) would stretch the box, which would be measured again and drawn taller:
         a loop that grows the page without end.
       */}
-      {size.width > 0 && size.height > 0 ? (
+      {width > 0 && measuredHeight > 0 ? (
         <div data-slot="chart-layer" className="absolute inset-0">
-          {children({ width: size.width, height: size.height })}
+          {children({ width, height: measuredHeight })}
         </div>
       ) : null}
       {table ? <ChartDataTable {...table} /> : null}

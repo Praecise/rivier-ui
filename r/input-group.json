@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Input Group",
   "description": "An input with a leading or trailing icon, text or button inside one shared border.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "class-variance-authority"
   ],

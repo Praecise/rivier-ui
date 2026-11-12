@@ -10,7 +10,7 @@
 
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
-import puppeteer, { type Browser, type Page } from "puppeteer-core";
+import puppeteer, { type Browser, type ElementHandle, type Page } from "puppeteer-core";
 import { libraryDir } from "./registry.ts";
 
 const url = process.argv[2] ?? "http://localhost:3320";
@@ -50,9 +50,9 @@ async function clickText(page: Page, selector: string, text: string): Promise<bo
   );
   const element = handle.asElement();
   if (!element) return false;
-  await (element as import("puppeteer-core").ElementHandle<HTMLElement>).scrollIntoView();
+  await (element as ElementHandle<HTMLElement>).scrollIntoView();
   await sleep(250);
-  await (element as import("puppeteer-core").ElementHandle<HTMLElement>).click();
+  await (element as ElementHandle<HTMLElement>).click();
   return true;
 }
 

@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Page Transition",
   "description": "Wraps page content and plays a short enter (a fade and a small rise) each time the route changes.",
+  "categories": [
+    "motion"
+  ],
   "dependencies": [
     "motion"
   ],

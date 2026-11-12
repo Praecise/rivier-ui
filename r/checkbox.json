@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Checkbox",
   "description": "A checkbox with checked, unchecked and indeterminate states.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "lucide-react",
     "radix-ui"

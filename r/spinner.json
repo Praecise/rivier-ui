@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Spinner",
   "description": "A turning ring that says something is in progress, announced to assistive technology by its label.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "class-variance-authority"
   ],

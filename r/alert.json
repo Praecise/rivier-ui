@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Alert",
   "description": "A message in the page with an icon, a title, a description and an optional action. Four variants: info, success, warning, destructive.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "class-variance-authority",
     "lucide-react"

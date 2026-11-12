@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Reveal",
   "description": "Fades and moves its content into place when it scrolls into view.",
+  "categories": [
+    "motion"
+  ],
   "dependencies": [],
   "registryDependencies": [
     "@rivier-ui/theme",

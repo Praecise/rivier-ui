@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Label",
   "description": "The text name of a control. Clicking it focuses or toggles the control it points to.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "radix-ui"
   ],

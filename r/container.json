@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Container",
   "description": "Centres content at the page width with the page gutter on both sides. Four sizes: narrow, page, wide, full.",
+  "categories": [
+    "layout"
+  ],
   "dependencies": [
     "class-variance-authority",
     "radix-ui"

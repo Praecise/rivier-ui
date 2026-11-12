@@ -13,6 +13,7 @@
  *   <Orb color="--chart-2" speed={0.6} distortion={0.5} detail={32} />
  * </Scene>
  */
+/* eslint-disable react-hooks/immutability -- three.js objects (uniforms, the canvas, scene nodes) are changed in place by design, in effects and frames, never during render */
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import { Color, Vector2, type Mesh } from "three";

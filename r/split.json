@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Split",
   "description": "Two columns, usually media beside text, that stack into one on a narrow width. A ratio between the columns and a reverse option.",
+  "categories": [
+    "layout"
+  ],
   "dependencies": [],
   "registryDependencies": [
     "@rivier-ui/theme",

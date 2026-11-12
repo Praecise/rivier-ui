@@ -14,6 +14,7 @@
  *   </ModelStage>
  * </Scene>
  */
+/* eslint-disable react-hooks/immutability -- three.js objects (uniforms, the canvas, scene nodes) are changed in place by design, in effects and frames, never during render */
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useMemo, useRef, type ReactNode } from "react";
 import { Box3, Vector3, type Group } from "three";

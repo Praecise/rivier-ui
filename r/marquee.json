@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Marquee",
   "description": "A row that scrolls sideways without end. It pauses on hover and on keyboard focus, and under reduced motion it is an ordinary wrapped row.",
+  "categories": [
+    "layout"
+  ],
   "dependencies": [],
   "registryDependencies": [
     "@rivier-ui/theme",

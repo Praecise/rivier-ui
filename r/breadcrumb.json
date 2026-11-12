@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Breadcrumb",
   "description": "The path from the top of the site to the current page, as links with separators.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "lucide-react",
     "radix-ui"

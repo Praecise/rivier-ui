@@ -21,7 +21,9 @@ The repository is private until launch.
 - **Past the flat page.** Bento grids and layout, motion and page transitions, 3D scenes, and charts are part of
   the same library and the same theme, not separate products with separate looks.
 - **Built on what already works.** Radix for behaviour and accessibility, Tailwind CSS for styling, Motion for
-  animation, three.js for 3D, d3 for chart maths. Theme variable names follow the shadcn convention, so
+  animation, three.js for 3D, d3 for chart maths, cmdk and Sonner for the palette and toasts. Where Radix has
+  no primitive (calendar, sortable list, bottom sheet, media players) the component is written here to the
+  WAI-ARIA pattern rather than adding a package: every dependency is MIT or Apache 2.0 and nothing is hosted. Theme variable names follow the shadcn convention, so
   components written for it take this theme as they are.
 
 ## Use it in a project
@@ -68,27 +70,45 @@ edited to restyle them. All tokens: `registry/theme/rivier-ui.css`.
 
 ## What is in it
 
-`npm run ui -- list` is the current answer. By category: `ui` (controls and surfaces), `layout` (containers,
-sections, bento grid, marquee), `motion` (reveals, scroll scenes, pointer effects, page and view transitions),
-`three` (scenes that fall back to a still when WebGL or motion is not available), `viz` (charts and
-sparklines), `lib` (helpers).
+`npm run ui -- list` is the current answer. By category: `ui` (controls and surfaces, dates and times,
+steps and wizards, sortable lists, sheets and docks, conversation parts, pictures and players, uploads,
+records and consent), `layout` (containers, sections, bento grid, marquee, a frame for a map), `motion`
+(reveals, scroll scenes, pointer effects, page and view transitions), `three` (scenes that fall back to a
+still when WebGL or motion is not available), `viz` (charts and sparklines), `lib` (helpers: class names,
+motion tokens, reading direction, screen-reader announcements, controllable state).
+
+Every component is keyboard operable to the WAI-ARIA pattern for its kind, works right-to-left and at phone
+width, stops moving when the visitor asks for less motion, and carries no fixed words: labels are passed in
+or are props with English defaults, so a product in any language can use it.
 
 ## For assistants
 
 - Start with `llms.txt`: every item with its purpose and an example, in one file.
 - `CONVENTIONS.md` is how a component is written and what a project's own components should follow.
 - Other tools: `registry.json` and `r/<name>.json` follow the shadcn registry format under the namespace
-  `@rivier-ui`. Reading it with the shadcn command or its MCP server has not been tested yet.
+  `@rivier-ui`. Tested with the shadcn command 4.23.0 on 2026-11-12: with the `r/` folder served over HTTP
+  and `"registries": { "@rivier-ui": "<address>/r/{name}.json" }` in the project's `components.json`,
+  `shadcn add @rivier-ui/button` puts the component, what it depends on and the theme in the same places as
+  `rivier-ui add` and installs the packages. Two differences: it does not import the theme into the global
+  stylesheet (add `@import "tw-animate-css";` and `@import "../styles/rivier-ui.css";` after Tailwind by
+  hand), and it drops the header comment from the copied file, which is the part an assistant reads. So
+  `rivier-ui add` stays the recommended way. Its MCP server has not been tested.
 
 ## Working on the library
 
 ```sh
 npm install            # once
+npm run lint:install   # once: the lint tools have their own packages (lint/)
 npm run typecheck      # TypeScript, strict
+npm run lint           # ESLint with the React rules a project's lint runs on a copied component
 npm run registry       # checks every header and writes registry.json, r/, llms.txt
 npm run site:install   # copies the whole registry into the showcase site with the library's own command
 npm run site:dev       # the showcase, http://localhost:3320: every item, with the theme switches
+npm run smoke          # with the showcase running: the overview page in a real browser
+npm run check          # with the showcase running: every component page: keyboard, focus, roles, right-to-left, 390 px, axe-core
 ```
 
 A component is one file in `registry/<category>/`. Its dependencies are read from its imports; nothing is
-listed by hand. Rules: `CONVENTIONS.md`. Changes: `CHANGELOG.md` (prelaunch: dated, no version numbers).
+listed by hand. It is shown on a showcase page (`site/src/app/<group>/`) and tested by that page's checks
+(`scripts/checks/<group>.ts`). Rules: `CONVENTIONS.md`. Changes: `CHANGELOG.md` (prelaunch: dated, no
+version numbers).

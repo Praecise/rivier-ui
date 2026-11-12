@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Radio Group",
   "description": "A set of radio buttons where exactly one is chosen, with arrow-key movement between them.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "radix-ui"
   ],

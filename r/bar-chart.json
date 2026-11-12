@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Bar Chart",
   "description": "A bar chart, vertical or horizontal, grouped or stacked, always measured from zero, with a tooltip on hover and arrow-key reading.",
+  "categories": [
+    "viz"
+  ],
   "dependencies": [
     "d3-scale"
   ],

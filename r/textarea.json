@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Textarea",
   "description": "A multi-line text input that grows with its content, with an invalid state.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [],
   "registryDependencies": [
     "@rivier-ui/theme",

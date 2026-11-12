@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Table",
   "description": "A semantic table with styled parts, inside a wrapper that scrolls sideways so it never overflows a narrow screen.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [],
   "registryDependencies": [
     "@rivier-ui/theme",

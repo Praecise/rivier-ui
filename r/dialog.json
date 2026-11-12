@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Dialog",
   "description": "A modal window over a dimmed page, with parts for a header, title, description and footer.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "lucide-react",
     "radix-ui"

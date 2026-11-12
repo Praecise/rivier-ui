@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Sheet",
   "description": "A modal panel that slides in from an edge of the screen, with parts for a header, title, description and footer.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "class-variance-authority",
     "lucide-react",

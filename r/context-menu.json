@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Context Menu",
   "description": "A menu of actions that opens at the pointer on right-click, and on a long press on touch screens: items, checkbox and radio items, labels, separators, sub-menus and a shortcut slot.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "lucide-react",
     "radix-ui"

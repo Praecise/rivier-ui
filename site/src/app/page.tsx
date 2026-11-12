@@ -8,6 +8,7 @@ import { Hero } from "./_showcase/hero";
 import { Layouts } from "./_showcase/layouts";
 import { Motions } from "./_showcase/motions";
 import { Overlays } from "./_showcase/overlays";
+import { PAGES } from "./_showcase/pages";
 import { SiteHeader } from "./_showcase/site-header";
 import { ThemePanel } from "./_showcase/theme-panel";
 
@@ -45,6 +46,19 @@ export default function Page() {
         </Group>
         <Group id="charts" title="Charts" description="SVG charts in the theme's series colours, each with a text alternative. All figures are examples.">
           <Charts />
+        </Group>
+
+        <Group id="more" title="More, by task" description="Each of these pages shows a group of components and is driven by the browser checks: keyboard, screen reader names, right-to-left and phone width.">
+          <ul className="grid gap-4 @2xl:grid-cols-2 @5xl:grid-cols-3">
+            {PAGES.map((page) => (
+              <li key={page.href} className="flex">
+                <a href={page.href} className="flex w-full flex-col gap-1 rounded-surface border bg-card p-5 transition-colors duration-instant ease-out hover:bg-accent motion-reduce:transition-none">
+                  <span className="font-medium">{page.title}</span>
+                  <span className="text-sm text-muted-foreground">{page.description}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
         </Group>
 
         <section className="mx-auto w-full max-w-page px-(--gutter) py-16">

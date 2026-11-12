@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Slider",
   "description": "A slider for one value, or a range with two thumbs.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "radix-ui"
   ],

@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Scroll Scene",
   "description": "A tall section with a pinned viewport whose children are driven by scroll progress from 0 to 1, for scroll-told sequences.",
+  "categories": [
+    "motion"
+  ],
   "dependencies": [
     "motion"
   ],

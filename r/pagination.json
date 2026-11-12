@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Pagination",
   "description": "Links to the previous, next and numbered pages of a long list, with the look of buttons.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "class-variance-authority",
     "lucide-react",

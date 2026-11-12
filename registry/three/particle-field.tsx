@@ -13,6 +13,7 @@
  *   <ParticleField count={400} color="--foreground" size={0.03} spread={10} />
  * </Scene>
  */
+/* eslint-disable react-hooks/immutability -- three.js objects (uniforms, the canvas, scene nodes) are changed in place by design, in effects and frames, never during render */
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import { Color, type Points } from "three";

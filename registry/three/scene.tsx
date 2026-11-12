@@ -87,7 +87,7 @@ export function Scene({
 }: SceneProps) {
   const [root, setRoot] = useState<HTMLDivElement | null>(null);
   /** null until mounted: the server and the first client render show the fallback. */
-  const [client, setClient] = useState<{ webgl: boolean; reduced: boolean } | null>(null);
+  const [client, setClient] = useState<{ webgl: boolean; reduced: boolean; observer: boolean } | null>(null);
   const [near, setNear] = useState(false);
   const [seen, setSeen] = useState(false);
   const [tabVisible, setTabVisible] = useState(true);
@@ -96,7 +96,7 @@ export function Scene({
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = (): void => setClient({ webgl: hasWebGL(), reduced: query.matches });
+    const update = (): void => setClient({ webgl: hasWebGL(), reduced: query.matches, observer: typeof IntersectionObserver !== "undefined" });
     const visibility = (): void => setTabVisible(document.visibilityState !== "hidden");
     update();
     visibility();
@@ -109,12 +109,7 @@ export function Scene({
   }, []);
 
   useEffect(() => {
-    if (!root) return;
-    if (typeof IntersectionObserver === "undefined") {
-      setNear(true);
-      setSeen(true);
-      return;
-    }
+    if (!root || typeof IntersectionObserver === "undefined") return;
     const observer = new IntersectionObserver(
       (entries) => {
         const inside = entries.some((entry) => entry.isIntersecting);
@@ -142,8 +137,10 @@ export function Scene({
   );
 
   const still = client?.reduced === true;
-  const active = client !== null && client.webgl && !failed && seen && (!still || allowReducedMotion);
-  const loop = !near || !tabVisible ? "never" : still ? "demand" : frameloop;
+  // Without IntersectionObserver the scene cannot know where it is, so it counts as in view.
+  const unobserved = client !== null && !client.observer;
+  const active = client !== null && client.webgl && !failed && (seen || unobserved) && (!still || allowReducedMotion);
+  const loop = !(near || unobserved) || !tabVisible ? "never" : still ? "demand" : frameloop;
   const shown = active && ready;
 
   return (

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "segmented-control",
+  "type": "registry:ui",
+  "title": "Segmented Control",
+  "description": "A row of two to five segments where exactly one is chosen, with a marker that slides to the choice.",
+  "categories": [
+    "ui"
+  ],
+  "dependencies": [
+    "radix-ui"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn",
+    "@rivier-ui/layout-transition",
+    "@rivier-ui/motion"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/segmented-control.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/segmented-control.tsx",
+      "content": "\"use client\";\n/**\n * @name segmented-control\n * @category ui\n * @description A row of two to five segments where exactly one is chosen, with a marker that slides to the choice.\n * @when Switching one setting between a few short, equal options that take effect at once: a view (list or map), a unit, a period (day, week, month). It is a radio group, so one option is always chosen. For switching panels of content use tabs; for options that can each be on or off use toggle-group or chip; for more than five options use select.\n * @example\n * <SegmentedControl defaultValue=\"list\" aria-label=\"View\">\n *   <SegmentedControlItem value=\"list\">List</SegmentedControlItem>\n *   <SegmentedControlItem value=\"map\">Map</SegmentedControlItem>\n * </SegmentedControl>\n *\n * // Controlled, full width, with icons\n * <SegmentedControl value={period} onValueChange={setPeriod} aria-label=\"Period\" className=\"w-full\">\n *   <SegmentedControlItem value=\"day\"><Sun /> Day</SegmentedControlItem>\n *   <SegmentedControlItem value=\"week\"><Calendar /> Week</SegmentedControlItem>\n * </SegmentedControl>\n */\nimport { RadioGroup as RadioGroupPrimitive } from \"radix-ui\";\nimport { createContext, use, useId, type ComponentProps } from \"react\";\nimport { Morph, MorphGroup } from \"@/components/motion/layout-transition\";\nimport { cn } from \"@/lib/cn\";\nimport { DURATION, EASE } from \"@/lib/motion\";\n\ntype SegmentedSize = \"sm\" | \"md\";\n\nconst SegmentedContext = createContext<{ size: SegmentedSize }>({ size: \"md\" });\n\nexport type SegmentedControlProps = Omit<ComponentProps<typeof RadioGroupPrimitive.Root>, \"orientation\"> & {\n  /** \"md\" (default) is the height of a control; \"sm\" is for toolbars and dense rows. */\n  size?: SegmentedSize;\n};\n\n/**\n * A radio group laid out as one control: Left and Right arrows (the other way round in right-to-left pages)\n * move the choice, Tab enters and leaves it. Segments share the width equally, so the control can be set to\n * `w-full`. Name it with `aria-label` or `aria-labelledby`. `value`, `defaultValue` and `onValueChange`\n * control it; give a `defaultValue`, because a segmented control with nothing chosen reads as broken.\n */\nexport function SegmentedControl({ className, size = \"md\", children, ...props }: SegmentedControlProps) {\n  const id = useId();\n  return (\n    <RadioGroupPrimitive.Root\n      data-slot=\"segmented-control\"\n      orientation=\"horizontal\"\n      className={cn(\n        \"inline-grid w-fit max-w-full auto-cols-fr grid-flow-col gap-1 rounded-control border border-input bg-muted p-1 data-[disabled]:opacity-50\",\n        className,\n      )}\n      {...props}\n    >\n      <SegmentedContext value={{ size }}>\n        <MorphGroup id={id}>{children}</MorphGroup>\n      </SegmentedContext>\n    </RadioGroupPrimitive.Root>\n  );\n}\n\nexport type SegmentedControlItemProps = ComponentProps<typeof RadioGroupPrimitive.Item>;\n\n/**\n * One segment. The marker behind the chosen one is a shared element that slides from the previous choice\n * (transform only; it simply appears in place under reduced motion). The chosen segment is told apart by\n * its ground and edge as well as its weight, not by colour alone.\n */\nexport function SegmentedControlItem({ className, children, ...props }: SegmentedControlItemProps) {\n  const { size } = use(SegmentedContext);\n  return (\n    <RadioGroupPrimitive.Item\n      data-slot=\"segmented-control-item\"\n      className={cn(\n        \"group/segment relative inline-flex min-w-0 items-center justify-center rounded-[calc(var(--radius-control)-0.125rem)] px-3 text-sm text-muted-foreground transition-colors duration-instant ease-out select-none hover:text-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=checked]:font-medium data-[state=checked]:text-foreground motion-reduce:transition-none\",\n        size === \"sm\" ? \"h-[calc(var(--control-h-sm)-0.625rem)] pointer-coarse:h-[calc(var(--control-h)-0.625rem)]\" : \"h-[calc(var(--control-h)-0.625rem)]\",\n        className,\n      )}\n      {...props}\n    >\n      {/* Rendered only in the chosen segment: the same layoutId appearing in another segment is what slides. */}\n      <RadioGroupPrimitive.Indicator asChild>\n        <Morph\n          layoutId=\"marker\"\n          aria-hidden=\"true\"\n          data-slot=\"segmented-control-marker\"\n          transition={{ duration: DURATION.base, ease: EASE }}\n          className=\"absolute inset-0 rounded-[inherit] border border-border-strong bg-background\"\n        />\n      </RadioGroupPrimitive.Indicator>\n      <span className=\"relative inline-flex min-w-0 items-center gap-2 truncate [&_svg]:size-4 [&_svg]:shrink-0\">{children}</span>\n    </RadioGroupPrimitive.Item>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "Switching one setting between a few short, equal options that take effect at once: a view (list or map), a unit, a period (day, week, month). It is a radio group, so one option is always chosen. For switching panels of content use tabs; for options that can each be on or off use toggle-group or chip; for more than five options use select.",
+    "example": "<SegmentedControl defaultValue=\"list\" aria-label=\"View\">\n  <SegmentedControlItem value=\"list\">List</SegmentedControlItem>\n  <SegmentedControlItem value=\"map\">Map</SegmentedControlItem>\n</SegmentedControl>\n\n// Controlled, full width, with icons\n<SegmentedControl value={period} onValueChange={setPeriod} aria-label=\"Period\" className=\"w-full\">\n  <SegmentedControlItem value=\"day\"><Sun /> Day</SegmentedControlItem>\n  <SegmentedControlItem value=\"week\"><Calendar /> Week</SegmentedControlItem>\n</SegmentedControl>",
+    "client": true
+  }
+}

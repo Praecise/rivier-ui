@@ -18,7 +18,7 @@
  * setTheme({ mode: "dark" });
  * setTheme({ accent: { hue: 262, chroma: 0.19 } });
  */
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
 
 export const THEME_MODES = ["light", "dark", "system"] as const;
 export const THEME_RADII = ["none", "sm", "md", "lg", "full"] as const;
@@ -63,13 +63,65 @@ function apply(element: HTMLElement, theme: Theme, systemDark: boolean): void {
   }
 }
 
-function stored(): Partial<Theme> {
+/** The stored choice, as text. Read through useSyncExternalStore, so it is compared by value and never set in an effect. */
+function readStored(): string | null {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}") as Partial<Theme>;
+    return localStorage.getItem(STORAGE_KEY);
+  } catch {
+    // Storage can be unavailable (private mode, a sandboxed frame).
+    return null;
+  }
+}
+
+function parseStored(raw: string | null): Partial<Theme> {
+  if (!raw) return {};
+  try {
+    const value: unknown = JSON.parse(raw);
+    return value !== null && typeof value === "object" ? (value as Partial<Theme>) : {};
   } catch {
     return {};
   }
 }
+
+/** Providers on this page that follow the stored choice. Another tab's change arrives as a "storage" event. */
+const storedListeners = new Set<() => void>();
+
+function subscribeStored(onChange: () => void): () => void {
+  const onStorage = (event: StorageEvent): void => {
+    if (event.key === null || event.key === STORAGE_KEY) onChange();
+  };
+  storedListeners.add(onChange);
+  window.addEventListener("storage", onStorage);
+  return () => {
+    storedListeners.delete(onChange);
+    window.removeEventListener("storage", onStorage);
+  };
+}
+
+/** Writes (or, with null, forgets) the choice and tells every provider. False when storage is unavailable. */
+function writeStored(theme: Theme | null): boolean {
+  try {
+    if (theme) localStorage.setItem(STORAGE_KEY, JSON.stringify(theme));
+    else localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    return false;
+  }
+  for (const listener of storedListeners) listener();
+  return true;
+}
+
+const DARK_QUERY = "(prefers-color-scheme: dark)";
+
+function subscribeSystemDark(onChange: () => void): () => void {
+  const media = window.matchMedia(DARK_QUERY);
+  media.addEventListener("change", onChange);
+  return () => media.removeEventListener("change", onChange);
+}
+
+const systemDarkOnClient = (): boolean => window.matchMedia(DARK_QUERY).matches;
+const systemDarkOnServer = (): boolean => false;
+const noSubscription = (): (() => void) => () => {};
+const nothingStored = (): null => null;
 
 export type ThemeProviderProps = {
   children: ReactNode;
@@ -81,18 +133,16 @@ export type ThemeProviderProps = {
 
 export function ThemeProvider({ children, defaults, persist = true }: ThemeProviderProps) {
   const initial = useMemo<Theme>(() => ({ ...BASE, ...defaults }), [defaults]);
-  const [theme, setThemeState] = useState<Theme>(initial);
-  const [systemDark, setSystemDark] = useState(false);
 
-  // The stored choice and the device's preference are only known in the browser.
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = (): void => setSystemDark(media.matches);
-    onChange();
-    if (persist) setThemeState({ ...initial, ...stored() });
-    media.addEventListener("change", onChange);
-    return () => media.removeEventListener("change", onChange);
-  }, [initial, persist]);
+  // The device's preference and the stored choice live outside React and are only known in the browser:
+  // they are read as external stores. The server and the hydration render see the defaults, then the page
+  // renders again with the real values (ThemeScript has already set the attributes, so nothing flashes).
+  const systemDark = useSyncExternalStore(subscribeSystemDark, systemDarkOnClient, systemDarkOnServer);
+  const storedRaw = useSyncExternalStore(persist ? subscribeStored : noSubscription, persist ? readStored : nothingStored, nothingStored);
+  // The choice for this visit only: used when persist is false, or when storage is unavailable.
+  const [session, setSession] = useState<Partial<Theme>>({});
+
+  const theme = useMemo<Theme>(() => ({ ...initial, ...parseStored(storedRaw), ...session }), [initial, storedRaw, session]);
 
   useEffect(() => {
     apply(document.documentElement, theme, systemDark);
@@ -100,29 +150,16 @@ export function ThemeProvider({ children, defaults, persist = true }: ThemeProvi
 
   const setTheme = useCallback(
     (change: Partial<Theme>): void => {
-      setThemeState((current) => {
-        const next = { ...current, ...change };
-        if (persist) {
-          try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-          } catch {
-            // Storage can be unavailable (private mode); the theme still applies for this visit.
-          }
-        }
-        return next;
-      });
+      if (persist && writeStored({ ...initial, ...parseStored(readStored()), ...change })) return;
+      setSession((current) => ({ ...current, ...change }));
     },
-    [persist],
+    [initial, persist],
   );
 
   const resetTheme = useCallback((): void => {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      // Nothing was stored.
-    }
-    setThemeState(initial);
-  }, [initial]);
+    writeStored(null);
+    setSession({});
+  }, []);
 
   const value = useMemo<ThemeContextValue>(
     () => ({ theme, resolvedMode: theme.mode === "dark" || (theme.mode === "system" && systemDark) ? "dark" : "light", setTheme, resetTheme }),

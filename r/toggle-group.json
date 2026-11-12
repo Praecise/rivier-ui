@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Toggle Group",
   "description": "A joined row of toggles where one (type=\"single\") or several (type=\"multiple\") are on.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "class-variance-authority",
     "radix-ui"

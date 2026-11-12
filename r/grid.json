@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Grid",
   "description": "A responsive grid of equal columns that fits as many as the width allows, from a minimum column width. No breakpoints.",
+  "categories": [
+    "layout"
+  ],
   "dependencies": [
     "class-variance-authority",
     "radix-ui"

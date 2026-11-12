@@ -4,6 +4,9 @@
   "type": "registry:lib",
   "title": "Cn",
   "description": "Joins class names and resolves Tailwind conflicts, so a class passed in wins over a component's own.",
+  "categories": [
+    "lib"
+  ],
   "dependencies": [
     "clsx",
     "tailwind-merge"

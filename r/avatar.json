@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Avatar",
   "description": "A round picture of a person or a team, with initials shown until the image loads or when it fails, and a group that overlaps.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "class-variance-authority",
     "radix-ui"

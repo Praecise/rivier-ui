@@ -4,6 +4,9 @@
   "type": "registry:lib",
   "title": "Use Size",
   "description": "Measures an element with ResizeObserver and returns its content width and height in whole pixels.",
+  "categories": [
+    "lib"
+  ],
   "dependencies": [],
   "registryDependencies": [
     "@rivier-ui/theme"
