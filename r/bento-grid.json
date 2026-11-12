@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Bento Grid",
   "description": "A grid of flat cards of unequal sizes. One column on a phone, two on a tablet, then 2, 3, 4 or 6: decided by the grid's own width, so it works inside any container.",
+  "categories": [
+    "layout"
+  ],
   "dependencies": [
     "radix-ui"
   ],

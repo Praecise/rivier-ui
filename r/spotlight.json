@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Spotlight",
   "description": "A surface on which a soft light in the highlight colour follows the pointer.",
+  "categories": [
+    "motion"
+  ],
   "dependencies": [
     "motion"
   ],

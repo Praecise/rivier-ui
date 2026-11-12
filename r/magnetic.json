@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Magnetic",
   "description": "A wrapper whose child is gently pulled toward the pointer while it is hovered, and springs back when the pointer leaves.",
+  "categories": [
+    "motion"
+  ],
   "dependencies": [
     "motion"
   ],

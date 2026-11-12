@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Accordion",
   "description": "Stacked sections whose content opens and closes under its heading.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "lucide-react",
     "radix-ui"

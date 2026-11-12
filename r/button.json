@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Button",
   "description": "A button, or a link that looks like one. Five variants, three sizes, a loading state.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "class-variance-authority",
     "radix-ui"

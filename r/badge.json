@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Badge",
   "description": "A small label for a status, a count or a category. Six variants and an optional leading dot.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "class-variance-authority"
   ],

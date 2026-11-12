@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Presence",
   "description": "Animates its children in when they are shown and out before they are removed.",
+  "categories": [
+    "motion"
+  ],
   "dependencies": [
     "motion"
   ],

@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Empty State",
   "description": "What a list, a table or a search shows when there is nothing in it: an icon, a title, a description and an action.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "lucide-react"
   ],

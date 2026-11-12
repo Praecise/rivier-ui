@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Sparkline",
   "description": "A tiny line, area or bar chart with no axes, for a stat tile or a table cell, described in words for assistive technology.",
+  "categories": [
+    "viz"
+  ],
   "dependencies": [
     "d3-scale",
     "d3-shape"

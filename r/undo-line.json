@@ -1,0 +1,33 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "undo-line",
+  "type": "registry:ui",
+  "title": "Undo Line",
+  "description": "A line that stays where something was just done, says what it was, and offers to undo it.",
+  "categories": [
+    "ui"
+  ],
+  "dependencies": [
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/announce",
+    "@rivier-ui/button",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/undo-line.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/undo-line.tsx",
+      "content": "\"use client\";\n/**\n * @name undo-line\n * @category ui\n * @description A line that stays where something was just done, says what it was, and offers to undo it.\n * @when After an action that can be taken back, inside the place it happened: a row removed from a plan, a message archived, a change applied by an assistant. It stays until it is dismissed or the next action replaces it, so it is not missed the way a toast is by someone using a screen reader, a magnifier or a slow hand. For news that needs no answer and is unrelated to one place use toaster; for a decision before the action use dialog.\n * @example\n * {removed ? (\n *   <UndoLine>\n *     <UndoLineMessage>Lunch was removed from Saturday.</UndoLineMessage>\n *     <UndoLineAction onClick={restore}>Undo</UndoLineAction>\n *     <UndoLineDismiss aria-label=\"Dismiss\" onClick={() => setRemoved(null)} />\n *   </UndoLine>\n * ) : null}\n */\nimport { X } from \"lucide-react\";\nimport { useEffect, useRef, type ComponentProps } from \"react\";\nimport { buttonVariants } from \"@/components/ui/button\";\nimport { announce } from \"@/lib/announce\";\nimport { cn } from \"@/lib/cn\";\n\n/** The line: the message at the start, the actions at the end, wrapping under it when narrow. */\nexport function UndoLine({ className, ...props }: ComponentProps<\"div\">) {\n  return (\n    <div\n      data-slot=\"undo-line\"\n      className={cn(\"flex w-full min-w-0 flex-wrap items-center gap-x-2 gap-y-1 rounded-control border bg-muted py-1 ps-3.5 pe-1 text-sm text-foreground\", className)}\n      {...props}\n    />\n  );\n}\n\nexport type UndoLineMessageProps = ComponentProps<\"p\"> & {\n  /** Set false to stop the message being said to screen-reader users (when the project announces it itself). */\n  announced?: boolean;\n};\n\n/**\n * What was done, in the past tense and with its object (\"Lunch was removed from Saturday\"). It is said\n * politely to screen-reader users when the line appears and again whenever its words change, through the\n * page's shared live region: a line that has only just been added to the page would otherwise be missed.\n */\nexport function UndoLineMessage({ className, announced = true, ...props }: UndoLineMessageProps) {\n  const ref = useRef<HTMLParagraphElement>(null);\n  const said = useRef(\"\");\n  useEffect(() => {\n    const text = ref.current?.textContent?.trim() ?? \"\";\n    if (!announced || text === \"\" || text === said.current) return;\n    said.current = text;\n    announce(text);\n  });\n  return <p ref={ref} data-slot=\"undo-line-message\" className={cn(\"min-w-0 flex-1 basis-40 py-1.5\", className)} {...props} />;\n}\n\n/** Takes the action back. Its word is the project's (\"Undo\"). After undoing, move focus to what came back. */\nexport function UndoLineAction({ className, type = \"button\", ...props }: ComponentProps<\"button\">) {\n  return <button type={type} data-slot=\"undo-line-action\" className={cn(buttonVariants({ variant: \"ghost\", size: \"sm\" }), \"font-medium underline underline-offset-4 pointer-coarse:h-control\", className)} {...props} />;\n}\n\n/** Closes the line and keeps the change. Icon only: give it an `aria-label` in the interface language. */\nexport function UndoLineDismiss({ className, children, type = \"button\", \"aria-label\": ariaLabel = \"Dismiss\", ...props }: ComponentProps<\"button\">) {\n  return (\n    <button\n      type={type}\n      data-slot=\"undo-line-dismiss\"\n      aria-label={ariaLabel}\n      className={cn(buttonVariants({ variant: \"ghost\", size: \"sm\" }), \"size-(--control-h-sm) px-0 text-muted-foreground pointer-coarse:size-(--control-h)\", className)}\n      {...props}\n    >\n      {children ?? <X aria-hidden=\"true\" strokeWidth={1.5} />}\n    </button>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "After an action that can be taken back, inside the place it happened: a row removed from a plan, a message archived, a change applied by an assistant. It stays until it is dismissed or the next action replaces it, so it is not missed the way a toast is by someone using a screen reader, a magnifier or a slow hand. For news that needs no answer and is unrelated to one place use toaster; for a decision before the action use dialog.",
+    "example": "{removed ? (\n  <UndoLine>\n    <UndoLineMessage>Lunch was removed from Saturday.</UndoLineMessage>\n    <UndoLineAction onClick={restore}>Undo</UndoLineAction>\n    <UndoLineDismiss aria-label=\"Dismiss\" onClick={() => setRemoved(null)} />\n  </UndoLine>\n) : null}",
+    "client": true
+  }
+}

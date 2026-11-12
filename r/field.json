@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Field",
   "description": "Lays out a label, a control, a description and an error message, and connects them (htmlFor, id, aria-describedby, aria-invalid) without hand-written ids.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "radix-ui"
   ],

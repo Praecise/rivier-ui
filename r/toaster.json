@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Toaster",
   "description": "The place where toasts appear: sonner's Toaster drawn with the theme's tokens, and its `toast` function.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "lucide-react",
     "sonner"

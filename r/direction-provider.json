@@ -1,0 +1,31 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "direction-provider",
+  "type": "registry:ui",
+  "title": "Direction Provider",
+  "description": "Sets the reading direction (left to right, or right to left) for everything inside it: the `dir` attribute for layout and text, and the context Radix-based components read for arrow keys and placement.",
+  "categories": [
+    "ui"
+  ],
+  "dependencies": [
+    "radix-ui"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/direction-provider.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/direction-provider.tsx",
+      "content": "\"use client\";\n/**\n * @name direction-provider\n * @category ui\n * @description Sets the reading direction (left to right, or right to left) for everything inside it: the `dir` attribute for layout and text, and the context Radix-based components read for arrow keys and placement.\n * @when Once around the app, with the direction of the current language, in any product that has or may get a right-to-left language (Arabic, Hebrew, Persian, Urdu, Dhivehi). Also around one part of a page in the other direction. A product in one left-to-right language does not need it. Put `dir` on <html> as well (the provider's own element covers only what is inside it; menus and dialogs are portalled to <body>). For people's own words in an unknown language use `dir=\"auto\"` on that element instead.\n * @example\n * // app/layout.tsx\n * const dir = directionOf(locale); // \"rtl\" for \"ar\", \"he\", \"fa\", \"ur\", \"dv\" …\n * <html lang={locale} dir={dir}>\n *   <body>\n *     <DirectionProvider dir={dir}>{children}</DirectionProvider>\n *   </body>\n * </html>\n *\n * // anywhere below\n * const dir = useDirection();\n */\nimport { Direction as DirectionPrimitive, Slot } from \"radix-ui\";\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport type Direction = \"ltr\" | \"rtl\";\n\n/** Scripts that are written right to left, by ISO 15924 code. */\nconst RTL_SCRIPTS = new Set([\"Arab\", \"Hebr\", \"Thaa\", \"Syrc\", \"Nkoo\", \"Adlm\", \"Rohg\", \"Samr\", \"Mand\"]);\n/** Languages written right to left when the tag names no script. */\nconst RTL_LANGUAGES = new Set([\"ar\", \"he\", \"iw\", \"fa\", \"ur\", \"dv\", \"ps\", \"sd\", \"ug\", \"yi\", \"ckb\", \"syr\", \"nqo\", \"ks\", \"prs\", \"bal\"]);\n\ntype LocaleWithTextInfo = Intl.Locale & { getTextInfo?: () => { direction?: string }; textInfo?: { direction?: string } };\n\n/**\n * The reading direction of a language tag (\"ar\", \"he-IL\", \"az-Arab\", \"en-GB\"). It asks the runtime\n * (`Intl.Locale` text info) where that exists and falls back to the tag's script or language.\n */\nexport function directionOf(locale: string): Direction {\n  try {\n    const tag: LocaleWithTextInfo = new Intl.Locale(locale);\n    const direction = tag.getTextInfo?.().direction ?? tag.textInfo?.direction;\n    if (direction === \"rtl\" || direction === \"ltr\") return direction;\n    const script = tag.script ?? tag.maximize().script;\n    if (script) return RTL_SCRIPTS.has(script) ? \"rtl\" : \"ltr\";\n    return RTL_LANGUAGES.has(tag.language) ? \"rtl\" : \"ltr\";\n  } catch {\n    return \"ltr\";\n  }\n}\n\nexport type DirectionProviderProps = Omit<ComponentProps<\"div\">, \"dir\"> & {\n  /** \"ltr\" or \"rtl\". Use directionOf(locale) to get it from a language tag. */\n  dir: Direction;\n  /** Put `dir` on the child element instead of a wrapping div. */\n  asChild?: boolean;\n};\n\n/** The wrapper is `display: contents`, so it adds no box: it only carries the `dir` attribute. */\nexport function DirectionProvider({ dir, asChild = false, className, children, ...props }: DirectionProviderProps) {\n  const Comp = asChild ? Slot.Root : \"div\";\n  return (\n    <DirectionPrimitive.Provider dir={dir}>\n      <Comp data-slot=\"direction-provider\" dir={dir} className={cn(!asChild && \"contents\", className)} {...props}>\n        {children}\n      </Comp>\n    </DirectionPrimitive.Provider>\n  );\n}\n\n/** The direction set by the nearest DirectionProvider (\"ltr\" when there is none). Pass a component's own `dir` prop to let it win. */\nexport function useDirection(local?: Direction): Direction {\n  return DirectionPrimitive.useDirection(local);\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "Once around the app, with the direction of the current language, in any product that has or may get a right-to-left language (Arabic, Hebrew, Persian, Urdu, Dhivehi). Also around one part of a page in the other direction. A product in one left-to-right language does not need it. Put `dir` on <html> as well (the provider's own element covers only what is inside it; menus and dialogs are portalled to <body>). For people's own words in an unknown language use `dir=\"auto\"` on that element instead.",
+    "example": "// app/layout.tsx\nconst dir = directionOf(locale); // \"rtl\" for \"ar\", \"he\", \"fa\", \"ur\", \"dv\" …\n<html lang={locale} dir={dir}>\n  <body>\n    <DirectionProvider dir={dir}>{children}</DirectionProvider>\n  </body>\n</html>\n\n// anywhere below\nconst dir = useDirection();",
+    "client": true
+  }
+}

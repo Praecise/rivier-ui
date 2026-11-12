@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Tilt",
   "description": "A wrapper that tilts its content in 3D toward the pointer on hover and springs back, with an optional glare.",
+  "categories": [
+    "motion"
+  ],
   "dependencies": [
     "motion"
   ],

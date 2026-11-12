@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Navbar",
   "description": "A responsive site header: a brand, a row of links and a slot for actions. Below `md` the links move into a menu button that opens them in a sheet.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "lucide-react",
     "radix-ui"

@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Select",
   "description": "A themed dropdown for choosing one value from a list, with groups, labels and separators. Never a native select.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "class-variance-authority",
     "lucide-react",

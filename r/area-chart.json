@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Area Chart",
   "description": "A line chart with the space under each line filled flat at low opacity, optionally stacked so the series add up to a total.",
+  "categories": [
+    "viz"
+  ],
   "dependencies": [],
   "registryDependencies": [
     "@rivier-ui/theme",

@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Progress",
   "description": "A bar that fills as a task completes, or slides back and forth when the amount done is not known.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "class-variance-authority",
     "radix-ui"

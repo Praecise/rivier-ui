@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Line Chart",
   "description": "A line chart of one or more series over a numeric or time x, with a crosshair tooltip, arrow-key reading and labels at the line ends.",
+  "categories": [
+    "viz"
+  ],
   "dependencies": [
     "d3-scale",
     "d3-shape"

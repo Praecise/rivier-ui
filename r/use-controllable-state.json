@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "use-controllable-state",
+  "type": "registry:lib",
+  "title": "Use Controllable State",
+  "description": "State that a parent may control: it follows `value` when one is given and keeps its own from `defaultValue` when not, calling `onChange` either way.",
+  "categories": [
+    "lib"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@rivier-ui/theme"
+  ],
+  "files": [
+    {
+      "path": "registry/lib/use-controllable-state.ts",
+      "type": "registry:lib",
+      "target": "lib/use-controllable-state.ts",
+      "content": "\"use client\";\n/**\n * @name use-controllable-state\n * @category lib\n * @description State that a parent may control: it follows `value` when one is given and keeps its own from `defaultValue` when not, calling `onChange` either way.\n * @when Writing a component that should work both controlled (`value` + `onValueChange`) and uncontrolled (`defaultValue`), which every input-like component in the library does. Radix primitives already do this for their own state; use this for state the library adds on top.\n * @example\n * function Stepper({ value, defaultValue = 0, onValueChange }: { value?: number; defaultValue?: number; onValueChange?: (value: number) => void }) {\n *   const [count, setCount] = useControllableState({ value, defaultValue, onChange: onValueChange });\n *   return <button onClick={() => setCount(count + 1)}>{count}</button>;\n * }\n */\nimport { useState } from \"react\";\n\nexport type ControllableStateOptions<T> = {\n  /** The controlled value. Leave undefined to let the component keep its own. */\n  value?: T | undefined;\n  /** The starting value when uncontrolled. */\n  defaultValue: T;\n  /** Called with the next value whenever it changes, controlled or not. */\n  onChange?: ((value: T) => void) | undefined;\n};\n\n/**\n * Returns the current value and a setter. The setter takes a value or a function of the current value; it\n * calls `onChange` only when the value really changes, and updates its own state only when uncontrolled.\n * The mode is decided by whether `value` is undefined, so a controlled value of \"nothing\" is null, not undefined.\n */\nexport function useControllableState<T>({ value, defaultValue, onChange }: ControllableStateOptions<T>): [T, (next: T | ((current: T) => T)) => void] {\n  const [own, setOwn] = useState<T>(defaultValue);\n  const controlled = value !== undefined;\n  const current = controlled ? value : own;\n\n  const set = (next: T | ((current: T) => T)): void => {\n    const resolved = typeof next === \"function\" ? (next as (current: T) => T)(current) : next;\n    if (Object.is(resolved, current)) return;\n    if (!controlled) setOwn(resolved);\n    onChange?.(resolved);\n  };\n\n  return [current, set];\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "lib",
+    "when": "Writing a component that should work both controlled (`value` + `onValueChange`) and uncontrolled (`defaultValue`), which every input-like component in the library does. Radix primitives already do this for their own state; use this for state the library adds on top.",
+    "example": "function Stepper({ value, defaultValue = 0, onValueChange }: { value?: number; defaultValue?: number; onValueChange?: (value: number) => void }) {\n  const [count, setCount] = useControllableState({ value, defaultValue, onChange: onValueChange });\n  return <button onClick={() => setCount(count + 1)}>{count}</button>;\n}",
+    "client": true
+  }
+}

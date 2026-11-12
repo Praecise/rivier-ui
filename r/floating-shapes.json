@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Floating Shapes",
   "description": "A few simple solids (icosahedron, torus, box, octahedron) floating and turning slowly, flat-shaded or wireframe, coloured from theme variables.",
+  "categories": [
+    "three"
+  ],
   "dependencies": [
     "@react-three/fiber",
     "three"

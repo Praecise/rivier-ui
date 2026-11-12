@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Stack",
   "description": "A flex row or column with a gap from a fixed scale, and props for alignment, distribution and wrapping.",
+  "categories": [
+    "layout"
+  ],
   "dependencies": [
     "class-variance-authority",
     "radix-ui"

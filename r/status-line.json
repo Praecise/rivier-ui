@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "status-line",
+  "type": "registry:ui",
+  "title": "Status Line",
+  "description": "One line that says in words what is happening now (\"Searching\", \"Writing a reply\", \"Done\"), read out politely by screen readers, with an optional moving mark and a slot for a stop button.",
+  "categories": [
+    "ui"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/status-line.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/status-line.tsx",
+      "content": "/**\n * @name status-line\n * @category ui\n * @description One line that says in words what is happening now (\"Searching\", \"Writing a reply\", \"Done\"), read out politely by screen readers, with an optional moving mark and a slot for a stop button.\n * @when Beside a thread or any surface where work goes on that the person waits for: it is the one polite live region of that surface. Render it from the start, empty, and change its text: a region that appears together with its text is often not announced. It keeps its height when empty, so nothing jumps. For a wait with no words use spinner; for a measurable one use progress; for a result that must outlive the moment use alert or toaster.\n * @example\n * <StatusLine working={busy} action={busy ? <StatusLineAction onClick={stop}>Stop</StatusLineAction> : null}>\n *   {busy ? \"Searching three sources\" : \"\"}\n * </StatusLine>\n */\nimport type { ComponentProps, ReactNode } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport type StatusLineProps = ComponentProps<\"div\"> & {\n  /** Shows the moving mark. The words, not the mark, carry the meaning. */\n  working?: boolean;\n  /** The mark: three dots (default), a ring, none, or your own element (it is hidden from assistive technology). */\n  indicator?: \"dots\" | \"spinner\" | \"none\" | ReactNode;\n  /** A control beside the words, usually StatusLineAction (\"Stop\"). It sits outside the live region, so it is not read out with every change. */\n  action?: ReactNode;\n  /** The status in words. An empty string clears it. */\n  children?: ReactNode;\n};\n\n/**\n * `role=\"status\"` (polite, atomic) on the words alone. The mark is decoration: it pulses or turns with\n * opacity and transform only, and stands still under reduced motion.\n */\nexport function StatusLine({ className, working = false, indicator = \"dots\", action, children, ...props }: StatusLineProps) {\n  return (\n    <div\n      data-slot=\"status-line\"\n      data-working={working ? \"\" : undefined}\n      className={cn(\"flex min-h-(--control-h-sm) min-w-0 items-center gap-2 text-sm text-muted-foreground pointer-coarse:min-h-(--control-h)\", className)}\n      {...props}\n    >\n      {working && indicator !== \"none\" ? (\n        <span aria-hidden=\"true\" data-slot=\"status-line-indicator\" className=\"inline-flex shrink-0 items-center\">\n          {indicator === \"dots\" ? <Dots /> : indicator === \"spinner\" ? <Ring /> : indicator}\n        </span>\n      ) : null}\n      <span data-slot=\"status-line-text\" role=\"status\" aria-live=\"polite\" aria-atomic=\"true\" className=\"min-w-0 flex-1 truncate\">\n        {children}\n      </span>\n      {action}\n    </div>\n  );\n}\n\nfunction Dots() {\n  return (\n    <span className=\"inline-flex items-center gap-1\">\n      <span className=\"size-1.5 animate-pulse rounded-full bg-current motion-reduce:animate-none\" />\n      <span className=\"size-1.5 animate-pulse rounded-full bg-current [animation-delay:var(--duration-base)] motion-reduce:animate-none\" />\n      <span className=\"size-1.5 animate-pulse rounded-full bg-current [animation-delay:calc(var(--duration-base)*2)] motion-reduce:animate-none\" />\n    </span>\n  );\n}\n\nfunction Ring() {\n  return <span className=\"size-4 animate-spin rounded-full border-2 border-current border-e-transparent motion-reduce:animate-none\" />;\n}\n\nexport type StatusLineActionProps = ComponentProps<\"button\">;\n\n/** A small text button for the line: \"Stop\", \"Cancel\", \"Try again\". */\nexport function StatusLineAction({ className, type = \"button\", ...props }: StatusLineActionProps) {\n  return (\n    <button\n      type={type}\n      data-slot=\"status-line-action\"\n      className={cn(\n        \"inline-flex h-control-sm shrink-0 items-center justify-center gap-1.5 rounded-control border border-border-strong bg-background px-3 text-sm font-medium text-foreground transition-[background-color,opacity] duration-instant ease-out hover:bg-accent disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none pointer-coarse:h-control [&_svg]:size-4 [&_svg]:shrink-0\",\n        className,\n      )}\n      {...props}\n    />\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "Beside a thread or any surface where work goes on that the person waits for: it is the one polite live region of that surface. Render it from the start, empty, and change its text: a region that appears together with its text is often not announced. It keeps its height when empty, so nothing jumps. For a wait with no words use spinner; for a measurable one use progress; for a result that must outlive the moment use alert or toaster.",
+    "example": "<StatusLine working={busy} action={busy ? <StatusLineAction onClick={stop}>Stop</StatusLineAction> : null}>\n  {busy ? \"Searching three sources\" : \"\"}\n</StatusLine>",
+    "client": false
+  }
+}

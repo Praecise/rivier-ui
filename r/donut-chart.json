@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Donut Chart",
   "description": "A ring showing how one whole splits into at most five parts, with a label in the centre and each part's value and share in the legend.",
+  "categories": [
+    "viz"
+  ],
   "dependencies": [
     "d3-shape"
   ],

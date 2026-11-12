@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Stat",
   "description": "A number tile: a label, a value, an optional change with its direction, and a slot for a sparkline.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "lucide-react"
   ],

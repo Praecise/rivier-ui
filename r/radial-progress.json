@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Radial Progress",
   "description": "A ring gauge for one value against a limit, with the value and a label in the centre.",
+  "categories": [
+    "viz"
+  ],
   "dependencies": [],
   "registryDependencies": [
     "@rivier-ui/theme",

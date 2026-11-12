@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Scroll Area",
   "description": "A scrolling region with thin, themed scrollbars that look the same on every platform. Native scrolling underneath.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "radix-ui"
   ],

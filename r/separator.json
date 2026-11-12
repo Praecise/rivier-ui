@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Separator",
   "description": "A hairline between two pieces of content, horizontal or vertical, with an optional label in the middle.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "radix-ui"
   ],

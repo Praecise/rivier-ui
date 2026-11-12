@@ -4,6 +4,9 @@
   "type": "registry:lib",
   "title": "Theme Color",
   "description": "Resolves a theme CSS variable such as \"--highlight\" to an rgb() string that three.js and canvas code can parse, and re-reads it when the theme changes.",
+  "categories": [
+    "lib"
+  ],
   "dependencies": [],
   "registryDependencies": [
     "@rivier-ui/theme"

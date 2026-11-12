@@ -4,6 +4,9 @@
   "type": "registry:ui",
   "title": "Dropdown Menu",
   "description": "A menu of actions that opens from a button: items, checkbox and radio items, labels, separators, sub-menus and a shortcut slot.",
+  "categories": [
+    "ui"
+  ],
   "dependencies": [
     "lucide-react",
     "radix-ui"

@@ -4,6 +4,9 @@
   "type": "registry:component",
   "title": "Stagger",
   "description": "A container whose items fade and move into place one after another when it scrolls into view.",
+  "categories": [
+    "motion"
+  ],
   "dependencies": [],
   "registryDependencies": [
     "@rivier-ui/theme",
