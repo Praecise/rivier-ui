@@ -62,9 +62,41 @@ readable by an assistant. `registry/ui/button.tsx` and `registry/ui/card.tsx` ar
 
 - Behaviour comes from Radix primitives where one exists. Keep their accessibility: labels, roles, focus
   return, keyboard support. Icon-only controls need an `aria-label`. Decoration is `aria-hidden`.
+- Where Radix has no primitive (a calendar, a spin button, a sortable list, a splitter, a media scrubber),
+  the component is written here to the WAI-ARIA Authoring Practices pattern for its kind, and its browser
+  check proves the pattern key by key. A new package is not added for one component.
 - Focus is visible: the theme draws a 2px ring on `:focus-visible`; do not remove outlines.
 - Text contrast at least 4.5:1 in both themes; do not put `text-muted-foreground` on `bg-muted` at small sizes
   without checking.
+- State is never carried by colour alone: chosen, disabled, failed, current each have a mark or a word too.
+- Anything done by dragging can also be done without it (buttons, keys): WCAG 2.5.7.
+- A change that no focus move will read out (an item moved, a total changed, an upload finished) is said
+  through `announce()` from `@/lib/announce`: one shared live region for the page. A component does not
+  create its own live region unless it is one by nature (`status-line`, `toaster`).
+
+## Parts, state and words
+
+- Composable parts, not one component with twenty props: a root that holds the state in a context, and named
+  parts (`Calendar`, `CalendarGrid`; `Composer`, `ComposerInput`, `ComposerSubmit`) that a project arranges,
+  leaves out or replaces. A root may render a sensible default arrangement when it has no children.
+- Anything that holds a value or an open state works controlled and uncontrolled: `value`, `defaultValue`,
+  `onValueChange` (`open`, `defaultOpen`, `onOpenChange`), through `@/lib/use-controllable-state`.
+- Values are plain data. A day is `"2026-11-14"`, a month `"2026-11"`, a time `"19:30"`, never a `Date`: a
+  `Date` carries a time zone and the wrong one changes the day.
+- No words are fixed in a component. What a person reads or hears is passed in by the project, or is a prop
+  with an English default (`aria-label`, a `labels` object, a message function) so it can be translated.
+  Dates, times, numbers and lists are formatted with `Intl` and a `locale` prop.
+- Nothing in the library names a product, a client or a domain. Examples use neutral subjects.
+
+## Direction and scripts
+
+- Layout uses logical utilities only, so it mirrors by itself. Code that handles Left and Right arrow keys or
+  moves something sideways with a transform asks `inlineStep`, `inlineSign` or `isRtl` from
+  `@/lib/direction`. Icons that point (arrows, chevrons) flip with `rtl:-scale-x-100`; clocks, ticks, play
+  buttons and media time bars do not.
+- `direction-provider` sets the direction for Radix-based components; people's own words get `dir="auto"`.
+- The theme adapts tracking and leading to the script of the language (`lang`): do not set letter-spacing
+  or a tight line height with arbitrary values (`tracking-[…]`, `leading-[1]`), which the theme cannot reach.
 
 ## Motion
 
@@ -75,7 +107,8 @@ readable by an assistant. `registry/ui/button.tsx` and `registry/ui/card.tsx` ar
 - Everything stops under reduced motion: `motion-reduce:` utilities in CSS; in `motion` components use
   `useReducedMotion()` and render the final state. Content must be readable with motion off and with
   JavaScript still loading: text is in the markup, never created by an animation.
-- Motion never changes layout height after the page has loaded.
+- Motion never changes layout height after the page has loaded. Where a size must change (a step of a wizard
+  that is taller than the last), it changes at once, or through a transform-based layout animation.
 
 ## Three and visualisation
 
@@ -90,4 +123,15 @@ readable by an assistant. `registry/ui/button.tsx` and `registry/ui/card.tsx` ar
 
 ## Checking
 
-From this repository: `npm run typecheck` must pass, and `npm run registry` must accept the header.
+From this repository:
+
+- `npm run typecheck` must pass, and `npm run registry` must accept the header.
+- `npm run lint` must pass (once: `npm run lint:install`). It runs the React rules a project's own lint
+  runs on a copied component, the React Compiler rules included (no state set in an effect, no ref read
+  during render).
+- `npm run check` must pass against the showcase (`npm run site:build`, `npm run site:start`). Every
+  component is on a showcase page (`site/src/app/<group>/`) with a file of checks (`scripts/checks/<group>.ts`)
+  that drives it in a real browser at desktop width, at 390 px with touch, and at 390 px right-to-left: its
+  keyboard pattern key by key, roles, names and states, focus on open and close, controlled and uncontrolled
+  use, no sideways overflow, no console errors, and no WCAG 2.2 A or AA violation found by axe-core.
+  A new component comes with its demonstration and its checks.
