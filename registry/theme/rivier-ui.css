@@ -250,6 +250,77 @@
   transition-duration: var(--duration-slow);
 }
 
+/*
+ * Scripts. Type set for Latin breaks elsewhere, so these follow the language (`lang` on <html> or on any
+ * element; they need no class):
+ * - Letter-spacing breaks the joins of cursive scripts (Arabic, Thaana, Syriac, N'Ko) and pulls marks off
+ *   their bases in Hebrew, the Indic scripts, Thai, Lao, Khmer and Burmese: the tracking utilities become 0.
+ * - Tight leading clips stacked marks (harakat, fili, matras, tone marks): the tight steps are opened and the
+ *   large text sizes, which are set solid for Latin, get room.
+ * - Chinese, Japanese and Korean have no spaces to break at: strict line breaking, and only wide tracking is
+ *   dropped (there are no joins to break).
+ * Capitals do not exist in these scripts, so `uppercase` does nothing there: a small capital label is then
+ * just small text. Give such labels a larger size in those languages in the project's own styles.
+ */
+:lang(ar),
+:lang(fa),
+:lang(ur),
+:lang(ps),
+:lang(sd),
+:lang(ug),
+:lang(ckb),
+:lang(dv),
+:lang(syr),
+:lang(nqo),
+:lang(he),
+:lang(yi),
+:lang(hi),
+:lang(mr),
+:lang(ne),
+:lang(bn),
+:lang(pa),
+:lang(gu),
+:lang(ta),
+:lang(te),
+:lang(kn),
+:lang(ml),
+:lang(si),
+:lang(th),
+:lang(lo),
+:lang(km),
+:lang(my) {
+  --tracking-tighter: 0em;
+  --tracking-tight: 0em;
+  --tracking-wide: 0em;
+  --tracking-wider: 0em;
+  --tracking-widest: 0em;
+  --leading-tight: 1.5;
+  --leading-snug: 1.6;
+  --leading-normal: 1.7;
+  --text-3xl--line-height: 1.45;
+  --text-4xl--line-height: 1.4;
+  --text-5xl--line-height: 1.35;
+  --text-6xl--line-height: 1.35;
+  --text-7xl--line-height: 1.35;
+  --text-8xl--line-height: 1.35;
+  --text-9xl--line-height: 1.35;
+}
+:lang(zh),
+:lang(ja),
+:lang(ko) {
+  --tracking-tighter: 0em;
+  --tracking-tight: 0em;
+  --tracking-wider: 0.025em;
+  --tracking-widest: 0.05em;
+  --leading-tight: 1.35;
+  --text-5xl--line-height: 1.2;
+  --text-6xl--line-height: 1.2;
+  --text-7xl--line-height: 1.2;
+  --text-8xl--line-height: 1.2;
+  --text-9xl--line-height: 1.2;
+  line-break: strict;
+}
+
 /* View transitions between pages and states (components/motion/view-transition). */
 @media (prefers-reduced-motion: no-preference) {
   ::view-transition-old(root),
