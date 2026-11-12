@@ -1,11 +1,13 @@
 "use client";
 // Showcase: chips, segmented control, number stepper.
 
+import { Leaf, Music, Soup, Telescope } from "lucide-react";
 import { useRef, useState } from "react";
 import { Chip, ChipButton, ChipGroup, ChipGroupItem, ChipRemove } from "@/components/ui/chip";
 import { Label } from "@/components/ui/label";
 import { NumberStepper, NumberStepperDecrement, NumberStepperIncrement, NumberStepperInput } from "@/components/ui/number-stepper";
 import { SegmentedControl, SegmentedControlItem } from "@/components/ui/segmented-control";
+import { Tile, TileDescription, TileGroup, TileLabel, TileMedia } from "@/components/ui/tile-group";
 import { Demo } from "./demo";
 
 const FILTERS = ["Under 50", "This weekend", "Outdoors"];
@@ -16,6 +18,7 @@ export function Choices() {
   const [moods, setMoods] = useState<string[]>(["calm"]);
   const [view, setView] = useState("list");
   const [nights, setNights] = useState(2);
+  const [days, setDays] = useState<string[]>(["quiet"]);
   const reset = useRef<HTMLButtonElement>(null);
 
   return (
@@ -124,6 +127,46 @@ export function Choices() {
             <Label htmlFor="weight">Weight in kg (step 0.5)</Label>
             <NumberStepper id="weight" defaultValue={1.5} min={0} max={10} step={0.5} />
           </div>
+        </div>
+      </Demo>
+      <Demo title="Tiles" className="@3xl:col-span-2">
+        <div className="flex flex-col gap-3">
+          <p id="day-label" className="text-sm font-medium">
+            What kind of day? (several)
+          </p>
+          <TileGroup type="multiple" value={days} onValueChange={setDays} aria-labelledby="day-label">
+            <Tile value="quiet">
+              <TileMedia>
+                <Leaf aria-hidden="true" strokeWidth={1.5} />
+              </TileMedia>
+              <TileLabel>Quiet</TileLabel>
+              <TileDescription>Gardens and slow walks</TileDescription>
+            </Tile>
+            <Tile value="lively">
+              <TileMedia>
+                <Music aria-hidden="true" strokeWidth={1.5} />
+              </TileMedia>
+              <TileLabel>Lively</TileLabel>
+              <TileDescription>Music and markets</TileDescription>
+            </Tile>
+            <Tile value="curious">
+              <TileMedia>
+                <Telescope aria-hidden="true" strokeWidth={1.5} />
+              </TileMedia>
+              <TileLabel>Curious</TileLabel>
+              <TileDescription>Workshops and museums</TileDescription>
+            </Tile>
+            <Tile value="hungry" disabled>
+              <TileMedia>
+                <Soup aria-hidden="true" strokeWidth={1.5} />
+              </TileMedia>
+              <TileLabel>Hungry</TileLabel>
+              <TileDescription>Not offered this week</TileDescription>
+            </Tile>
+          </TileGroup>
+          <p className="text-sm text-muted-foreground">
+            Chosen: <span data-testid="days">{days.join(", ") || "none"}</span>
+          </p>
         </div>
       </Demo>
     </div>

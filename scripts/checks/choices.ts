@@ -119,5 +119,18 @@ export async function run(kit: Kit): Promise<void> {
   await keys("ArrowUp", "ArrowUp", "ArrowUp");
   check((await page.$eval("#weight", (node) => (node as HTMLInputElement).value)) === "3", "decimal steps add up without rounding errors");
 
+  // Tiles: several can be on; each is named by its word; a disabled one is skipped.
+  const tiles = await kit.demo("Tiles");
+  check((await attr(`${tiles} [data-slot=tile-group]`, "role")) === "group", "a tile group that takes several is a group");
+  check(await kit.focus(`${tiles} [data-slot=tile]`), "a tile takes focus");
+  check((await attr(`${tiles} [data-slot=tile]`, "aria-pressed")) === "true", "a tile that is on says so");
+  await keys(forward, "Space");
+  check((await text("[data-testid=days]")) === "quiet, lively", `arrow then Space switches the next tile on (${await text("[data-testid=days]")})`);
+  await keys(forward, forward);
+  check((await kit.focused()).startsWith("Quiet"), `the disabled tile is skipped and focus wraps (${await kit.focused()})`);
+  check((await count(`${tiles} [data-slot=tile][data-state=on] [data-slot=tile-check]`)) === 2, "a chosen tile shows a tick, not only a colour");
+  const columns = await page.evaluate((s) => getComputedStyle(document.querySelector(`${s} [data-slot=tile-group]`) as Element).gridTemplateColumns.split(" ").length, tiles);
+  check(kit.phone ? columns === 2 : columns >= 3, `the grid follows its container (${columns} columns)`);
+
   await kit.axe("main", "after the checks");
 }
