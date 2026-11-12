@@ -1,0 +1,13 @@
+{
+  "name": "rivier-ui-lint",
+  "private": true,
+  "type": "module",
+  "description": "Lint tooling for Rivier UI, kept apart because the TypeScript parser for ESLint needs the TypeScript 6 API while the library type-checks with TypeScript 7.",
+  "devDependencies": {
+    "eslint": "^10.14.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "jiti": "^2.7.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.2"
+  }
+}

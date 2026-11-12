@@ -50,6 +50,7 @@ export function NumberTicker({
 
   // The options object is compared by content, not identity, so an inline object does not rebuild the formatter.
   const optionsKey = JSON.stringify(options ?? null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- optionsKey stands for options
   const formatter = useMemo(() => new Intl.NumberFormat(locale, options), [locale, optionsKey]);
 
   const safe = useMotionSafe();
