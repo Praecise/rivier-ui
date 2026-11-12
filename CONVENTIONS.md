@@ -30,7 +30,8 @@ readable by an assistant. `registry/ui/button.tsx` and `registry/ui/card.tsx` ar
 - Allowed packages (all installed, latest): `react`, `radix-ui` (the unified package:
   `import { Dialog } from "radix-ui"`, then `Dialog.Root`), `class-variance-authority`, `clsx`,
   `tailwind-merge`, `lucide-react`, `motion` (`import { motion } from "motion/react"`), `three`,
-  `@react-three/fiber`, `d3-scale`, `d3-shape`, `cmdk`, `sonner`. Nothing else without asking. Check the
+  `@react-three/fiber`, `d3-scale`, `d3-shape`, `cmdk`, `sonner`, and `@sparkjsdev/spark` in `model-viewer`
+  only, by `import()`. Nothing else without asking. Check the
   installed package's types in `node_modules` before using an API; do not write an API from memory.
 - React 19: `ref` is a normal prop; do not use `forwardRef`. Type props as `ComponentProps<"div">` or
   `ComponentProps<typeof Dialog.Content>` and spread the rest onto the root element.
@@ -115,7 +116,9 @@ readable by an assistant. `registry/ui/button.tsx` and `registry/ui/card.tsx` ar
 - Three components are client-only and lazy: they render a static fallback (the `fallback` prop, or a flat
   token-coloured block) until the canvas is ready, when WebGL is missing, and under reduced motion. They take
   their colours from the theme's CSS variables read at mount, cap the pixel ratio at 2, pause when off screen,
-  and dispose of what they create.
+  and dispose of what they create. `model-viewer` stands alone rather than inside `scene`: it imports
+  nothing heavy at the top of the file and fetches three.js, a loader and Spark with `import()` when it
+  comes near the screen. A package named in an `import()` is installed by `add` like any other.
 - Charts are SVG, sized by their container, drawn with `d3-scale` and `d3-shape` for the maths only. Series
   colours are `chart-1` … `chart-5`, in that fixed order: a validated set that does not follow the highlight
   colour (run a palette validator before changing it). A sixth series is folded into "Other" or given a dash, never a new hue. Every chart takes `data` and accessors or keys, has a text alternative

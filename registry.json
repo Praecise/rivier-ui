@@ -566,6 +566,68 @@
       }
     },
     {
+      "name": "carousel",
+      "type": "registry:ui",
+      "title": "Carousel",
+      "description": "A row of slides that is scrolled sideways one at a time (or a few at a time), with previous and next buttons, dots or a count, keys, and an optional autoplay that always has a pause button.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/button",
+        "@rivier-ui/cn",
+        "@rivier-ui/direction",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/carousel.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/carousel.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "A handful of pictures or cards of equal weight where one (or a few) is enough at a time: the photos of a place, featured items, quotes. It is the browser's own scrolling with CSS scroll snap, so a swipe, a trackpad and momentum work as they do everywhere, right-to-left pages mirror by themselves and nothing moves under reduced motion; no carousel package is used (Embla, MIT, moves slides with transforms on its own engine, which this does not need). Set how many slides show with a basis on the slides (`className=\"basis-1/2 md:basis-1/3\"`). Do not hide content a person must read in a carousel, and do not autoplay anything with text to read. For looking at pictures large use gallery with lightbox; for scenes of a clip use scene-strip; for thousands of items use virtual-list.",
+        "example": "<Carousel aria-label=\"Rooms\">\n  <CarouselViewport>\n    {rooms.map((room) => (\n      <CarouselSlide key={room.id}>\n        <img src={room.picture} alt={room.name} className=\"aspect-video w-full object-cover\" />\n      </CarouselSlide>\n    ))}\n  </CarouselViewport>\n  <div className=\"flex items-center justify-between gap-2\">\n    <CarouselPrevious />\n    <CarouselDots />\n    <CarouselNext />\n  </div>\n</Carousel>\n\n// Controlled, three to a view on wide screens, with a count; and one that plays by itself\n<Carousel index={index} onIndexChange={setIndex} aria-label=\"Featured\">\n  <CarouselViewport>{cards.map((card) => <CarouselSlide key={card.id} className=\"basis-full md:basis-1/3\">…</CarouselSlide>)}</CarouselViewport>\n  <CarouselPrevious /> <CarouselCount /> <CarouselNext />\n</Carousel>\n<Carousel autoplay={5000} loop aria-label=\"Highlights\">\n  <CarouselViewport>…</CarouselViewport>\n  <CarouselPlayPause /> <CarouselPrevious /> <CarouselNext />\n</Carousel>",
+        "client": true
+      }
+    },
+    {
+      "name": "certainty-legend",
+      "type": "registry:ui",
+      "title": "Certainty Legend",
+      "description": "A small key of three or four named classes (how sure something is, or any other kind), each with its own pattern as well as its own colour, where each class can be switched off and on.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/certainty-legend.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/certainty-legend.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "A scene, a map, a drawing or a chart marks its parts by class and the reader needs the key and a way to hide a class: what is recorded, what is worked out, what is a guess. The project supplies the names; the legend reports which classes are shown (`onValueChange`) and the project applies that to its own scene. Use CertaintySwatch to draw the same pattern in the scene's own key or in a caption. The pattern is what tells classes apart for someone who cannot tell the colours apart, so use it in the scene too. For filters with no key use chip; for the series of a chart, the chart's own legend.",
+        "example": "const classes = [\n  { id: \"recorded\", label: \"Recorded\", description: \"Measured on site\" },\n  { id: \"inferred\", label: \"Inferred\", description: \"Worked out from what remains\" },\n  { id: \"imagined\", label: \"Imagined\", description: \"A guess, drawn to complete the picture\" },\n];\n<CertaintyLegend aria-label=\"How sure each part is\" classes={classes} defaultValue={[\"recorded\", \"inferred\", \"imagined\"]} onValueChange={(shown) => scene.show(shown)} />\n\n// The same pattern elsewhere\n<CertaintySwatch pattern=\"hatch\" tone={2} />",
+        "client": true
+      }
+    },
+    {
       "name": "checkbox",
       "type": "registry:ui",
       "title": "Checkbox",
@@ -686,6 +748,36 @@
         "category": "ui",
         "when": "Fast access to many actions or pages by typing (the Ctrl/Cmd+K palette), or a searchable list inside a popover. For a handful of actions use dropdown-menu. CommandDialog is usually opened by a shortcut, with no trigger, so focus has nowhere to return: remember the opener (`opener.current = document.activeElement` before opening) and refocus it in `onCloseAutoFocus={(event) => { event.preventDefault(); opener.current?.focus(); }}`.",
         "example": "const [open, setOpen] = useState(false);\n\n<Button variant=\"outline\" onClick={() => setOpen(true)}>Search</Button>\n<CommandDialog open={open} onOpenChange={setOpen}>\n  <CommandInput placeholder=\"Type a command\" />\n  <CommandList>\n    <CommandEmpty>Nothing found.</CommandEmpty>\n    <CommandGroup heading=\"Pages\">\n      <CommandItem onSelect={() => setOpen(false)}>Dashboard</CommandItem>\n      <CommandItem onSelect={() => setOpen(false)}>Settings <CommandShortcut>Ctrl ,</CommandShortcut></CommandItem>\n    </CommandGroup>\n    <CommandSeparator />\n    <CommandGroup heading=\"Account\">\n      <CommandItem onSelect={() => setOpen(false)}>Sign out</CommandItem>\n    </CommandGroup>\n  </CommandList>\n</CommandDialog>",
+        "client": true
+      }
+    },
+    {
+      "name": "compare-slider",
+      "type": "registry:ui",
+      "title": "Compare Slider",
+      "description": "Two layers of the same size, one over the other, with a divider that is dragged or moved with the keyboard to show more of one and less of the other: then and now, before and after.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/compare-slider.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/compare-slider.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Comparing two views of the same thing in the same frame: two pictures, two maps, two 3D viewers, any two children. Each side has a visible name. The divider is a slider, so it works without dragging. The frame is drawn left to right in every language (a picture is not mirrored in a right-to-left page), so the first layer is always on the left and the arrow keys move the divider the way they point. For two things that are not the same view use two cards side by side; for many pictures use gallery or carousel.",
+        "example": "<CompareSlider aspect={16 / 9} labels={{ first: \"1930\", second: \"Today\" }} aria-label=\"The square in 1930 and today\">\n  <CompareSliderFirst><img src=\"/square-1930.jpg\" alt=\"The square in 1930: a tram stop and a kiosk\" /></CompareSliderFirst>\n  <CompareSliderSecond><img src=\"/square-today.jpg\" alt=\"The square today: trees and a fountain\" /></CompareSliderSecond>\n  <CompareSliderLabels />\n  <CompareSliderHandle />\n</CompareSlider>\n\n// Controlled, with any two children\n<CompareSlider value={split} onValueChange={setSplit} labels={{ first: \"Survey\", second: \"Reconstruction\" }} aria-label=\"Survey and reconstruction\">\n  <CompareSliderFirst><SurveyView /></CompareSliderFirst>\n  <CompareSliderSecond><ReconstructionView /></CompareSliderSecond>\n  <CompareSliderLabels />\n  <CompareSliderHandle />\n</CompareSlider>",
         "client": true
       }
     },
@@ -1357,6 +1449,38 @@
       }
     },
     {
+      "name": "media-row-list",
+      "type": "registry:ui",
+      "title": "Media Row List",
+      "description": "The pictures or clips a person has added, as rows they can put in order, describe and choose a cover from: each row shows its upload progress or its error with a retry, a field for its text alternative, a \"cover\" choice and a remove button.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn",
+        "@rivier-ui/dropzone",
+        "@rivier-ui/input",
+        "@rivier-ui/sortable-list",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/media-row-list.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/media-row-list.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "After a dropzone, when the order of the files matters and each needs a description: the photos of a listing, the slides of a story, the pages of a document. It is ready-made from sortable-list (drag by the handle, lift and move with the keyboard, or the move buttons; every move is read out) and the upload rows of dropzone, and contains no upload engine: the project uploads and passes each row its state. For files whose order does not matter use the dropzone's own UploadList; to reorder things that are not files use sortable-list.",
+        "example": "const [rows, setRows] = useState<MediaRow[]>([\n  { id: \"a\", name: \"kitchen.jpg\", size: 1_200_000, state: \"done\", alt: \"The kitchen, from the door\" },\n  { id: \"b\", name: \"garden.jpg\", size: 2_400_000, state: \"uploading\", progress: 40 },\n  { id: \"c\", name: \"stairs.jpg\", state: \"failed\", error: \"The connection dropped.\" },\n]);\nconst [cover, setCover] = useState<string | null>(\"a\");\n<MediaRowList\n  aria-label=\"Pictures, in order\"\n  items={rows}\n  onItemsChange={setRows}\n  cover={cover}\n  onCoverChange={setCover}\n  onAltChange={(id, alt) => setRows((all) => all.map((row) => (row.id === id ? { ...row, alt } : row)))}\n  onRemove={(id) => setRows((all) => all.filter((row) => row.id !== id))}\n  onRetry={(id) => upload(id)}\n/>",
+        "client": true
+      }
+    },
+    {
       "name": "message",
       "type": "registry:ui",
       "title": "Message",
@@ -1597,6 +1721,36 @@
         "category": "ui",
         "when": "A wait that can be measured: an upload, a multi-step job. Leave `value` out (or pass null) for the indeterminate state. For a short unknown wait use spinner. Always label it.",
         "example": "<Progress value={64} aria-label=\"Uploading\" />\n<Progress value={3} max={8} size=\"sm\" aria-label=\"Step 3 of 8\" />\n<Progress aria-label=\"Connecting\" />",
+        "client": true
+      }
+    },
+    {
+      "name": "provenance-label",
+      "type": "registry:ui",
+      "title": "Provenance Label",
+      "description": "A label that stays on a picture, a video or a 3D view and says what it is (a photograph, a reconstruction, made by a model), with a popover for its sources, placed so the media's own controls can never cover it.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/popover"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/provenance-label.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/provenance-label.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "A reader must not mistake what they are looking at: a reconstruction beside a photograph, a generated picture, an artist's impression, archive footage. Two placements. ProvenanceFrame puts the label in its own strip above the media, outside the media's box, where nothing the media draws can reach it: use this by default. `position` puts it over a top corner inside the media's box, above its controls and on a solid ground: use this when the label must also stay in full screen, with the label inside the element that goes full screen. The bottom edge is left to controls and captions. For the source of one fact in text use fact-row's SourceChip; for a key of classes inside a scene use certainty-legend.",
+        "example": "// In its own strip above the media\n<ProvenanceFrame>\n  <ProvenanceLabel details={<p>Drawn from the 1890 survey and two photographs. The roof is a guess.</p>}>Imagined reconstruction</ProvenanceLabel>\n  <img src=\"/mill.jpg\" alt=\"The mill as it may have looked\" />\n</ProvenanceFrame>\n\n// Over a corner of a player, so it stays in full screen\n<VideoPlayer aria-label=\"The mill, reconstructed\">\n  <VideoPlayerVideo src=\"/mill.mp4\" />\n  <ProvenanceLabel position=\"top-start\">Imagined reconstruction</ProvenanceLabel>\n  <VideoPlayerControls>…</VideoPlayerControls>\n</VideoPlayer>",
         "client": true
       }
     },
@@ -2546,6 +2700,33 @@
       }
     },
     {
+      "name": "virtual-list",
+      "type": "registry:ui",
+      "title": "Virtual List",
+      "description": "A long list or grid that renders only the rows in view: thousands of items of any height in a box that scrolls, each still announced with its position in the whole list, with a way to go to an item and to come back to where the person was.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/virtual-list.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/virtual-list.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "More items than the page should hold at once (a few hundred or more): a feed, a log, search results, a picture library. Rows may have any height: each is measured once it is drawn and the rest are estimated, and the view does not jump when a row above it turns out taller. Give the box a height and a name (`aria-label`). For a short list render the rows plainly; for a conversation that grows at the bottom use thread; for pages of results use pagination. Written here on ResizeObserver instead of adding a virtualisation package: a headless one would bring the offsets but not the roles, the positions for screen readers, the kept focus or the restoration, which are most of this file. It scrolls inside its own box only, not with the window.",
+        "example": "// Rows of any height\n<VirtualList count={messages.length} estimateSize={72} getKey={(index) => messages[index].id} aria-label=\"Messages\" className=\"h-96 rounded-surface border\">\n  {(index) => <article className=\"border-b p-3\">{messages[index].text}</article>}\n</VirtualList>\n\n// A grid, as many columns as fit; the place is remembered for this tab\n<VirtualGrid count={pictures.length} columns={{ minWidth: 160 }} gap={8} estimateSize={160} restoreKey=\"library\" aria-label=\"Pictures\" className=\"h-[32rem]\">\n  {(index) => <img src={pictures[index].src} alt={pictures[index].alt} className=\"aspect-square w-full rounded-control object-cover\" />}\n</VirtualGrid>\n\n// Going to an item\nconst list = useRef<VirtualListHandle>(null);\n<VirtualList handleRef={list} count={10000} aria-label=\"Lines\">{(index) => <p className=\"p-2\">Line {index + 1}</p>}</VirtualList>\n<Button onClick={() => list.current?.scrollToIndex(4999, { align: \"center\" })}>Go to line 5,000</Button>",
+        "client": true
+      }
+    },
+    {
       "name": "wizard",
       "type": "registry:ui",
       "title": "Wizard",
@@ -2837,6 +3018,40 @@
         "when": "Spacing a run of siblings evenly: form fields, a button row, a header with actions. For columns that reflow by width use grid; for unequal tiles use bento-grid.",
         "example": "<Stack gap=\"lg\">\n  <h2>Title</h2>\n  <p>Body</p>\n</Stack>\n<Stack direction=\"horizontal\" gap=\"sm\" align=\"center\" justify=\"between\" wrap>\n  <span>Plan</span>\n  <Button size=\"sm\">Change</Button>\n</Stack>\n<Stack asChild gap=\"xs\"><ul><li>One</li><li>Two</li></ul></Stack>",
         "client": false
+      }
+    },
+    {
+      "name": "film-stage",
+      "type": "registry:component",
+      "title": "Film Stage",
+      "description": "A stage for a sequence of timed scenes with a transport: it owns the clock and the chrome (play, time bar, speed, sound), mounts the scene for the current moment, cuts or crossfades between scenes, and can draw any moment on request for export.",
+      "categories": [
+        "motion"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn",
+        "@rivier-ui/scene-strip",
+        "@rivier-ui/scrubber",
+        "@rivier-ui/use-controllable-state",
+        "@rivier-ui/use-media"
+      ],
+      "files": [
+        {
+          "path": "registry/motion/film-stage.tsx",
+          "type": "registry:component",
+          "target": "components/motion/film-stage.tsx"
+        }
+      ],
+      "meta": {
+        "category": "motion",
+        "when": "Content the project draws itself from a time: an animated explainer, a story in scenes, a slideshow with narration, a film assembled from markup, SVG or canvas. Each scene gets its own local time and draws from it, so any frame can be drawn again exactly. The stage is the clock other things follow: scrubber, scene-strip, captions and hotspots work inside it as they do inside video-player, and narration audio is kept in step. For a video or sound file use video-player or audio-player; for motion tied to scrolling use scroll-scene; for a set of pictures a person pages through use carousel.",
+        "example": "const scenes = [\n  { id: \"title\", duration: 4, label: \"Title\", children: <h2 className=\"p-8 text-3xl\">How a pot is thrown</h2> },\n  { id: \"wheel\", duration: 6, label: \"On the wheel\", transition: \"crossfade\" as const, render: ({ progress }) => <Wheel turn={progress} /> },\n];\n<FilmStage scenes={scenes} aria-label=\"How a pot is thrown\">\n  <FilmStageFrame aspect={16 / 9}>\n    <Captions cues={cues} lang=\"en\" />\n  </FilmStageFrame>\n  <FilmStageAudio src=\"/narration.mp3\" />\n  <FilmStageControls>\n    <FilmStageScrubber />\n    <FilmStageControlsRow>\n      <FilmStagePlay />\n      <FilmStageMute />\n      <FilmStageTime />\n      <FilmStageRate className=\"ms-auto\" />\n    </FilmStageControlsRow>\n  </FilmStageControls>\n  <FilmStageSceneStrip />\n</FilmStage>\n\n// Export: a headless browser draws each frame, with no timer running on the page\n<FilmStage scenes={scenes} deterministic exportName=\"main\" aria-label=\"How a pot is thrown\">…</FilmStage>\n// in the page, from the exporter: await window.__filmStage.main.renderAt(frame / 30), then take the picture",
+        "client": true
       }
     },
     {
@@ -3338,6 +3553,40 @@
         "category": "three",
         "when": "Showing one object: a product, a loaded model, a shape of your own. Use it inside scene. For decoration without a subject use orb or floating-shapes.",
         "example": "<Scene aspect={4 / 3} label=\"A turning torus knot\">\n  <ModelStage>\n    <mesh>\n      <torusKnotGeometry args={[1, 0.32, 128, 16]} />\n      <meshStandardMaterial flatShading />\n    </mesh>\n  </ModelStage>\n</Scene>",
+        "client": true
+      }
+    },
+    {
+      "name": "model-viewer",
+      "type": "registry:component",
+      "title": "Model Viewer",
+      "description": "Shows one 3D model that a person can turn, zoom and reset: a glTF or GLB file, or Gaussian splats (.spz, .ply, .splat, .ksplat, .sog), with a poster and progress while it loads and a still fallback where 3D cannot run.",
+      "categories": [
+        "three"
+      ],
+      "dependencies": [
+        "@sparkjsdev/spark",
+        "lucide-react",
+        "three"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn",
+        "@rivier-ui/progress",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/three/model-viewer.tsx",
+          "type": "registry:component",
+          "target": "components/three/model-viewer.tsx"
+        }
+      ],
+      "meta": {
+        "category": "three",
+        "when": "A file to look at from every side: an object, a product, a scanned place. It is a whole viewer, not a part of scene: for your own meshes inside a react-three-fiber canvas use scene with model-stage. Nothing heavy is in this file: three.js is fetched when the viewer comes near the screen, its glTF loader only for glTF, and Spark (`@sparkjsdev/spark`, installed with this item) only when the file is splats. glTF that carries splats in an extension is not read (Spark has no glTF loader); Draco, Meshopt and KTX2 compression need their decoders set in `configureLoader`. Plain wheel and vertical swipes scroll the page: zoom is pinch, Ctrl with the wheel, the keys or the buttons. To compare two models, give two viewers the same `view` and `bounds` inside compare-slider, with `children={null}` and buttons of your own that change the shared view.",
+        "example": "<ModelViewer src=\"/models/vase.glb\" alt=\"A clay vase with a painted belt\" poster=\"/models/vase.jpg\" />\n\n// Splats, turning by itself (never under reduced motion), with a hand-off to AR on phones\n<ModelViewer\n  src=\"/models/courtyard.spz\"\n  alt=\"The courtyard, scanned in 2026\"\n  autoRotate\n  rotation={[180, 0, 0]}\n  ar={{ usdz: \"/models/courtyard.usdz\", glb: \"https://example.com/models/courtyard.glb\" }}\n/>\n\n// Two viewers, one camera\nconst [view, setView] = useState<ModelView>({ azimuth: 0, polar: 15, zoom: 1 });\nconst frame = { center: [0, 4, 0], radius: 9 } as const; // one sphere for both, so they keep their sizes and line up\n<ModelViewer src=\"/models/then.glb\" alt=\"As built\" view={view} onViewChange={setView} bounds={frame} />\n<ModelViewer src=\"/models/now.glb\" alt=\"Today\" view={view} onViewChange={setView} bounds={frame} />",
         "client": true
       }
     },

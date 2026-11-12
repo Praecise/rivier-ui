@@ -21,8 +21,9 @@ The repository is private until launch.
 - **Past the flat page.** Bento grids and layout, motion and page transitions, 3D scenes, and charts are part of
   the same library and the same theme, not separate products with separate looks.
 - **Built on what already works.** Radix for behaviour and accessibility, Tailwind CSS for styling, Motion for
-  animation, three.js for 3D, d3 for chart maths, cmdk and Sonner for the palette and toasts. Where Radix has
-  no primitive (calendar, sortable list, bottom sheet, media players) the component is written here to the
+  animation, three.js for 3D (and Spark for Gaussian splats, fetched only by a viewer that shows them), d3
+  for chart maths, cmdk and Sonner for the palette and toasts. Where Radix has
+  no primitive (calendar, sortable list, bottom sheet, media players, carousel, windowed list) the component is written here to the
   WAI-ARIA pattern rather than adding a package: every dependency is MIT or Apache 2.0 and nothing is hosted. Theme variable names follow the shadcn convention, so
   components written for it take this theme as they are.
 
@@ -72,9 +73,11 @@ edited to restyle them. All tokens: `registry/theme/rivier-ui.css`.
 
 `npm run ui -- list` is the current answer. By category: `ui` (controls and surfaces, dates and times,
 steps and wizards, sortable lists, sheets and docks, conversation parts, pictures and players, uploads,
+carousels, windowed lists and grids, a then-and-now slider, a certainty legend and a provenance label,
 records and consent), `layout` (containers, sections, bento grid, marquee, a frame for a map), `motion`
-(reveals, scroll scenes, pointer effects, page and view transitions), `three` (scenes that fall back to a
-still when WebGL or motion is not available), `viz` (charts and sparklines), `lib` (helpers: class names,
+(reveals, scroll scenes, pointer effects, page and view transitions, a stage for timed scenes), `three`
+(scenes that fall back to a still when WebGL or motion is not available, and a viewer for a glTF model or
+Gaussian splats), `viz` (charts and sparklines), `lib` (helpers: class names,
 motion tokens, reading direction, screen-reader announcements, controllable state).
 
 Every component is keyboard operable to the WAI-ARIA pattern for its kind, works right-to-left and at phone
@@ -107,6 +110,9 @@ npm run site:dev       # the showcase, http://localhost:3320: every item, with t
 npm run smoke          # with the showcase running: the overview page in a real browser
 npm run check          # with the showcase running: every component page: keyboard, focus, roles, right-to-left, 390 px, axe-core
 ```
+
+The 3D files on the showcase's `/models` page are written by `scripts/make-test-assets.ts` (computed, not
+scanned or downloaded) and committed in `site/public/models/`.
 
 A component is one file in `registry/<category>/`. Its dependencies are read from its imports; nothing is
 listed by hand. It is shown on a showcase page (`site/src/app/<group>/`) and tested by that page's checks

@@ -11,4 +11,9 @@ export const PAGES = [
   { href: "/gallery", title: "Pictures and uploads", description: "A gallery, a lightbox with zoom, shared-element transitions, a dropzone with progress." },
   { href: "/players", title: "Video and sound", description: "A video player, an audio player with a waveform, a scrubber, captions." },
   { href: "/records", title: "Records and decisions", description: "A compare table, fact rows with their source, consent, a language switcher, prices, a countdown." },
+  { href: "/models", title: "Models in 3D", description: "A viewer for one model, glTF or Gaussian splats, with a poster, progress, keys and a still fallback." },
+  { href: "/evidence", title: "Comparison and provenance", description: "A then-and-now slider, a legend of certainty classes, a label that says what a picture is." },
+  { href: "/carousel", title: "Carousels and media rows", description: "A scroll-snap carousel with autoplay that can be paused, and reorderable rows of uploads." },
+  { href: "/lists", title: "Lists of any length", description: "A windowed list and grid for thousands of rows of any height, with their place remembered." },
+  { href: "/stage", title: "Stage for timed scenes", description: "A sequence of timed scenes with a transport and a clock, and frames drawn on request for export." },
 ] as const;
