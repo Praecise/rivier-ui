@@ -153,7 +153,9 @@ export function makeKit(page: Page, size: SizeName, dir: Direction, tally: Tally
       }),
     focusIs: (selector) => page.evaluate((s) => document.activeElement?.matches(s) ?? false, selector),
     announced: () => page.evaluate(() => [...document.querySelectorAll("#rui-announcer [role=log] > div")].map((node) => node.textContent ?? "")),
-    overflow: () => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth),
+    // Measured against the width the device was given, not the page's own client width: a phone browser
+    // widens its layout viewport to fit content that overflows, which would hide the overflow.
+    overflow: () => page.evaluate((width) => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - width, SIZES[size].width),
     async screenshot(name) {
       await page.screenshot({ path: join(outDir, `${group}-${size}-${dir}-${name}.png`) as `${string}.png` });
     },

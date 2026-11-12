@@ -7,8 +7,8 @@
 //   npm run check -- url=http://localhost:3320 browser="<path to Edge or Chrome>"
 //
 // Each group has a page in the showcase (site/src/app/<group>/page.tsx) and a file here that exports
-// `route` and `run(kit)`. Every group is run three times: desktop, phone (390 px, touch), and phone
-// right-to-left. Around the group's own checks the runner tests, each time: axe-core finds no WCAG 2.2 A or
+// `route` and `run(kit)`. Every group is run four times: desktop, desktop right-to-left, phone (390 px,
+// touch), and phone right-to-left. Around the group's own checks the runner tests, each time: axe-core finds no WCAG 2.2 A or
 // AA violation, nothing overflows sideways, and the page and console report no errors.
 
 import { mkdirSync, readdirSync } from "node:fs";
@@ -43,6 +43,7 @@ mkdirSync(outDir, { recursive: true });
 const tally: Tally = { passes: [], failures: [] };
 const PASSES: { size: SizeName; dir: Direction }[] = [
   { size: "desktop", dir: "ltr" },
+  { size: "desktop", dir: "rtl" },
   { size: "phone", dir: "ltr" },
   { size: "phone", dir: "rtl" },
 ];
