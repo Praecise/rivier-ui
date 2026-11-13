@@ -19,8 +19,6 @@ full ground covers MIT, ISC, BSD and Apache-2.0 packages of that kind):
 | `d3-contour` | ISC | Density contours |
 | `d3-delaunay` | ISC | The nearest point under the pointer in scatter, density and map layers |
 | `d3-geo` | ISC | Map projections, paths, the graticule and great-circle routes |
-| `@tanstack/react-table` | MIT | The data grid's state: sorting, filtering, grouping, pinning, selection, pages |
-| `@tanstack/react-virtual` | MIT | Rows of the data grid drawn only when in view |
 
 ### Charts (`viz`)
 

@@ -959,6 +959,41 @@
       }
     },
     {
+      "name": "data-grid",
+      "type": "registry:ui",
+      "title": "Data Grid",
+      "description": "A table of records a person works in: sorting by one or several columns, a filter per column and a search across all, grouping with totals, columns pinned to the start, shown and hidden, rows chosen by checkbox, pages or a window of rows for thousands, and cells edited in place; one tab stop and arrow keys from cell to cell, to the WAI-ARIA grid pattern.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/button",
+        "@rivier-ui/checkbox",
+        "@rivier-ui/cn",
+        "@rivier-ui/dropdown-menu",
+        "@rivier-ui/input",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/data-grid.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/data-grid.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Lists of records that are sorted, narrowed, compared and changed: orders, accounts, files, results. For a few rows to read use table; for side-by-side comparison of two to four things use compare-table; for an endless feed use virtual-list.",
+        "example": "<DataGrid\n  label=\"Orders\"\n  rows={orders}\n  rowId={(order) => order.id}\n  columns={[\n    { key: \"id\", header: \"Order\", pin: \"start\", width: 110 },\n    { key: \"customer\", header: \"Customer\" },\n    { key: \"status\", header: \"Status\" },\n    { key: \"total\", header: \"Total\", type: \"number\", aggregate: \"sum\", editable: true },\n  ]}\n  selectable\n  pageSize={20}\n  onCellEdit={(id, key, value) => save(id, key, value)}\n/>",
+        "client": true
+      }
+    },
+    {
       "name": "date-picker",
       "type": "registry:ui",
       "title": "Date Picker",

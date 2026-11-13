@@ -640,6 +640,29 @@ Use it: Something the person holds for a limited time: a reserved seat, a price 
 </p>
 ```
 
+### data-grid
+
+A table of records a person works in: sorting by one or several columns, a filter per column and a search across all, grouping with totals, columns pinned to the start, shown and hidden, rows chosen by checkbox, pages or a window of rows for thousands, and cells edited in place; one tab stop and arrow keys from cell to cell, to the WAI-ARIA grid pattern.
+
+Use it: Lists of records that are sorted, narrowed, compared and changed: orders, accounts, files, results. For a few rows to read use table; for side-by-side comparison of two to four things use compare-table; for an endless feed use virtual-list.
+
+```tsx
+<DataGrid
+  label="Orders"
+  rows={orders}
+  rowId={(order) => order.id}
+  columns={[
+    { key: "id", header: "Order", pin: "start", width: 110 },
+    { key: "customer", header: "Customer" },
+    { key: "status", header: "Status" },
+    { key: "total", header: "Total", type: "number", aggregate: "sum", editable: true },
+  ]}
+  selectable
+  pageSize={20}
+  onCellEdit={(id, key, value) => save(id, key, value)}
+/>
+```
+
 ### date-picker
 
 A button that shows a date, or a range of dates, and opens a calendar in a popover to choose it. Values are "YYYY-MM-DD" strings.
