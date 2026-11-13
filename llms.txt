@@ -2571,6 +2571,22 @@ Use it: Comparing distributions across groups: which is higher, which is wider, 
 />
 ```
 
+### bullet-chart
+
+One measure against its target and its bands (poor, fair, good) in a single slim row: the value as a bar, the target as a tick, the bands as steps of grey behind them. Several rows stack, each on its own scale.
+
+Use it: Showing how a few measures stand against their goals in little space: a dashboard of targets, a scorecard. For one value against a limit with nothing else use radial-progress or progress; to compare many values with each other use bar-chart.
+
+```tsx
+<BulletChart
+  label="Quarter targets"
+  items={[
+    { label: "Revenue", value: 270, target: 250, ranges: [150, 225, 300] },
+    { label: "New customers", value: 1400, target: 1600, ranges: [1000, 1500, 2000] },
+  ]}
+/>
+```
+
 ### calendar-heatmap
 
 A value per day laid out as a calendar, a column for each week and a row for each weekday, coloured on one hue from faint to strong, with month and weekday names and arrow keys that move by day and by week.
@@ -2585,6 +2601,24 @@ Use it: Showing a daily measure over months: activity, sales per day, rainfall, 
   value="count"
   from="2026-01-01"
   to="2026-03-31"
+/>
+```
+
+### candlestick-chart
+
+Opening, highest, lowest and closing values per period (a price, a reading): a thin line from low to high, a body from open to close, filled when it closed lower and hollow when it closed higher, so the direction is never colour alone.
+
+Use it: Showing the range and the direction of a value within each period: prices by day, temperatures by day with their extremes. For the close alone use line-chart; for spread across many observations use box-plot.
+
+```tsx
+<CandlestickChart
+  label="Price by day"
+  data={[
+    { day: new Date("2026-03-02"), open: 10, high: 12, low: 9.5, close: 11.4 },
+    { day: new Date("2026-03-03"), open: 11.4, high: 11.8, low: 10.1, close: 10.3 },
+    { day: new Date("2026-03-04"), open: 10.3, high: 11, low: 10, close: 10.9 },
+  ]}
+  x="day"
 />
 ```
 
@@ -2691,6 +2725,26 @@ Use it: Showing a prediction or an estimate with its uncertainty: a forecast, a 
 />
 ```
 
+### funnel-chart
+
+The steps of a process that people (or things) drop out of, as centred bars that narrow with the count, each with its count, its share of the first step and its share of the step before.
+
+Use it: Showing where a sequence loses the most: sign-up steps, a sales pipeline, a hiring process. For flows that split and join use sankey-chart; for amounts that are not a sequence use bar-chart horizontal.
+
+```tsx
+<FunnelChart
+  label="Sign-up steps"
+  data={[
+    { step: "Visited", people: 1200 },
+    { step: "Started", people: 640 },
+    { step: "Confirmed email", people: 410 },
+    { step: "Finished", people: 290 },
+  ]}
+  x="step"
+  value="people"
+/>
+```
+
 ### gantt-chart
 
 Tasks as bars along a time axis, one row each, under optional group headings: how far each has got, which must finish before another starts (arrows), milestones as diamonds and a line for today, with Up and Down reading each task.
@@ -2779,6 +2833,28 @@ Use it: Showing who or what is connected to what: clusters, bridges between grou
   label="Libraries and what they use"
   nodes={[{ id: "app", group: "Apps" }, { id: "ui", group: "Libraries" }, { id: "charts", group: "Libraries" }, { id: "maths", group: "Libraries" }]}
   links={[{ source: "app", target: "ui" }, { source: "app", target: "charts" }, { source: "charts", target: "maths" }]}
+/>
+```
+
+### radar-chart
+
+Several measures on spokes around a centre, one closed shape per series, so profiles can be compared at a glance: which is stronger where, with arrow keys reading each spoke.
+
+Use it: Comparing two or three profiles across five to ten measures on the same scale: skills, product ratings, nutrition against a target. For exact comparison, or measures on different scales, use bar-chart or small-multiples; with more than three series the shapes tangle.
+
+```tsx
+<RadarChart
+  label="Two plans compared"
+  data={[
+    { measure: "Speed", basic: 3, plus: 4 },
+    { measure: "Storage", basic: 2, plus: 5 },
+    { measure: "Support", basic: 3, plus: 4 },
+    { measure: "Price", basic: 5, plus: 3 },
+    { measure: "Security", basic: 4, plus: 4 },
+  ]}
+  axis="measure"
+  series={[{ key: "basic", label: "Basic" }, { key: "plus", label: "Plus" }]}
+  max={5}
 />
 ```
 
@@ -2903,5 +2979,27 @@ Use it: Showing how a large total divides across a hierarchy (a budget by depart
       { name: "Travel", value: 260 },
     ],
   }}
+/>
+```
+
+### waterfall-chart
+
+How a starting amount becomes an ending one, step by step: each rise or fall a bar floating from the running total, totals standing on the baseline, signs printed on every step so rises and falls never rest on colour.
+
+Use it: Explaining a change between two totals: a budget's start to its end, revenue to profit, last year to this year by cause. For parts of one total use bar-chart stacked or treemap; for change over time use line-chart.
+
+```tsx
+<WaterfallChart
+  label="From revenue to profit"
+  data={[
+    { step: "Revenue", amount: 500, total: true },
+    { step: "Costs", amount: -220 },
+    { step: "Marketing", amount: -80 },
+    { step: "Other income", amount: 30 },
+    { step: "Profit", amount: 230, total: true },
+  ]}
+  x="step"
+  value="amount"
+  total="total"
 />
 ```

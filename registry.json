@@ -3795,6 +3795,39 @@
       }
     },
     {
+      "name": "bullet-chart",
+      "type": "registry:component",
+      "title": "Bullet Chart",
+      "description": "One measure against its target and its bands (poor, fair, good) in a single slim row: the value as a bar, the target as a tick, the bands as steps of grey behind them. Several rows stack, each on its own scale.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale"
+      ],
+      "devDependencies": [
+        "@types/d3-scale"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/bullet-chart.tsx",
+          "type": "registry:component",
+          "target": "components/viz/bullet-chart.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing how a few measures stand against their goals in little space: a dashboard of targets, a scorecard. For one value against a limit with nothing else use radial-progress or progress; to compare many values with each other use bar-chart.",
+        "example": "<BulletChart\n  label=\"Quarter targets\"\n  items={[\n    { label: \"Revenue\", value: 270, target: 250, ranges: [150, 225, 300] },\n    { label: \"New customers\", value: 1400, target: 1600, ranges: [1000, 1500, 2000] },\n  ]}\n/>",
+        "client": true
+      }
+    },
+    {
       "name": "calendar-heatmap",
       "type": "registry:component",
       "title": "Calendar Heatmap",
@@ -3824,6 +3857,39 @@
         "category": "viz",
         "when": "Showing a daily measure over months: activity, sales per day, rainfall, where the pattern by weekday and season matters. For a few weeks with exact values use bar-chart; for a trend use line-chart; to pick a day use calendar.",
         "example": "<CalendarHeatmap\n  label=\"Workouts per day\"\n  data={[{ day: \"2026-01-05\", count: 1 }, { day: \"2026-01-06\", count: 2 }, { day: \"2026-01-09\", count: 1 }]}\n  day=\"day\"\n  value=\"count\"\n  from=\"2026-01-01\"\n  to=\"2026-03-31\"\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "candlestick-chart",
+      "type": "registry:component",
+      "title": "Candlestick Chart",
+      "description": "Opening, highest, lowest and closing values per period (a price, a reading): a thin line from low to high, a body from open to close, filled when it closed lower and hollow when it closed higher, so the direction is never colour alone.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale"
+      ],
+      "devDependencies": [
+        "@types/d3-scale"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/candlestick-chart.tsx",
+          "type": "registry:component",
+          "target": "components/viz/candlestick-chart.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing the range and the direction of a value within each period: prices by day, temperatures by day with their extremes. For the close alone use line-chart; for spread across many observations use box-plot.",
+        "example": "<CandlestickChart\n  label=\"Price by day\"\n  data={[\n    { day: new Date(\"2026-03-02\"), open: 10, high: 12, low: 9.5, close: 11.4 },\n    { day: new Date(\"2026-03-03\"), open: 11.4, high: 11.8, low: 10.1, close: 10.3 },\n    { day: new Date(\"2026-03-04\"), open: 10.3, high: 11, low: 10, close: 10.9 },\n  ]}\n  x=\"day\"\n/>",
         "client": true
       }
     },
@@ -4000,6 +4066,34 @@
       }
     },
     {
+      "name": "funnel-chart",
+      "type": "registry:component",
+      "title": "Funnel Chart",
+      "description": "The steps of a process that people (or things) drop out of, as centred bars that narrow with the count, each with its count, its share of the first step and its share of the step before.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/funnel-chart.tsx",
+          "type": "registry:component",
+          "target": "components/viz/funnel-chart.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing where a sequence loses the most: sign-up steps, a sales pipeline, a hiring process. For flows that split and join use sankey-chart; for amounts that are not a sequence use bar-chart horizontal.",
+        "example": "<FunnelChart\n  label=\"Sign-up steps\"\n  data={[\n    { step: \"Visited\", people: 1200 },\n    { step: \"Started\", people: 640 },\n    { step: \"Confirmed email\", people: 410 },\n    { step: \"Finished\", people: 290 },\n  ]}\n  x=\"step\"\n  value=\"people\"\n/>",
+        "client": true
+      }
+    },
+    {
       "name": "gantt-chart",
       "type": "registry:component",
       "title": "Gantt Chart",
@@ -4163,6 +4257,34 @@
         "category": "viz",
         "when": "Showing who or what is connected to what: clusters, bridges between groups, the most linked items. Keep it to a few hundred nodes. For amounts flowing in one direction use sankey-chart; for a hierarchy use treemap or tree-view; for a process the person edits use flow-diagram.",
         "example": "<NetworkGraph\n  label=\"Libraries and what they use\"\n  nodes={[{ id: \"app\", group: \"Apps\" }, { id: \"ui\", group: \"Libraries\" }, { id: \"charts\", group: \"Libraries\" }, { id: \"maths\", group: \"Libraries\" }]}\n  links={[{ source: \"app\", target: \"ui\" }, { source: \"app\", target: \"charts\" }, { source: \"charts\", target: \"maths\" }]}\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "radar-chart",
+      "type": "registry:component",
+      "title": "Radar Chart",
+      "description": "Several measures on spokes around a centre, one closed shape per series, so profiles can be compared at a glance: which is stronger where, with arrow keys reading each spoke.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/radar-chart.tsx",
+          "type": "registry:component",
+          "target": "components/viz/radar-chart.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Comparing two or three profiles across five to ten measures on the same scale: skills, product ratings, nutrition against a target. For exact comparison, or measures on different scales, use bar-chart or small-multiples; with more than three series the shapes tangle.",
+        "example": "<RadarChart\n  label=\"Two plans compared\"\n  data={[\n    { measure: \"Speed\", basic: 3, plus: 4 },\n    { measure: \"Storage\", basic: 2, plus: 5 },\n    { measure: \"Support\", basic: 3, plus: 4 },\n    { measure: \"Price\", basic: 5, plus: 3 },\n    { measure: \"Security\", basic: 4, plus: 4 },\n  ]}\n  axis=\"measure\"\n  series={[{ key: \"basic\", label: \"Basic\" }, { key: \"plus\", label: \"Plus\" }]}\n  max={5}\n/>",
         "client": true
       }
     },
@@ -4400,6 +4522,39 @@
         "category": "viz",
         "when": "Showing how a large total divides across a hierarchy (a budget by department and team, storage by folder) when there are too many parts for a donut. For a few parts use donut-chart; to see the levels as rings use sunburst; to compare exact sizes use bar-chart.",
         "example": "<Treemap\n  label=\"Spending by area\"\n  data={{\n    name: \"All spending\",\n    children: [\n      { name: \"Housing\", children: [{ name: \"Rent\", value: 1200 }, { name: \"Power\", value: 140 }] },\n      { name: \"Food\", children: [{ name: \"Groceries\", value: 420 }, { name: \"Cafés\", value: 90 }] },\n      { name: \"Travel\", value: 260 },\n    ],\n  }}\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "waterfall-chart",
+      "type": "registry:component",
+      "title": "Waterfall Chart",
+      "description": "How a starting amount becomes an ending one, step by step: each rise or fall a bar floating from the running total, totals standing on the baseline, signs printed on every step so rises and falls never rest on colour.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale"
+      ],
+      "devDependencies": [
+        "@types/d3-scale"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/waterfall-chart.tsx",
+          "type": "registry:component",
+          "target": "components/viz/waterfall-chart.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Explaining a change between two totals: a budget's start to its end, revenue to profit, last year to this year by cause. For parts of one total use bar-chart stacked or treemap; for change over time use line-chart.",
+        "example": "<WaterfallChart\n  label=\"From revenue to profit\"\n  data={[\n    { step: \"Revenue\", amount: 500, total: true },\n    { step: \"Costs\", amount: -220 },\n    { step: \"Marketing\", amount: -80 },\n    { step: \"Other income\", amount: 30 },\n    { step: \"Profit\", amount: 230, total: true },\n  ]}\n  x=\"step\"\n  value=\"amount\"\n  total=\"total\"\n/>",
         "client": true
       }
     }
