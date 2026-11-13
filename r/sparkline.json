@@ -11,6 +11,10 @@
     "d3-scale",
     "d3-shape"
   ],
+  "devDependencies": [
+    "@types/d3-scale",
+    "@types/d3-shape"
+  ],
   "registryDependencies": [
     "@rivier-ui/theme",
     "@rivier-ui/chart",
