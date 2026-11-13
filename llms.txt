@@ -2670,6 +2670,20 @@ Use it: Showing exchanges within a set where both directions matter: moves betwe
 />
 ```
 
+### choropleth
+
+A geo-map layer that colours each region by a number, on one hue from faint to strong, on two hues either side of a midpoint, or in classes with stated edges; with a legend that says each step's range in words and a table of every region's value.
+
+Use it: Showing a rate or a share that varies by region: turnout by district, rainfall by county. Use rates, not raw counts (large regions look important whatever their count); for counts use geo-markers bubbles. Goes inside geo-map.
+
+```tsx
+const scale = choroplethScale(regions.features.map((f) => f.properties.rate), { thresholds: [10, 20, 30] });
+<GeoMap label="Rate by region" fit={regions}>
+  <Choropleth label="Rate by region" data={regions} value={(f) => f.properties?.rate} name={(f) => f.properties?.name} scale={scale} />
+</GeoMap>
+<ChoroplethLegend title="Rate (%)" scale={scale} />
+```
+
 ### circle-pack
 
 A hierarchy as circles inside circles: each group an outline holding its parts, each part a circle whose area is its size, with zooming into a group by click or Enter and back out by the trail or Backspace.
@@ -2811,6 +2825,88 @@ Use it: Planning or reporting work over time: a project plan, a release schedule
   ]}
   today="2026-03-20"
 />
+```
+
+### geo-hexbin
+
+A geo-map layer that gathers many points into hexagons or squares of equal size on screen, each coloured on one hue by how many points (or how much weight) fall in it, re-gathered as the map zooms; each cell read by arrow keys and listed in a table.
+
+Use it: Thousands of points where single marks would pile up: sightings, incidents, trips, addresses. For a few dozen named places use geo-markers; for values that belong to regions use choropleth. Goes inside geo-map.
+
+```tsx
+<GeoMap label="Sightings" fit={area}>
+  <GeoFeatures data={area} />
+  <GeoHexbin label="Sightings" points={sightings} radius={14} valueLabel="Sightings" />
+</GeoMap>
+```
+
+### geo-map
+
+A map drawn from GeoJSON the project passes (no tiles, no hosted data), in any d3-geo projection fitted to its box, zoomed and panned by dragging, pinching, Ctrl and the wheel, a double click, buttons or keys, with parts for a graticule, plain shapes, a scale bar, and layers that are read item by item by arrow keys.
+
+Use it: Showing places, regions or routes from data the project holds: a choropleth, sites on a map, flows between cities. Add layers inside it: choropleth, geo-markers, geo-routes, geo-hexbin, geo-tiles. Inside layout/map-frame it loads only when asked. For a street map with search and directions, bring a map engine and put it in map-frame; for a spinning globe as decoration use three/globe.
+
+```tsx
+<GeoMap label="Regions of the study area" fit={regions} projection="equal-earth">
+  <GeoGraticule />
+  <GeoFeatures data={regions} />
+  <GeoMarkers label="Sites" points={[{ id: "a", name: "Site A", lon: 10.7, lat: 59.9 }]} />
+  <GeoScaleBar />
+</GeoMap>
+```
+
+### geo-markers
+
+A geo-map layer of places: points in their group's colour and shape with optional names, or bubbles whose area is a number; each read by arrow keys and listed in a table.
+
+Use it: Marking sites, cities or events on a map, or comparing counts by place (bubbles: area, never radius, carries the number). For values that belong to whole regions use choropleth; for thousands of points use geo-hexbin. Goes inside geo-map.
+
+```tsx
+<GeoMap label="Our stores" fit={country}>
+  <GeoFeatures data={country} />
+  <GeoMarkers
+    label="Stores"
+    points={[
+      { id: "a", name: "Harbour", lon: 5.32, lat: 60.39, value: 120 },
+      { id: "b", name: "Station", lon: 10.75, lat: 59.91, value: 340 },
+    ]}
+    variant="bubble"
+    valueLabel="Visits"
+  />
+</GeoMap>
+```
+
+### geo-routes
+
+A geo-map layer of journeys and flows between places: great-circle routes (the shortest way over the globe) or arcs drawn over the map, thicker for larger amounts, with an arrow for the direction; each read by arrow keys and listed in a table.
+
+Use it: Showing movement between places: flights, deliveries, migration, trade. Keep to a few dozen routes, or aggregate them first. For flows without geography use sankey-chart or chord-diagram. Goes inside geo-map.
+
+```tsx
+<GeoMap label="Flights from the hub" projection="natural-earth">
+  <GeoGraticule />
+  <GeoRoutes
+    label="Flights"
+    routes={[
+      { id: "1", name: "Hub to Port", from: [10.7, 59.9], to: [-74, 40.7], value: 12 },
+      { id: "2", name: "Hub to Cape", from: [10.7, 59.9], to: [18.4, -33.9], value: 4 },
+    ]}
+    valueLabel="Flights a week"
+  />
+</GeoMap>
+```
+
+### geo-tiles
+
+A geo-map layer of raster map tiles from an address template the project gives ("…/{z}/{x}/{y}.png"), placed under the other layers and following the zoom, with the attribution the tile provider asks for. It has no default address: nothing is fetched unless the project names a server.
+
+Use it: A geo-map needs a picture of streets or terrain under the data and the project has a tile server it may use (its own, or a provider whose terms it accepts). Use projection="mercator" (tiles are drawn in Web Mercator). Tiles come from a third party, so put the map in layout/map-frame with a MapFrameNotice and nothing is requested before the person asks. Without tiles, draw shapes with GeoFeatures.
+
+```tsx
+<GeoMap label="Delivery area" fit={area} projection="mercator">
+  <GeoTiles url="https://tiles.example.org/{z}/{x}/{y}.png" attribution="© Example contributors" />
+  <GeoFeatures data={area} variant="line" />
+</GeoMap>
 ```
 
 ### heatmap

@@ -4000,6 +4000,40 @@
       }
     },
     {
+      "name": "choropleth",
+      "type": "registry:component",
+      "title": "Choropleth",
+      "description": "A geo-map layer that colours each region by a number, on one hue from faint to strong, on two hues either side of a midpoint, or in classes with stated edges; with a legend that says each step's range in words and a table of every region's value.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-geo"
+      ],
+      "devDependencies": [
+        "@types/d3-geo"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn",
+        "@rivier-ui/geo-map"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/choropleth.tsx",
+          "type": "registry:component",
+          "target": "components/viz/choropleth.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing a rate or a share that varies by region: turnout by district, rainfall by county. Use rates, not raw counts (large regions look important whatever their count); for counts use geo-markers bubbles. Goes inside geo-map.",
+        "example": "const scale = choroplethScale(regions.features.map((f) => f.properties.rate), { thresholds: [10, 20, 30] });\n<GeoMap label=\"Rate by region\" fit={regions}>\n  <Choropleth label=\"Rate by region\" data={regions} value={(f) => f.properties?.rate} name={(f) => f.properties?.name} scale={scale} />\n</GeoMap>\n<ChoroplethLegend title=\"Rate (%)\" scale={scale} />",
+        "client": true
+      }
+    },
+    {
       "name": "circle-pack",
       "type": "registry:component",
       "title": "Circle Pack",
@@ -4227,6 +4261,170 @@
         "category": "viz",
         "when": "Planning or reporting work over time: a project plan, a release schedule, a timeline of events with lengths. For events without length use timeline (a list) or a line-chart annotation; for a calendar of single days use calendar or calendar-heatmap.",
         "example": "<GanttChart\n  label=\"Launch plan\"\n  tasks={[\n    { id: \"design\", label: \"Design\", start: \"2026-03-02\", end: \"2026-03-13\", group: \"Product\", progress: 1 },\n    { id: \"build\", label: \"Build\", start: \"2026-03-09\", end: \"2026-04-03\", group: \"Product\", progress: 0.4, dependsOn: [\"design\"] },\n    { id: \"launch\", label: \"Launch\", start: \"2026-04-06\", end: \"2026-04-06\", group: \"Marketing\", milestone: true, dependsOn: [\"build\"] },\n  ]}\n  today=\"2026-03-20\"\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "geo-hexbin",
+      "type": "registry:component",
+      "title": "Geo Hexbin",
+      "description": "A geo-map layer that gathers many points into hexagons or squares of equal size on screen, each coloured on one hue by how many points (or how much weight) fall in it, re-gathered as the map zooms; each cell read by arrow keys and listed in a table.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn",
+        "@rivier-ui/geo-map"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/geo-hexbin.tsx",
+          "type": "registry:component",
+          "target": "components/viz/geo-hexbin.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Thousands of points where single marks would pile up: sightings, incidents, trips, addresses. For a few dozen named places use geo-markers; for values that belong to regions use choropleth. Goes inside geo-map.",
+        "example": "<GeoMap label=\"Sightings\" fit={area}>\n  <GeoFeatures data={area} />\n  <GeoHexbin label=\"Sightings\" points={sightings} radius={14} valueLabel=\"Sightings\" />\n</GeoMap>",
+        "client": true
+      }
+    },
+    {
+      "name": "geo-map",
+      "type": "registry:component",
+      "title": "Geo Map",
+      "description": "A map drawn from GeoJSON the project passes (no tiles, no hosted data), in any d3-geo projection fitted to its box, zoomed and panned by dragging, pinching, Ctrl and the wheel, a double click, buttons or keys, with parts for a graticule, plain shapes, a scale bar, and layers that are read item by item by arrow keys.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-geo",
+        "lucide-react"
+      ],
+      "devDependencies": [
+        "@types/d3-geo"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state",
+        "@rivier-ui/use-size"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/geo-map.tsx",
+          "type": "registry:component",
+          "target": "components/viz/geo-map.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing places, regions or routes from data the project holds: a choropleth, sites on a map, flows between cities. Add layers inside it: choropleth, geo-markers, geo-routes, geo-hexbin, geo-tiles. Inside layout/map-frame it loads only when asked. For a street map with search and directions, bring a map engine and put it in map-frame; for a spinning globe as decoration use three/globe.",
+        "example": "<GeoMap label=\"Regions of the study area\" fit={regions} projection=\"equal-earth\">\n  <GeoGraticule />\n  <GeoFeatures data={regions} />\n  <GeoMarkers label=\"Sites\" points={[{ id: \"a\", name: \"Site A\", lon: 10.7, lat: 59.9 }]} />\n  <GeoScaleBar />\n</GeoMap>",
+        "client": true
+      }
+    },
+    {
+      "name": "geo-markers",
+      "type": "registry:component",
+      "title": "Geo Markers",
+      "description": "A geo-map layer of places: points in their group's colour and shape with optional names, or bubbles whose area is a number; each read by arrow keys and listed in a table.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale"
+      ],
+      "devDependencies": [
+        "@types/d3-scale"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn",
+        "@rivier-ui/geo-map"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/geo-markers.tsx",
+          "type": "registry:component",
+          "target": "components/viz/geo-markers.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Marking sites, cities or events on a map, or comparing counts by place (bubbles: area, never radius, carries the number). For values that belong to whole regions use choropleth; for thousands of points use geo-hexbin. Goes inside geo-map.",
+        "example": "<GeoMap label=\"Our stores\" fit={country}>\n  <GeoFeatures data={country} />\n  <GeoMarkers\n    label=\"Stores\"\n    points={[\n      { id: \"a\", name: \"Harbour\", lon: 5.32, lat: 60.39, value: 120 },\n      { id: \"b\", name: \"Station\", lon: 10.75, lat: 59.91, value: 340 },\n    ]}\n    variant=\"bubble\"\n    valueLabel=\"Visits\"\n  />\n</GeoMap>",
+        "client": true
+      }
+    },
+    {
+      "name": "geo-routes",
+      "type": "registry:component",
+      "title": "Geo Routes",
+      "description": "A geo-map layer of journeys and flows between places: great-circle routes (the shortest way over the globe) or arcs drawn over the map, thicker for larger amounts, with an arrow for the direction; each read by arrow keys and listed in a table.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-geo",
+        "d3-scale"
+      ],
+      "devDependencies": [
+        "@types/d3-geo",
+        "@types/d3-scale"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn",
+        "@rivier-ui/geo-map"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/geo-routes.tsx",
+          "type": "registry:component",
+          "target": "components/viz/geo-routes.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing movement between places: flights, deliveries, migration, trade. Keep to a few dozen routes, or aggregate them first. For flows without geography use sankey-chart or chord-diagram. Goes inside geo-map.",
+        "example": "<GeoMap label=\"Flights from the hub\" projection=\"natural-earth\">\n  <GeoGraticule />\n  <GeoRoutes\n    label=\"Flights\"\n    routes={[\n      { id: \"1\", name: \"Hub to Port\", from: [10.7, 59.9], to: [-74, 40.7], value: 12 },\n      { id: \"2\", name: \"Hub to Cape\", from: [10.7, 59.9], to: [18.4, -33.9], value: 4 },\n    ]}\n    valueLabel=\"Flights a week\"\n  />\n</GeoMap>",
+        "client": true
+      }
+    },
+    {
+      "name": "geo-tiles",
+      "type": "registry:component",
+      "title": "Geo Tiles",
+      "description": "A geo-map layer of raster map tiles from an address template the project gives (\"…/{z}/{x}/{y}.png\"), placed under the other layers and following the zoom, with the attribution the tile provider asks for. It has no default address: nothing is fetched unless the project names a server.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/geo-map"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/geo-tiles.tsx",
+          "type": "registry:component",
+          "target": "components/viz/geo-tiles.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "A geo-map needs a picture of streets or terrain under the data and the project has a tile server it may use (its own, or a provider whose terms it accepts). Use projection=\"mercator\" (tiles are drawn in Web Mercator). Tiles come from a third party, so put the map in layout/map-frame with a MapFrameNotice and nothing is requested before the person asks. Without tiles, draw shapes with GeoFeatures.",
+        "example": "<GeoMap label=\"Delivery area\" fit={area} projection=\"mercator\">\n  <GeoTiles url=\"https://tiles.example.org/{z}/{x}/{y}.png\" attribution=\"© Example contributors\" />\n  <GeoFeatures data={area} variant=\"line\" />\n</GeoMap>",
         "client": true
       }
     },
