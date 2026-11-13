@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "skip-link",
+  "type": "registry:ui",
+  "title": "Skip Link",
+  "description": "A link at the very start of the page, hidden until it has keyboard focus, that jumps past the header and navigation to the main content (WCAG 2.4.1).",
+  "categories": [
+    "ui"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/skip-link.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/skip-link.tsx",
+      "content": "/**\n * @name skip-link\n * @category ui\n * @description A link at the very start of the page, hidden until it has keyboard focus, that jumps past the header and navigation to the main content (WCAG 2.4.1).\n * @when Every page with a header or navigation before its content: put it first inside `<body>`, and give the main content the id it points to. Several can go in a row (to the content, to the search).\n * @example\n * <SkipLink href=\"#main\">Skip to content</SkipLink>\n * …\n * <main id=\"main\" tabIndex={-1}>…</main>\n */\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport function SkipLink({ className, ...props }: ComponentProps<\"a\">) {\n  return (\n    <a\n      data-slot=\"skip-link\"\n      className={cn(\n        \"fixed start-2 top-2 z-[100] -translate-y-[200%] rounded-control border bg-background px-4 py-2 text-sm font-medium text-foreground transition-transform duration-instant ease-out focus:translate-y-0 motion-reduce:transition-none\",\n        className,\n      )}\n      {...props}\n    />\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "Every page with a header or navigation before its content: put it first inside `<body>`, and give the main content the id it points to. Several can go in a row (to the content, to the search).",
+    "example": "<SkipLink href=\"#main\">Skip to content</SkipLink>\n…\n<main id=\"main\" tabIndex={-1}>…</main>",
+    "client": false
+  }
+}

@@ -112,6 +112,18 @@ function Stepper({ value, defaultValue = 0, onValueChange }: { value?: number; d
 }
 ```
 
+### use-hotkeys
+
+Binds keyboard shortcuts ("mod+k", "shift+?", "g i") to handlers on the page or on one element, by the key's place for letters so they work on keyboards of every script, left alone while typing in a field; and formats a shortcut for showing ("⌘K" on Apple, "Ctrl+K" elsewhere).
+
+Use it: Shortcuts for frequent actions: opening command, saving, moving between items. Show each one where its action is (kbd, a menu's shortcut slot) and keep a list of them. Do not take keys a screen reader or the browser uses (single letters without a modifier only inside a focused widget; never Tab or the arrows on the page).
+
+```tsx
+useHotkeys("mod+k", () => setOpen(true));
+useHotkeys("g i", () => router.push("/inbox"), { sequenceTimeout: 800 });
+<Kbd>{formatHotkey("mod+k")}</Kbd>
+```
+
 ### use-media
 
 Follows an audio or video element (playing, time, duration, buffered, volume, rate, text tracks, waiting, error) as React state, with the actions to drive it, the context player parts share, and time formatting through Intl.
@@ -298,6 +310,20 @@ Use it: Pages nested three or more levels deep, above the page title. The last i
     <BreadcrumbItem><BreadcrumbPage>Atlas</BreadcrumbPage></BreadcrumbItem>
   </BreadcrumbList>
 </Breadcrumb>
+```
+
+### button-group
+
+Buttons joined into one block with shared edges (rounded only at the ends), side by side or stacked, with an optional piece of text or a separator between them.
+
+Use it: Related actions that belong together: a split button (an action and its menu), zoom out and in, previous and next. For a choice of one use segmented-control or toggle-group; for a set of commands over content use toolbar.
+
+```tsx
+<ButtonGroup aria-label="Zoom">
+  <Button variant="outline" size="icon" aria-label="Zoom out"><Minus /></Button>
+  <ButtonGroupText>100%</ButtonGroupText>
+  <Button variant="outline" size="icon" aria-label="Zoom in"><Plus /></Button>
+</ButtonGroup>
 ```
 
 ### button
@@ -1439,6 +1465,20 @@ Use it: Rating a thing on a short scale: a review, feedback after a task. For ye
 <Rating readOnly value={4.3} aria-label="Average rating" />
 ```
 
+### resizable
+
+Panels side by side (or stacked) with a handle between each pair that is dragged, or moved with the arrow keys, to share the space differently; Home and End go to the limits and Enter folds a panel away and back: the WAI-ARIA window splitter pattern.
+
+Use it: Layouts whose parts the person sizes: a list beside a detail view, an editor beside its preview, a map beside its table. For a panel docked beside the whole page use dock; for two fixed columns use split.
+
+```tsx
+<ResizablePanelGroup defaultSizes={[30, 70]} aria-label="Mail">
+  <ResizablePanel minSize={20} id="folders">Folders</ResizablePanel>
+  <ResizableHandle aria-label="Resize the folders" />
+  <ResizablePanel id="messages">Messages</ResizablePanel>
+</ResizablePanelGroup>
+```
+
 ### scene-strip
 
 A row of the scenes or chapters of a clip, each with a picture, a name and a length, that scrolls sideways, marks the one that is playing and goes to a scene when it is pressed.
@@ -1582,6 +1622,32 @@ Use it: Navigation, filters, details or a longer form beside the page. `side` is
 </Sheet>
 ```
 
+### sidebar
+
+An application's side navigation: groups of links with icons that fold to a slim rail of icons (their names still read out) and back with a button or Ctrl/⌘+B, and that becomes a sheet from the side on narrow screens; with the main area beside it.
+
+Use it: The frame of an app with many sections: a dashboard, settings, a workspace. For a site's header links use navbar; for a panel of tools the person resizes use dock or resizable.
+
+```tsx
+<SidebarProvider>
+  <Sidebar aria-label="Workspace">
+    <SidebarHeader>Acme</SidebarHeader>
+    <SidebarContent>
+      <SidebarGroup label="Work">
+        <SidebarMenu>
+          <SidebarMenuItem><SidebarMenuButton href="/inbox" icon={<Inbox />} current>Inbox</SidebarMenuButton></SidebarMenuItem>
+          <SidebarMenuItem><SidebarMenuButton href="/reports" icon={<ChartBar />}>Reports</SidebarMenuButton></SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarGroup>
+    </SidebarContent>
+  </Sidebar>
+  <SidebarInset>
+    <SidebarTrigger />
+    …
+  </SidebarInset>
+</SidebarProvider>
+```
+
 ### skeleton
 
 A pulsing block that stands in for content that is loading: a bare block sized by hand, lines of text, or a wrapper that takes the exact size of the real content. It is still under reduced motion.
@@ -1600,6 +1666,18 @@ Use it: Content whose shape is known is on its way. Nothing may jump when it arr
     <PriceCard price={price ?? PLACEHOLDER_PRICE} />
   </Skeleton>
 </section>
+```
+
+### skip-link
+
+A link at the very start of the page, hidden until it has keyboard focus, that jumps past the header and navigation to the main content (WCAG 2.4.1).
+
+Use it: Every page with a header or navigation before its content: put it first inside `<body>`, and give the main content the id it points to. Several can go in a row (to the content, to the search).
+
+```tsx
+<SkipLink href="#main">Skip to content</SkipLink>
+…
+<main id="main" tabIndex={-1}>…</main>
 ```
 
 ### slider
@@ -2102,6 +2180,16 @@ Use it: More items than the page should hold at once (a few hundred or more): a 
 const list = useRef<VirtualListHandle>(null);
 <VirtualList handleRef={list} count={10000} aria-label="Lines">{(index) => <p className="p-2">Line {index + 1}</p>}</VirtualList>
 <Button onClick={() => list.current?.scrollToIndex(4999, { align: "center" })}>Go to line 5,000</Button>
+```
+
+### visually-hidden
+
+Text that screen readers read and sighted people do not see, such as the name of an icon-only control or a heading that the layout makes obvious; with `focusable`, it appears while it has keyboard focus.
+
+Use it: Words that only assistive technology needs. For a link past repeated content use skip-link; for an icon button's name prefer `aria-label` on the button.
+
+```tsx
+<button type="button"><Bell aria-hidden="true" /><VisuallyHidden>Notifications</VisuallyHidden></button>
 ```
 
 ### wizard

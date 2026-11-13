@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "visually-hidden",
+  "type": "registry:ui",
+  "title": "Visually Hidden",
+  "description": "Text that screen readers read and sighted people do not see, such as the name of an icon-only control or a heading that the layout makes obvious; with `focusable`, it appears while it has keyboard focus.",
+  "categories": [
+    "ui"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/visually-hidden.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/visually-hidden.tsx",
+      "content": "/**\n * @name visually-hidden\n * @category ui\n * @description Text that screen readers read and sighted people do not see, such as the name of an icon-only control or a heading that the layout makes obvious; with `focusable`, it appears while it has keyboard focus.\n * @when Words that only assistive technology needs. For a link past repeated content use skip-link; for an icon button's name prefer `aria-label` on the button.\n * @example\n * <button type=\"button\"><Bell aria-hidden=\"true\" /><VisuallyHidden>Notifications</VisuallyHidden></button>\n */\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport type VisuallyHiddenProps = ComponentProps<\"span\"> & {\n  /** Shown while it, or a control inside it, has keyboard focus. */\n  focusable?: boolean;\n};\n\nexport function VisuallyHidden({ className, focusable = false, ...props }: VisuallyHiddenProps) {\n  return <span data-slot=\"visually-hidden\" className={cn(\"sr-only\", focusable && \"focus-within:not-sr-only focus:not-sr-only\", className)} {...props} />;\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "Words that only assistive technology needs. For a link past repeated content use skip-link; for an icon button's name prefer `aria-label` on the button.",
+    "example": "<button type=\"button\"><Bell aria-hidden=\"true\" /><VisuallyHidden>Notifications</VisuallyHidden></button>",
+    "client": false
+  }
+}

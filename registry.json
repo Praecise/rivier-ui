@@ -212,6 +212,32 @@
       }
     },
     {
+      "name": "use-hotkeys",
+      "type": "registry:lib",
+      "title": "Use Hotkeys",
+      "description": "Binds keyboard shortcuts (\"mod+k\", \"shift+?\", \"g i\") to handlers on the page or on one element, by the key's place for letters so they work on keyboards of every script, left alone while typing in a field; and formats a shortcut for showing (\"⌘K\" on Apple, \"Ctrl+K\" elsewhere).",
+      "categories": [
+        "lib"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme"
+      ],
+      "files": [
+        {
+          "path": "registry/lib/use-hotkeys.ts",
+          "type": "registry:lib",
+          "target": "lib/use-hotkeys.ts"
+        }
+      ],
+      "meta": {
+        "category": "lib",
+        "when": "Shortcuts for frequent actions: opening command, saving, moving between items. Show each one where its action is (kbd, a menu's shortcut slot) and keep a list of them. Do not take keys a screen reader or the browser uses (single letters without a modifier only inside a focused widget; never Tab or the arrows on the page).",
+        "example": "useHotkeys(\"mod+k\", () => setOpen(true));\nuseHotkeys(\"g i\", () => router.push(\"/inbox\"), { sequenceTimeout: 800 });\n<Kbd>{formatHotkey(\"mod+k\")}</Kbd>",
+        "client": true
+      }
+    },
+    {
       "name": "use-media",
       "type": "registry:lib",
       "title": "Use Media",
@@ -502,6 +528,33 @@
         "category": "ui",
         "when": "Pages nested three or more levels deep, above the page title. The last item is the current page: a BreadcrumbPage, not a link. For moving between sibling pages use tabs or the navbar. With a router link, pass it through `asChild`.",
         "example": "<Breadcrumb>\n  <BreadcrumbList>\n    <BreadcrumbItem><BreadcrumbLink href=\"/\">Home</BreadcrumbLink></BreadcrumbItem>\n    <BreadcrumbSeparator />\n    <BreadcrumbItem><BreadcrumbLink href=\"/projects\">Projects</BreadcrumbLink></BreadcrumbItem>\n    <BreadcrumbSeparator />\n    <BreadcrumbItem><BreadcrumbPage>Atlas</BreadcrumbPage></BreadcrumbItem>\n  </BreadcrumbList>\n</Breadcrumb>",
+        "client": false
+      }
+    },
+    {
+      "name": "button-group",
+      "type": "registry:ui",
+      "title": "Button Group",
+      "description": "Buttons joined into one block with shared edges (rounded only at the ends), side by side or stacked, with an optional piece of text or a separator between them.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/button-group.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/button-group.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Related actions that belong together: a split button (an action and its menu), zoom out and in, previous and next. For a choice of one use segmented-control or toggle-group; for a set of commands over content use toolbar.",
+        "example": "<ButtonGroup aria-label=\"Zoom\">\n  <Button variant=\"outline\" size=\"icon\" aria-label=\"Zoom out\"><Minus /></Button>\n  <ButtonGroupText>100%</ButtonGroupText>\n  <Button variant=\"outline\" size=\"icon\" aria-label=\"Zoom in\"><Plus /></Button>\n</ButtonGroup>",
         "client": false
       }
     },
@@ -2178,6 +2231,35 @@
       }
     },
     {
+      "name": "resizable",
+      "type": "registry:ui",
+      "title": "Resizable",
+      "description": "Panels side by side (or stacked) with a handle between each pair that is dragged, or moved with the arrow keys, to share the space differently; Home and End go to the limits and Enter folds a panel away and back: the WAI-ARIA window splitter pattern.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/direction",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/resizable.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/resizable.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Layouts whose parts the person sizes: a list beside a detail view, an editor beside its preview, a map beside its table. For a panel docked beside the whole page use dock; for two fixed columns use split.",
+        "example": "<ResizablePanelGroup defaultSizes={[30, 70]} aria-label=\"Mail\">\n  <ResizablePanel minSize={20} id=\"folders\">Folders</ResizablePanel>\n  <ResizableHandle aria-label=\"Resize the folders\" />\n  <ResizablePanel id=\"messages\">Messages</ResizablePanel>\n</ResizablePanelGroup>",
+        "client": true
+      }
+    },
+    {
       "name": "scene-strip",
       "type": "registry:ui",
       "title": "Scene Strip",
@@ -2391,6 +2473,38 @@
       }
     },
     {
+      "name": "sidebar",
+      "type": "registry:ui",
+      "title": "Sidebar",
+      "description": "An application's side navigation: groups of links with icons that fold to a slim rail of icons (their names still read out) and back with a button or Ctrl/⌘+B, and that becomes a sheet from the side on narrow screens; with the main area beside it.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/sheet",
+        "@rivier-ui/use-controllable-state",
+        "@rivier-ui/use-hotkeys"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/sidebar.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/sidebar.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "The frame of an app with many sections: a dashboard, settings, a workspace. For a site's header links use navbar; for a panel of tools the person resizes use dock or resizable.",
+        "example": "<SidebarProvider>\n  <Sidebar aria-label=\"Workspace\">\n    <SidebarHeader>Acme</SidebarHeader>\n    <SidebarContent>\n      <SidebarGroup label=\"Work\">\n        <SidebarMenu>\n          <SidebarMenuItem><SidebarMenuButton href=\"/inbox\" icon={<Inbox />} current>Inbox</SidebarMenuButton></SidebarMenuItem>\n          <SidebarMenuItem><SidebarMenuButton href=\"/reports\" icon={<ChartBar />}>Reports</SidebarMenuButton></SidebarMenuItem>\n        </SidebarMenu>\n      </SidebarGroup>\n    </SidebarContent>\n  </Sidebar>\n  <SidebarInset>\n    <SidebarTrigger />\n    …\n  </SidebarInset>\n</SidebarProvider>",
+        "client": true
+      }
+    },
+    {
       "name": "skeleton",
       "type": "registry:ui",
       "title": "Skeleton",
@@ -2414,6 +2528,33 @@
         "category": "ui",
         "when": "Content whose shape is known is on its way. Nothing may jump when it arrives: either size the block like the thing it replaces, or wrap the real component (rendered with placeholder data) in `<Skeleton loading>` so the box is exactly its final size. Mark the region that is loading with `aria-busy=\"true\"`: the placeholders themselves are hidden from assistive technology. For an unknown wait use spinner; for a measurable one use progress.",
         "example": "<div className=\"flex items-center gap-3\" aria-busy=\"true\">\n  <Skeleton className=\"size-10 rounded-full\" />\n  <SkeletonText lines={2} className=\"flex-1\" />\n</div>\n\n// Holds the final size: the card is laid out, invisible and inert, under the placeholder\n<section aria-busy={isLoading}>\n  <Skeleton loading={isLoading}>\n    <PriceCard price={price ?? PLACEHOLDER_PRICE} />\n  </Skeleton>\n</section>",
+        "client": false
+      }
+    },
+    {
+      "name": "skip-link",
+      "type": "registry:ui",
+      "title": "Skip Link",
+      "description": "A link at the very start of the page, hidden until it has keyboard focus, that jumps past the header and navigation to the main content (WCAG 2.4.1).",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/skip-link.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/skip-link.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Every page with a header or navigation before its content: put it first inside `<body>`, and give the main content the id it points to. Several can go in a row (to the content, to the search).",
+        "example": "<SkipLink href=\"#main\">Skip to content</SkipLink>\n…\n<main id=\"main\" tabIndex={-1}>…</main>",
         "client": false
       }
     },
@@ -3178,6 +3319,33 @@
         "when": "More items than the page should hold at once (a few hundred or more): a feed, a log, search results, a picture library. Rows may have any height: each is measured once it is drawn and the rest are estimated, and the view does not jump when a row above it turns out taller. Give the box a height and a name (`aria-label`); or, where the list is the page (a feed, results under a header), `scroll=\"window\"` and no height: it then grows to its full length and the window scrolls it. For a short list render the rows plainly; for a conversation that grows at the bottom use thread; for pages of results use pagination. Written here on ResizeObserver instead of adding a virtualisation package: a headless one would bring the offsets but not the roles, the positions for screen readers, the kept focus or the restoration, which are most of this file.",
         "example": "// Rows of any height\n<VirtualList count={messages.length} estimateSize={72} getKey={(index) => messages[index].id} aria-label=\"Messages\" className=\"h-96 rounded-surface border\">\n  {(index) => <article className=\"border-b p-3\">{messages[index].text}</article>}\n</VirtualList>\n\n// A grid, as many columns as fit; the place is remembered for this tab\n<VirtualGrid count={pictures.length} columns={{ minWidth: 160 }} gap={8} estimateSize={160} restoreKey=\"library\" aria-label=\"Pictures\" className=\"h-[32rem]\">\n  {(index) => <img src={pictures[index].src} alt={pictures[index].alt} className=\"aspect-square w-full rounded-control object-cover\" />}\n</VirtualGrid>\n\n// The page scrolls, not a box: no height, and rows above and below the window are not rendered\n<VirtualList scroll=\"window\" count={results.length} estimateSize={96} getKey={(index) => results[index].id} aria-label=\"Results\">\n  {(index) => <ResultCard result={results[index]} />}\n</VirtualList>\n\n// Going to an item\nconst list = useRef<VirtualListHandle>(null);\n<VirtualList handleRef={list} count={10000} aria-label=\"Lines\">{(index) => <p className=\"p-2\">Line {index + 1}</p>}</VirtualList>\n<Button onClick={() => list.current?.scrollToIndex(4999, { align: \"center\" })}>Go to line 5,000</Button>",
         "client": true
+      }
+    },
+    {
+      "name": "visually-hidden",
+      "type": "registry:ui",
+      "title": "Visually Hidden",
+      "description": "Text that screen readers read and sighted people do not see, such as the name of an icon-only control or a heading that the layout makes obvious; with `focusable`, it appears while it has keyboard focus.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/visually-hidden.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/visually-hidden.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Words that only assistive technology needs. For a link past repeated content use skip-link; for an icon button's name prefer `aria-label` on the button.",
+        "example": "<button type=\"button\"><Bell aria-hidden=\"true\" /><VisuallyHidden>Notifications</VisuallyHidden></button>",
+        "client": false
       }
     },
     {
