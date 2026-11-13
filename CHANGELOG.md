@@ -58,6 +58,29 @@ and checked by `scripts/checks/charts.ts`.
   left to right (words in a right-to-left script still read right to left inside a label). The hidden data
   table is now hidden by a wrapper: on the table itself, a wide table still widened the page on a phone.
 
+### Maps (`viz`)
+
+Drawn from GeoJSON the project passes: no tiles, no hosted data, nothing fetched unless the project names a
+tile server. Shown at `/maps` and checked by `scripts/checks/maps.ts`. CONVENTIONS lists six categories and no
+`map`, so they are in `viz`.
+
+- **`geo-map`**: any d3-geo projection by name (equal-earth, natural-earth, mercator, equirectangular,
+  orthographic, conic-equal-area, azimuthal-equal-area, transverse-mercator) or as a function, fitted to
+  `fit`; zoom and pan folded into the projection (crisp lines, exact tile maths) by dragging, pinching,
+  Ctrl or ⌘ with the wheel (the wheel alone still scrolls the page), a double click, buttons and keys (arrows
+  pan, + and - zoom, 0 resets), controlled with `view` and `onViewChange`. Parts: `GeoGraticule`,
+  `GeoFeatures`, `GeoScaleBar`, `GeoTable`, and `GeoLayer`, the readable layer every other layer is built on
+  (a named group in the Tab order, items read by arrow keys, said aloud, shown in a tooltip and brought into
+  view). Works inside `map-frame`.
+- **`choropleth`**: regions by a number, sequential, diverging or in classes (`choroplethScale`), and
+  `ChoroplethLegend`, which says each step's range in words.
+- **`geo-markers`**: points in group colours and shapes, or bubbles sized by area.
+- **`geo-routes`**: great-circle routes or arcs, width by amount, an arrow for the direction, distances.
+- **`geo-hexbin`**: points gathered into hexagons or squares on screen, re-gathered on zoom (the binning is
+  written here; no package).
+- **`geo-tiles`**: raster tiles from the project's own address template, with a required attribution and no
+  default host.
+
 ## 2026-11-13
 
 More that the existing components can do. Every change is an added prop or part with the old behaviour

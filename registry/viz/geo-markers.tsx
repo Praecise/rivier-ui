@@ -35,7 +35,7 @@ export type GeoPoint = {
   group?: string;
 };
 
-export type GeoMarkersProps = Omit<ComponentProps<"g">, "children"> & {
+export type GeoMarkersProps = Omit<ComponentProps<"g">, "children" | "points"> & {
   /** The layer's name, for screen readers and the table. */
   label: string;
   points: readonly GeoPoint[];

@@ -17,7 +17,7 @@ import { GeoLayer, GeoTable, useGeoMap } from "@/components/viz/geo-map";
 
 export type GeoWeightedPoint = { lon: number; lat: number /** How much the point counts. Default 1. */; weight?: number };
 
-export type GeoHexbinProps = Omit<ComponentProps<"g">, "children"> & {
+export type GeoHexbinProps = Omit<ComponentProps<"g">, "children" | "points"> & {
   label: string;
   points: readonly GeoWeightedPoint[];
   /** "hex" (the default: every neighbour the same distance away) or "square". */

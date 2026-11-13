@@ -69,7 +69,7 @@ export function choroplethScale(values: readonly (number | null | undefined)[], 
   };
 }
 
-export type ChoroplethProps = Omit<ComponentProps<"g">, "children"> & {
+export type ChoroplethProps = Omit<ComponentProps<"g">, "children" | "name" | "scale"> & {
   /** The layer's name, for screen readers and the table. */
   label: string;
   data: ExtendedFeatureCollection;
