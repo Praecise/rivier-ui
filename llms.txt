@@ -442,6 +442,16 @@ Use it: Filters in effect above a list (Chip with ChipRemove), suggested replies
 </ChipGroup>
 ```
 
+### color-picker
+
+A colour chosen in OKLCH (lightness, chroma, hue: even steps the eye sees as even): a field of lightness and chroma to point at, a slider for each of the three that the keys drive, swatches of the project's colours, and the value as text that can be typed, in OKLCH or hex.
+
+Use it: Choosing a brand colour, a highlight, a label colour. To choose among a few fixed colours use toggle-group or radio-group with swatches; for the theme's highlight use theme-provider (its accent hue and chroma are this picker's).
+
+```tsx
+<ColorPicker aria-label="Label colour" defaultValue="oklch(0.62 0.17 250)" swatches={["oklch(0.62 0.17 250)", "oklch(0.7 0.15 150)", "#d95926"]} />
+```
+
 ### combobox
 
 A select with a search field: a button that shows the choice and opens a list that narrows as one types.
@@ -1328,6 +1338,17 @@ Use it: Picking one of two to five options that should all be visible. For a lon
   <Label><RadioGroupItem value="monthly" /> Monthly</Label>
   <Label><RadioGroupItem value="yearly" /> Yearly</Label>
 </RadioGroup>
+```
+
+### rating
+
+A score of one to five (or any number) shown as stars and chosen like radio buttons: arrow keys move the score, each star named "3 of 5"; or, read-only, a score shown with its number in words.
+
+Use it: Rating a thing on a short scale: a review, feedback after a task. For yes and no use toggle or switch; for a number on a long scale use slider; for showing an average of many ratings use the read-only form with the count beside it.
+
+```tsx
+<Rating aria-label="Your rating" defaultValue={4} name="rating" />
+<Rating readOnly value={4.3} aria-label="Average rating" />
 ```
 
 ### scene-strip

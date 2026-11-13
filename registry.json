@@ -715,6 +715,37 @@
       }
     },
     {
+      "name": "color-picker",
+      "type": "registry:ui",
+      "title": "Color Picker",
+      "description": "A colour chosen in OKLCH (lightness, chroma, hue: even steps the eye sees as even): a field of lightness and chroma to point at, a slider for each of the three that the keys drive, swatches of the project's colours, and the value as text that can be typed, in OKLCH or hex.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/input",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/color-picker.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/color-picker.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Choosing a brand colour, a highlight, a label colour. To choose among a few fixed colours use toggle-group or radio-group with swatches; for the theme's highlight use theme-provider (its accent hue and chroma are this picker's).",
+        "example": "<ColorPicker aria-label=\"Label colour\" defaultValue=\"oklch(0.62 0.17 250)\" swatches={[\"oklch(0.62 0.17 250)\", \"oklch(0.7 0.15 150)\", \"#d95926\"]} />",
+        "client": true
+      }
+    },
+    {
       "name": "combobox",
       "type": "registry:ui",
       "title": "Combobox",
@@ -1962,6 +1993,37 @@
         "category": "ui",
         "when": "Picking one of two to five options that should all be visible. For a longer list use select; for a compact row of icons or short words use toggle-group; for on or off use switch.",
         "example": "<RadioGroup defaultValue=\"monthly\" aria-label=\"Billing period\">\n  <Label><RadioGroupItem value=\"monthly\" /> Monthly</Label>\n  <Label><RadioGroupItem value=\"yearly\" /> Yearly</Label>\n</RadioGroup>",
+        "client": true
+      }
+    },
+    {
+      "name": "rating",
+      "type": "registry:ui",
+      "title": "Rating",
+      "description": "A score of one to five (or any number) shown as stars and chosen like radio buttons: arrow keys move the score, each star named \"3 of 5\"; or, read-only, a score shown with its number in words.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react",
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/rating.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/rating.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Rating a thing on a short scale: a review, feedback after a task. For yes and no use toggle or switch; for a number on a long scale use slider; for showing an average of many ratings use the read-only form with the count beside it.",
+        "example": "<Rating aria-label=\"Your rating\" defaultValue={4} name=\"rating\" />\n<Rating readOnly value={4.3} aria-label=\"Average rating\" />",
         "client": true
       }
     },
