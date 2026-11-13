@@ -100,6 +100,24 @@ tile server. Shown at `/maps` and checked by `scripts/checks/maps.ts`. CONVENTIO
   with ffmpeg when it is on the PATH, else a zip of the frames with a `manifest.json` (written here: no
   package). Tried on 2026-11-13 against `/explainers` at 6 fps: 168 frames, a valid zip.
 
+### The other gaps (`ui`, `motion`, `layout`, `three`, `lib`)
+
+- **`data-grid`**: records to sort (Shift for several columns, said aloud), narrow (a filter per column, a
+  search across all), group (with sum, mean, count, min or max per group), pin, show and hide, choose
+  (checkboxes, the page at once), page, window (thousands of rows drawn only where seen, positions kept
+  with `aria-rowindex`) and edit in place (Enter or F2, Enter keeps, Escape leaves). The WAI-ARIA grid
+  pattern: one tab stop, arrow keys, Home and End, Ctrl with them, Page Up and Down, focus handed to a
+  cell's control. Written here: `@tanstack/react-table` 9 was installed for it and left out, because
+  wrapping its typed feature registry in a generic grid without `any` cost more than the behaviour.
+  `@tanstack/react-virtual` was removed with it. Shown at `/grid`.
+- **`form`**: on Radix Form: the browser's rules and the project's `match`, messages in words under each
+  field, and `FormErrorSummary`, the faults of a failed submit as links to the fields, said once.
+- **`tags-input`**, **`otp-input`**, **`password-input`** (show and hide, Caps Lock, rules marked in words),
+  **`currency-input`** (the locale's decimal mark, grouping and symbol; a plain number out),
+  **`color-picker`** (OKLCH: a field drawn from the maths, a slider per axis, swatches, OKLCH or hex),
+  **`rating`** (on Radix RadioGroup; read-only with the score in words). Shown at `/entry`.
+- Showcase: the header's row of page links scrolls sideways when there are more pages than fit.
+
 ## 2026-11-13
 
 More that the existing components can do. Every change is an added prop or part with the old behaviour

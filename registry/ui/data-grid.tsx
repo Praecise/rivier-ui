@@ -596,7 +596,7 @@ export function DataGridTable({ className, showFilters = true, ...props }: Compo
             if (line.kind === "group") {
               const open = !grid.collapsed.includes(line.value);
               return (
-                <tr key={`group:${line.value}`} aria-rowindex={row + 1} aria-expanded={open} className="bg-muted">
+                <tr key={`group:${line.value}`} data-group={line.value} aria-rowindex={row + 1} className="bg-muted">
                   {selectable ? <td className="sticky start-0 z-10 border-b bg-muted" /> : null}
                   {visible.map((column, index) => {
                     const p = pin(index);
@@ -611,6 +611,7 @@ export function DataGridTable({ className, showFilters = true, ...props }: Compo
                           <button
                             type="button"
                             tabIndex={-1}
+                            aria-expanded={open}
                             onClick={() => grid.toggleGroup(line.value)}
                             aria-label={`${open ? labels.collapse : labels.expand}: ${line.value}`}
                             className="inline-flex items-center gap-1 rounded-control"

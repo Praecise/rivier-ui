@@ -18,5 +18,7 @@ export const PAGES = [
   { href: "/charts", title: "Charts", description: "Scatter, distributions, forecasts with intervals, hierarchies, flows, networks, calendars, plans and more." },
   { href: "/maps", title: "Maps", description: "GeoJSON maps in any projection: choropleth, markers, routes, hexagon bins, tiles, zoom and pan by keys." },
   { href: "/explainers", title: "Explainers", description: "A film from a JSON spec: charts, maps, models, comparisons and quotes with captions, narration and provenance." },
+  { href: "/grid", title: "Data grid", description: "Sorting, filters, search, grouping, a pinned column, pages, thousands of rows and editing in place." },
+  { href: "/entry", title: "Data entry", description: "A self-checking form, tags, a one-time code, a password, money, a colour picker and a rating." },
   { href: "/stage", title: "Stage for timed scenes", description: "A sequence of timed scenes with a transport and a clock, and frames drawn on request for export." },
 ] as const;

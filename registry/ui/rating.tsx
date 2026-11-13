@@ -33,8 +33,7 @@ export type RatingProps = Omit<ComponentProps<"div">, "defaultValue" | "onChange
 
 const SIZES = { sm: "size-4", md: "size-6", lg: "size-8" } as const;
 
-export function Rating({
-  value,
+export function Rating({ "aria-label": ariaLabel, value,
   defaultValue = 0,
   onValueChange,
   max = 5,
@@ -69,7 +68,7 @@ export function Rating({
       <div
         data-slot="rating"
         role="img"
-        aria-label={`${props["aria-label"] ? `${props["aria-label"]}: ` : ""}${starLabel(number(score), number(max))}`}
+        aria-label={`${ariaLabel ? `${ariaLabel}: ` : ""}${starLabel(number(score), number(max))}`}
         className={cn("inline-flex items-center gap-0.5", className)}
         {...props}
       >
@@ -89,6 +88,7 @@ export function Rating({
       name={name}
       className={cn("inline-flex items-center gap-0.5", className)}
       onPointerLeave={() => setHover(null)}
+      aria-label={ariaLabel}
       {...props}
     >
       {Array.from({ length: max }, (_, i) => (

@@ -38,14 +38,10 @@ export function Form({ className, onInvalidCapture, onSubmit, faultCount = (coun
     const controls = [...form.elements].filter((element): element is HTMLInputElement => "validity" in element && !(element as HTMLInputElement).validity.valid);
     const found = controls.map((control) => {
       const label = control.labels?.[0]?.textContent?.trim() || control.getAttribute("aria-label") || control.name;
-      // The field's own visible message, when the project wrote one; else the browser's.
-      const described = control
-        .getAttribute("aria-describedby")
-        ?.split(" ")
-        .map((id) => form.ownerDocument.getElementById(id)?.textContent?.trim())
-        .filter(Boolean)
-        .join(" ");
-      return { id: control.id, label, message: described || control.validationMessage };
+      // The field's own visible messages, when the project wrote them; else the browser's.
+      const field = control.closest("[data-slot=form-field]");
+      const written = field ? [...field.querySelectorAll("[data-slot=form-message]")].map((node) => node.textContent?.trim()).filter(Boolean).join(" ") : "";
+      return { id: control.id, label, message: written || control.validationMessage };
     });
     setFaults(found);
     if (found.length > 0) announce(faultCount(found.length), "assertive");
@@ -61,10 +57,13 @@ export function Form({ className, onInvalidCapture, onSubmit, faultCount = (coun
           if (pending.current) return;
           pending.current = true;
           const form = event.currentTarget;
-          requestAnimationFrame(() => {
-            pending.current = false;
-            gather(form);
-          });
+          // Two frames: the fields first show their own messages, which the summary repeats.
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => {
+              pending.current = false;
+              gather(form);
+            }),
+          );
         }}
         onSubmit={(event) => {
           setFaults([]);
@@ -100,8 +99,9 @@ export function FormErrorSummary({ title, className, ...props }: FormErrorSummar
                 const target = fault.id ? document.getElementById(fault.id) : null;
                 if (!target) return;
                 event.preventDefault();
-                target.focus();
-                target.scrollIntoView({ block: "center" });
+                // At once: a smooth scroll still running would move the page under the person's next click.
+                target.focus({ preventScroll: true });
+                target.scrollIntoView({ block: "center", behavior: "instant" });
               }}
             >
               {fault.label}: {fault.message}
