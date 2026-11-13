@@ -1,9 +1,11 @@
 "use client";
-// Showcase: carousel and media-row-list. Pictures are drawn in code, so the page needs no files and no network.
+// Showcase: carousel (alone, and with thumbnails that open a lightbox) and media-row-list. Pictures are
+// drawn in code, so the page needs no files and no network.
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Carousel, CarouselCount, CarouselDots, CarouselNext, CarouselPlayPause, CarouselPrevious, CarouselSlide, CarouselViewport } from "@/components/ui/carousel";
+import { Lightbox, LightboxClose, LightboxContent, LightboxCounter, LightboxHeader, LightboxNext, LightboxPrevious, LightboxSlide, LightboxStage, LightboxTitle, LightboxTrigger, LightboxViewport } from "@/components/ui/lightbox";
 import { MediaRowList, type MediaRow } from "@/components/ui/media-row-list";
 import { Demo } from "./demo";
 
@@ -182,6 +184,114 @@ function Bare() {
   );
 }
 
+/** Thumbnails in a carousel, each opening the lightbox at its picture; one picture also has a second way in. */
+function Thumbnails() {
+  const [index, setIndex] = useState(0);
+  return (
+    <Lightbox count={PLACES.length} sharedTransition={false}>
+      <div className="flex flex-col gap-3">
+        <Carousel index={index} onIndexChange={setIndex} aria-label="Places, small">
+          <CarouselViewport className="gap-3">
+            {PLACES.map((place, at) => (
+              <CarouselSlide key={place.name} className="basis-full md:basis-[calc((100%-0.75rem)/2)]">
+                <LightboxTrigger index={at} aria-label={`Open picture: ${place.alt}`} className="block w-full overflow-hidden rounded-surface">
+                  <img src={picture(at)} alt="" className="aspect-video w-full object-cover" />
+                </LightboxTrigger>
+              </CarouselSlide>
+            ))}
+          </CarouselViewport>
+          <div className="flex items-center gap-2">
+            <CarouselPrevious />
+            <CarouselNext />
+            <CarouselCount className="ms-auto" />
+          </div>
+        </Carousel>
+        {/* A second trigger for the first picture that is never drawn (as one meant for another width would be), and one for the last that always is. */}
+        <LightboxTrigger index={0} className="hidden" data-testid="thumbs-undrawn">
+          Open the first picture
+        </LightboxTrigger>
+        <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+          <LightboxTrigger index={PLACES.length - 1} data-testid="thumbs-last" className="rounded-control border border-border-strong px-3 py-1.5 text-foreground">
+            Open the last picture
+          </LightboxTrigger>
+          <Button variant="outline" size="sm" onClick={() => setIndex(0)}>
+            Thumbnails to the start
+          </Button>
+          <span>
+            at: <span data-testid="thumbs-index">{index}</span>
+          </span>
+        </div>
+      </div>
+      <LightboxContent data-testid="thumbs-lightbox">
+        <LightboxHeader>
+          <LightboxCounter />
+          <LightboxTitle className="sr-only">Places</LightboxTitle>
+          <LightboxClose className="ms-auto" />
+        </LightboxHeader>
+        <LightboxStage>
+          <LightboxViewport>
+            {PLACES.map((place, at) => (
+              <LightboxSlide key={place.name} index={at}>
+                <img src={picture(at)} alt={place.alt} draggable={false} className="max-h-full max-w-full object-contain" />
+              </LightboxSlide>
+            ))}
+          </LightboxViewport>
+          <LightboxPrevious />
+          <LightboxNext />
+        </LightboxStage>
+      </LightboxContent>
+    </Lightbox>
+  );
+}
+
+const MORE: MediaRow[] = [
+  { id: "walk", name: "walk.mp4", size: 18_000_000, state: "uploading", progress: 30, hideCover: true, altRequired: true, status: "About a minute left." },
+  { id: "door", name: "door.jpg", size: 900_000, state: "checking", stateLabel: "Being checked", stateTone: "warning", status: "Pictures are looked at before they are shown.", alt: "The door, half open" },
+  { id: "roof", name: "roof.jpg", size: 1_100_000, state: "published", stateLabel: "Shown on the page", stateTone: "success", alt: "The roof from the yard" },
+  { id: "gate", name: "gate.jpg", size: 700_000, state: "rejected", stateLabel: "Not accepted", stateTone: "destructive", error: "Too dark to make out.", hideCover: true },
+];
+
+/** Rows in states of the project's own, with a status line, a control of its own, pause and resume, and descriptions that are checked. */
+function MoreRows() {
+  const [rows, setRows] = useState<MediaRow[]>(MORE);
+  const [checked, setChecked] = useState(false);
+  const [trimmed, setTrimmed] = useState(0);
+  const [drops, setDrops] = useState<string[]>([]);
+  const change = (id: string, patch: Partial<MediaRow>): void => setRows((all) => all.map((row) => (row.id === id ? { ...row, ...patch } : row)));
+  // The project's own rule, applied when asked: a description that is required and empty is an error.
+  const shown = rows.map((row) => ({
+    ...row,
+    ...(row.id === "walk" ? { controls: <Button size="sm" variant="ghost" aria-label="Trim: walk.mp4" onClick={() => setTrimmed((count) => count + 1)}>Trim</Button> } : {}),
+    ...(checked && !(row.alt ?? "").trim() ? { altError: row.id === "walk" ? "Say what the clip shows." : "Say what the picture shows." } : {}),
+  }));
+  return (
+    <div className="flex flex-col gap-3">
+      <MediaRowList
+        aria-label="Files being looked at"
+        variant="lines"
+        items={shown}
+        onItemsChange={(next) => setRows(next.map((row) => rows.find((own) => own.id === row.id) ?? row))}
+        onDropped={(drop) => setDrops((all) => [...all, `${drop.value}:${drop.from}>${drop.to}`])}
+        onAltChange={(id, alt) => change(id, { alt })}
+        onPause={(id) => change(id, { state: "paused", status: "Paused. Nothing is lost." })}
+        onResume={(id) => change(id, { state: "uploading", status: "About a minute left." })}
+        defaultCover="roof"
+      />
+      <div className="flex flex-wrap items-center gap-2">
+        <Button variant="outline" size="sm" onClick={() => setChecked(true)}>
+          Check the descriptions
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => change("door", { state: "published", stateLabel: "Shown on the page", stateTone: "success", status: "" })}>
+          Finish checking the door
+        </Button>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        trimmed: <span data-testid="more-trimmed">{trimmed}</span> · let go: <span data-testid="more-dropped">{drops.join(", ")}</span>
+      </p>
+    </div>
+  );
+}
+
 export function CarouselShowcase() {
   return (
     <div className="grid gap-6">
@@ -196,6 +306,9 @@ export function CarouselShowcase() {
       <Demo title="Carousel: several to a view, controlled">
         <Several />
       </Demo>
+      <Demo title="Carousel: thumbnails that open a lightbox">
+        <Thumbnails />
+      </Demo>
       <div className="grid gap-6 lg:grid-cols-2">
         <Demo title="Media rows">
           <Rows />
@@ -204,6 +317,9 @@ export function CarouselShowcase() {
           <Bare />
         </Demo>
       </div>
+      <Demo title="Media rows: the project's own states">
+        <MoreRows />
+      </Demo>
     </div>
   );
 }

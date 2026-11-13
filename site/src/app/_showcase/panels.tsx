@@ -67,6 +67,8 @@ export function Panels() {
   const [planOpen, setPlanOpen] = useState(false);
   const [width, setWidth] = useState(280);
   const [hidden, setHidden] = useState(false);
+  const [below, setBelow] = useState(200);
+  const [opened, setOpened] = useState(0);
   const [zoom, setZoom] = useState(1);
   const [mapOn, setMapOn] = useState(false);
 
@@ -206,6 +208,48 @@ export function Panels() {
             </p>
           </DockMain>
           <DockBar>Filters</DockBar>
+        </Dock>
+      </Demo>
+
+      <Demo title="Dock: its own stacking width, the bar above a composer" className="@3xl:col-span-2" bodyClassName="p-0">
+        <div className="flex flex-wrap items-center gap-3 border-b p-3 text-sm text-muted-foreground">
+          <Button variant="outline" size="sm" onClick={() => setBelow((now) => (now === 200 ? 16 : 200))}>
+            Stack below {below === 200 ? 16 : 200}rem instead
+          </Button>
+          <span>
+            stackBelow: <span data-testid="dock-below">{below}</span> · the bar was pressed: <span data-testid="dock-opened">{opened}</span>
+          </span>
+        </div>
+        <Dock data-testid="dock-above" stackBelow={below} defaultSize={40} minSize={30} maxSize={60} className="h-80">
+          <DockMain className="flex flex-col">
+            <div className="min-h-0 flex-1 p-4">
+              <p className="text-sm font-medium">Conversation</p>
+              <p className="mt-2 max-w-prose text-sm text-muted-foreground">On a narrow dock the bar for the plan sits here, above the composer, so the composer stays lowest.</p>
+            </div>
+            <DockBar show="stacked" onOpenStacked={() => setOpened((count) => count + 1)}>
+              <MapPin aria-hidden="true" strokeWidth={1.5} />
+              Plan · 3 stops
+            </DockBar>
+            <div data-testid="dock-composer" className="border-t p-3">
+              <Button variant="outline" size="sm">
+                Write a message
+              </Button>
+            </div>
+          </DockMain>
+          <DockResizer aria-label="Resize the plan beside the composer" />
+          <DockPanel aria-label="Plan beside the composer" className="bg-card">
+            <div className="flex items-center justify-between gap-2 border-b py-1 ps-4 pe-1">
+              <p className="text-sm font-medium">Plan</p>
+              <DockCollapse aria-label="Hide the plan beside the composer">
+                <PanelRightClose aria-hidden="true" strokeWidth={1.5} />
+              </DockCollapse>
+            </div>
+            <div className="min-h-0 flex-1 p-4 text-sm text-muted-foreground">Three stops.</div>
+          </DockPanel>
+          <DockBar show="collapsed">
+            <MapPin aria-hidden="true" strokeWidth={1.5} />
+            Plan · 3 stops
+          </DockBar>
         </Dock>
       </Demo>
 

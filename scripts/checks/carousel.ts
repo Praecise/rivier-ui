@@ -1,4 +1,4 @@
-// Checks: carousel, media-row-list (site/src/app/carousel).
+// Checks: carousel (alone, and holding the triggers of a lightbox), media-row-list (site/src/app/carousel).
 
 import type { Kit } from "../smoke-kit.ts";
 
@@ -248,6 +248,54 @@ export async function run(kit: Kit): Promise<void> {
   await page.mouse.move(2, 2);
   await kit.axe(auto, "carousel with autoplay");
 
+  // ---------------------------------------------------------------- Carousel: thumbnails that open a lightbox
+  const thumbs = await kit.demo("Carousel: thumbnails that open a lightbox");
+  const viewerBox = "[data-testid=thumbs-lightbox]";
+  const thumb = (place: number): string => `${thumbs} [data-slot=carousel-slide]:nth-child(${place}) [data-slot=lightbox-trigger]`;
+  const counter = (): Promise<string> => text(`${viewerBox} [data-slot=lightbox-counter]`);
+  const closed = async (): Promise<void> => {
+    await page.waitForFunction((s) => document.querySelector(s) === null, { timeout: 5000 }, viewerBox).catch(() => {});
+    await rest();
+  };
+  const thumbsPerView = kit.phone ? 1 : 2;
+  check((await shown(thumbs)).places.join() === (kit.phone ? "0" : "0,1"), `the thumbnails start at the first (${(await shown(thumbs)).places.join()})`);
+  // Two triggers for the first picture: the one in the carousel, and one that is not drawn.
+  check((await count(`${thumbs} [data-slot=lightbox-trigger]`)) === 8 && !(await page.evaluate(() => (document.querySelector("[data-testid=thumbs-undrawn]") as HTMLElement).getClientRects().length > 0)), "one picture has a second trigger that is not drawn");
+  await kit.click(thumb(1));
+  await sleep(500);
+  check((await counter()).startsWith("1"), `a thumbnail in a slide opens the lightbox at its picture (${await counter()})`);
+  await keys("Escape");
+  await closed();
+  check(await kit.focusIs(thumb(1)), `closing returns focus to the trigger that is drawn, not to the one that is not (${await kit.focused()})`);
+
+  // The picture shown at close has its trigger in a slide that is out of view, so inert.
+  await kit.click(thumb(1));
+  await sleep(500);
+  await keys(forward, forward, forward, forward);
+  await sleep(300);
+  check((await counter()).startsWith("5"), `the arrow keys go through the pictures (${await counter()})`);
+  check(await page.evaluate((s) => (document.querySelector(s) as HTMLElement).closest("[inert]") !== null, thumb(5)), "the fifth thumbnail is in a slide that is out of view, and inert");
+  await keys("Escape");
+  await closed();
+  check((await shown(thumbs)).places.includes(4), `the carousel has brought that slide into view (${(await shown(thumbs)).places.join()})`);
+  check(await kit.focusIs(thumb(5)), `and focus is on its thumbnail (${await kit.focused()})`);
+  check(Number(await text("[data-testid=thumbs-index]")) >= 5 - thumbsPerView, `the carousel's own place followed (${await text("[data-testid=thumbs-index]")})`);
+
+  // Two drawn triggers for one picture, one of them out of view and inert: the one that can be reached is used.
+  await kit.clickText(`${thumbs} button`, "Thumbnails to the start");
+  await rest();
+  check((await shown(thumbs)).places[0] === 0, "the thumbnails are back at the start");
+  await kit.click(thumb(1));
+  await sleep(500);
+  await keys("End");
+  await sleep(300);
+  check((await counter()).startsWith("6"), "End shows the last picture");
+  await keys("Escape");
+  await closed();
+  check(await kit.focusIs("[data-testid=thumbs-last]"), `of two triggers for the picture shown, focus goes to the one in view (${await kit.focused()})`);
+  check((await shown(thumbs)).places[0] === 0, "and the carousel is left where it was");
+  await kit.axe(thumbs, "the carousel of thumbnails");
+
   // ---------------------------------------------------------------- Media rows
   const rows = await kit.demo("Media rows");
   const order = (): Promise<string> => text("[data-testid=rows-order]");
@@ -255,7 +303,20 @@ export async function run(kit: Kit): Promise<void> {
   const row = (id: string): string => `${rows} [data-slot=media-row][data-row="${id}"]`;
   const START = "hills, wall, table, harbour";
   check((await page.$eval(`${rows} [data-slot=sortable-list]`, (node) => node.tagName)) === "OL" && (await attr(`${rows} [data-slot=sortable-list]`, "aria-label")) === "Pictures, in order", "the rows are a named ordered list");
-  check((await count(`${rows} [data-slot=sortable-list] > li`)) === 4 && (await count(`${rows} [data-slot=upload-item]:not([role=presentation])`)) === 0, "one list item per row: the upload row inside it is layout only");
+  check((await count(`${rows} [data-slot=sortable-list] > li`)) === 4 && (await count(`${rows} [data-slot=sortable-list] > li :is(ul, ol, li, [role=list], [role=listitem], [role=presentation])`)) === 0, "one list item per row, and no list inside a row");
+  check((await page.$eval(`${row("hills")} [data-slot=upload-item]`, (node) => node.tagName)) === "DIV", "the upload row inside it is a plain block, not a list item");
+  // Roundness: a row is a surface. Where controls become pills, a row of several lines must not.
+  const corners = await page.evaluate((s) => {
+    const root = document.documentElement;
+    const before = root.getAttribute("data-radius");
+    root.setAttribute("data-radius", "full");
+    const radius = (selector: string): number => Number.parseFloat(getComputedStyle(document.querySelector(selector) as Element).borderTopLeftRadius);
+    const found = { row: radius(`${s} [data-slot=media-row]`), height: (document.querySelector(`${s} [data-slot=media-row]`) as HTMLElement).offsetHeight, handle: radius(`${s} [data-slot=sortable-handle]`), field: radius(`${s} [data-slot=media-row-alt]`) };
+    if (before === null) root.removeAttribute("data-radius");
+    else root.setAttribute("data-radius", before);
+    return found;
+  }, rows);
+  check(corners.row > 0 && corners.row <= 32 && corners.row < corners.height / 3 && corners.handle > 1000 && corners.field > 1000, `at the roundest setting a row keeps the corners of a surface while its controls are pills (row ${corners.row}px of ${corners.height}px tall, handle ${corners.handle}px)`);
   const radios = await page.evaluate((s) => [...document.querySelectorAll<HTMLInputElement>(`${s} input[type=radio]`)].map((input) => `${input.getAttribute("aria-label")}|${input.checked}|${input.disabled}|${input.name}`), rows);
   check(radios.length === 4 && radios[0]?.startsWith("Cover: hills.jpg|true|false|") === true && new Set(radios.map((radio) => radio.split("|")[3])).size === 1, `the cover choices are radio buttons in one group, named by their file (${radios[0]})`);
   check(radios[2]?.startsWith("Cover: table.jpg|false|true|") === true, "a failed row cannot be the cover");
@@ -353,6 +414,73 @@ export async function run(kit: Kit): Promise<void> {
   check((await text(`${rows} [data-slot=media-row-empty]`)) === "No pictures yet." && (await kit.focusIs(`${rows} [data-slot=media-row-list]`)) && (await cover()) === "none", "with no rows left it shows the empty words, holds focus, and there is no cover");
   await kit.clickText(`${rows} button`, "Start again");
   check((await order()) === START && (await cover()) === "hills", "the rows come back");
+
+  // ---------------------------------------------------------------- Media rows: the project's own states
+  const more = await kit.demo("Media rows: the project's own states");
+  const mrow = (id: string): string => `${more} [data-slot=media-row][data-row="${id}"]`;
+  const stateOf = (id: string): Promise<string> => text(`${mrow(id)} [data-slot=upload-state]`);
+  check((await stateOf("door")) === "Being checked" && (await attr(`${mrow("door")} [data-slot=upload-item]`, "data-state")) === "checking" && (await attr(`${mrow("door")} [data-slot=upload-item]`, "data-tone")) === "warning", "a row can be in a state of the project's own, with the word and the tone it gives");
+  check((await stateOf("roof")) === "Shown on the page" && (await stateOf("gate")) === "Not accepted" && (await stateOf("walk")) === "Uploading", "each row has its own word; an upload state keeps its usual one");
+  check((await count(`${more} [data-slot=upload-state] svg`)) === 4, "every state has a mark beside its word: never colour alone");
+  const marks = await page.evaluate((s) => [...document.querySelectorAll(`${s} [data-slot=upload-state] svg`)].map((icon) => icon.innerHTML), more);
+  check(new Set(marks).size === 4, "and the four tones have four different marks");
+  check((await text(`${mrow("gate")} [data-slot=upload-detail]`)) === "Too dark to make out." && (await attr(`${mrow("gate")} [data-slot=upload-item]`, "data-tone")) === "destructive", "a state that reads as a failure shows why");
+  check((await text(`${mrow("walk")} [data-slot=media-row-status]`)) === "About a minute left." && (await text(`${mrow("door")} [data-slot=media-row-status]`)) === "Pictures are looked at before they are shown." && (await count(`${mrow("roof")} [data-slot=media-row-status]`)) === 0, "a row can carry a status line of its own; a row without one has none");
+  check((await count(`${mrow("walk")} input[type=radio]`)) === 0 && (await count(`${mrow("gate")} input[type=radio]`)) === 0 && (await count(`${mrow("door")} input[type=radio]`)) === 1 && (await count(`${mrow("roof")} input[type=radio]:checked`)) === 1, "the cover choice can be left out row by row");
+  check((await attr(`${mrow("walk")} [data-slot=media-row-controls] button`, "aria-label")) === "Trim: walk.mp4" && (await count(`${more} [data-slot=media-row-controls]`)) === 1, "a row has room for controls of the project's own");
+  await kit.click(`${mrow("walk")} [data-slot=media-row-controls] button`);
+  check((await text("[data-testid=more-trimmed]")) === "1", "which work");
+
+  // Pause and resume.
+  check((await attr(`${mrow("walk")} [data-slot=upload-pause]`, "aria-label")) === "Pause: walk.mp4" && (await count(`${more} [data-slot=upload-pause]`)) === 1 && (await count(`${more} [data-slot=upload-resume]`)) === 0, "a row that is uploading has a pause button, named after its file");
+  await kit.focus(`${mrow("walk")} [data-slot=upload-pause]`);
+  await keys("Enter");
+  await sleep(200);
+  check((await stateOf("walk")) === "Paused" && (await attr(`${mrow("walk")} [data-slot=upload-resume]`, "aria-label")) === "Resume: walk.mp4" && (await count(`${more} [data-slot=upload-pause]`)) === 0, "pausing tells the project; the row says Paused and offers Resume");
+  check((await attr(`${mrow("walk")} [role=progressbar]`, "aria-valuenow")) === "30" && (await text(`${mrow("walk")} [data-slot=media-row-status]`)) === "Paused. Nothing is lost.", "it keeps its progress, and its status line follows");
+  await kit.click(`${mrow("walk")} [data-slot=upload-resume]`);
+  await sleep(200);
+  check((await stateOf("walk")) === "Uploading" && (await count(`${mrow("walk")} [data-slot=upload-pause]`)) === 1, "resuming carries on");
+
+  // A required description, and one that is not acceptable.
+  const walkAlt = `${mrow("walk")} [data-slot=media-row-alt]`;
+  const labelOf = (selector: string): Promise<string> => page.evaluate((s) => (document.querySelector(s) as HTMLInputElement).labels?.[0]?.textContent ?? "", selector);
+  check((await attr(walkAlt, "required")) !== null && (await labelOf(walkAlt)) === "Description (required)", `a description that must be given says so in words and to a screen reader (${await labelOf(walkAlt)})`);
+  check((await attr(`${mrow("door")} [data-slot=media-row-alt]`, "required")) === null && (await labelOf(`${mrow("door")} [data-slot=media-row-alt]`)) === "Description", "one that need not be does not");
+  check((await attr(walkAlt, "aria-invalid")) === null && (await count(`${more} [data-slot=media-row-alt-error]`)) === 0, "nothing is marked wrong before it is checked");
+  await kit.clickText(`${more} button`, "Check the descriptions");
+  await sleep(200);
+  const told = await page.evaluate((s) => document.getElementById((document.querySelector(s) as HTMLElement).getAttribute("aria-describedby") ?? "")?.textContent ?? "", walkAlt);
+  check((await attr(walkAlt, "aria-invalid")) === "true" && told === "Say what the clip shows.", `an empty required description is marked invalid, with the message as its description (${told})`);
+  check((await count(`${mrow("walk")} [data-slot=media-row-alt-error] svg`)) === 1, "the message has a mark as well as a colour");
+  check((await kit.announced()).includes("walk.mp4: Say what the clip shows.") && (await kit.announced()).includes("gate.jpg: Say what the picture shows."), `the messages are read out as they appear, each with its file (${(await kit.announced()).slice(-2).join(" | ")})`);
+  check((await attr(`${mrow("roof")} [data-slot=media-row-alt]`, "aria-invalid")) === null, "a row with a description is left alone");
+  await kit.focus(walkAlt);
+  await page.keyboard.type("A walk along the wall");
+  await sleep(200);
+  check((await attr(walkAlt, "aria-invalid")) === null && (await attr(walkAlt, "aria-describedby")) === null && (await count(`${mrow("walk")} [data-slot=media-row-alt-error]`)) === 0 && (await kit.focusIs(walkAlt)), "once it is given the mark and the message go, and the field keeps focus");
+
+  // A state of the project's own that is good news is read out when the row reaches it.
+  await kit.clickText(`${more} button`, "Finish checking the door");
+  await sleep(200);
+  check((await stateOf("door")) === "Shown on the page" && (await kit.announced()).includes("door.jpg: Shown on the page") && (await count(`${mrow("door")} [data-slot=media-row-status]`)) === 0, "a row reaching a state that is good news is read out");
+
+  // Lines, not boxes; and the move is reported when it ends.
+  const line = await page.evaluate((s) => {
+    const style = getComputedStyle(document.querySelector(s) as Element);
+    return `${Number.parseFloat(style.borderTopLeftRadius)} ${style.borderBottomWidth} ${style.borderTopWidth} ${style.backgroundColor}`;
+  }, mrow("walk"));
+  check(line === "0 1px 0px rgba(0, 0, 0, 0)", `as lines, a row has a hairline under it and no box (${line})`);
+  check((await text("[data-testid=more-dropped]")) === "", "nothing has been let go yet");
+  await kit.click(`${more} [aria-label="Move walk.mp4 down"]`);
+  check((await text("[data-testid=more-dropped]")) === "walk:0>1", "a move made with a button is reported once, with where the row was and where it is");
+  await kit.focus(`${more} [aria-label="Reorder walk.mp4"]`);
+  await keys("Space", "ArrowDown", "ArrowDown", "Space");
+  check((await text("[data-testid=more-dropped]")) === "walk:0>1, walk:1>3", `a row lifted, moved two places and dropped is reported once (${await text("[data-testid=more-dropped]")})`);
+  await keys("Space", "ArrowUp", "Escape");
+  check((await text("[data-testid=more-dropped]")) === "walk:0>1, walk:1>3", "and not at all when it is put back");
+  await kit.axe(more, "media rows in the project's own states");
+  await kit.screenshot("media-rows-states");
 
   // ---------------------------------------------------------------- Media rows: order only
   const bare = await kit.demo("Media rows: order only");

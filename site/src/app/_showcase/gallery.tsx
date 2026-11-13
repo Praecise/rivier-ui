@@ -1,7 +1,7 @@
 "use client";
 // Showcase: gallery, lightbox, React view transitions, dropzone and upload rows.
 
-import { startTransition, useEffect, useRef, useState } from "react";
+import { startTransition, useEffect, useRef, useState, type ComponentProps } from "react";
 import { SharedElement } from "@/components/motion/view-transition";
 import { Button } from "@/components/ui/button";
 import {
@@ -57,6 +57,21 @@ const picture = (index: number): GalleryPicture => {
 
 const ALL = SCENES.map((_, index) => picture(index));
 const FEW: GalleryPicture[] = [...ALL.slice(0, 3), { src: "data:image/png;base64,AAAA", alt: "A picture whose file is missing" }];
+
+/** Pictures that carry their own size as well, which a framework's image component asks for. */
+type SizedPicture = GalleryPicture & { width: number; height: number };
+const SIZED: SizedPicture[] = [
+  ...SCENES.slice(0, 3).map((scene, index) => ({ ...picture(index), width: scene.width, height: scene.height })),
+  { src: "data:image/png;base64,AAAA", alt: "A picture whose file is missing", width: 800, height: 600 },
+];
+
+/**
+ * A stand-in for a framework's image component (the kind that takes `fill` and `sizes` and loads the
+ * picture its own way). It marks what it draws, so the checks can tell it from a plain `<img>`.
+ */
+function FrameworkImage({ fill = false, alt, ...props }: ComponentProps<"img"> & { fill?: boolean }) {
+  return <img data-framework-image={fill ? "fill" : "sized"} alt={alt} {...props} />;
+}
 
 type Upload = { id: number; name: string; size: number; state: UploadState; percent: number; attempts: number };
 
@@ -250,6 +265,31 @@ export function GalleryShowcase() {
             </LightboxStage>
           </LightboxContent>
         </Lightbox>
+      </Demo>
+
+      <Demo title="Gallery: the project's own image component">
+        <div className="flex flex-col gap-4">
+          <GalleryLightbox
+            title="Four drawings, drawn by the project's component"
+            items={SIZED}
+            sharedTransition={false}
+            renderImage={({ use, picture: item, props }) =>
+              use === "tile" ? (
+                <GalleryImage as={FrameworkImage} fill sizes="(min-width: 48rem) 25vw, 50vw" {...props} />
+              ) : (
+                <FrameworkImage {...props} width={use === "slide" ? item.width : 96} height={use === "slide" ? item.height : 72} />
+              )
+            }
+          />
+          <Gallery layout="grid" aria-label="Two tiles with no viewer" data-testid="own-parts">
+            <GalleryItem openLabel="Picture:">
+              <GalleryImage as={FrameworkImage} fill src={SIZED[1]?.src} alt="Three tall windows, as a part" />
+            </GalleryItem>
+            <GalleryItem openLabel="Picture:">
+              <GalleryImage src={SIZED[2]?.src} alt="A round table, as a plain picture" />
+            </GalleryItem>
+          </Gallery>
+        </div>
       </Demo>
 
       <Demo title="Shared element in a React transition">

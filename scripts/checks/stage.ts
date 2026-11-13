@@ -87,6 +87,12 @@ export async function run(kit: Kit): Promise<void> {
   check((await number(clock)) === 20 && JSON.stringify((await layers(stage)).map((layer) => layer.id)) === '["end"]' && (await text(`${stage} [data-slot=film-stage-elapsed]`)) === "0:20", "End goes to the end: the last frame of the last scene");
   await keys("Home");
   check((await number(clock)) === 0, "Home goes to the start");
+  await keys("n");
+  check((await number(clock)) === 4 && (await kit.announced()).includes("A circle crosses, scene 2 of 4"), `N goes to the start of the next scene and says which it is (${await text(clock)})`);
+  await keys("ArrowRight", "p");
+  check((await number(clock)) === 4, "P, more than a second into a scene, goes back to that scene's start");
+  await keys("p");
+  check((await number(clock)) === 0 && (await kit.announced()).includes("Title, scene 1 of 4"), "and pressed again at once, to the scene before");
 
   // Play and pause: the clock runs at the speed asked for, and the narration with it.
   await keys("Space");
@@ -304,6 +310,133 @@ export async function run(kit: Kit): Promise<void> {
   check(near(await shape(dframe), 16 / 9, 0.03), "the frame holds its shape here too");
   await kit.screenshot("stage-drawn");
   await kit.axe(drawn, "the stage drawn on request");
+
+  // ---- One clock for a stage and for parts outside it; several sounds; a loop; the scene buttons.
+  const round = await kit.demo("One clock, parts outside, several sounds, a loop");
+  const rstage = `${round} [data-slot=film-stage]`;
+  const beside = "[data-testid=round-beside]";
+  const rclock = "[data-testid=round-time]";
+  const rplay = `${rstage} [data-slot=film-stage-play]`;
+  const rnext = `${rstage} [data-slot=film-stage-next-scene]`;
+  const rprevious = `${rstage} [data-slot=film-stage-previous-scene]`;
+  const changes = (): Promise<string> => text("[data-testid=round-changes]");
+  type Sound = { time: number; paused: boolean; muted: boolean; volume: number };
+  const sounds = (): Promise<Record<string, Sound>> =>
+    page.evaluate(
+      (s) => Object.fromEntries([...document.querySelectorAll<HTMLAudioElement>(`${s} audio`)].map((audio) => [audio.dataset["sound"] ?? "", { time: audio.currentTime, paused: audio.paused, muted: audio.muted, volume: audio.volume }])),
+      rstage,
+    );
+  const silent: Sound = { time: -1, paused: true, muted: false, volume: -1 };
+  const rstrip = `${beside} [data-slot=scene-strip-item]`;
+  check((await page.evaluate((s, b) => !(document.querySelector(s) as Element).contains(document.querySelector(b)), rstage, beside)) && (await count(rstrip)) === 3, "a scene rstrip outside the stage element lists the scenes of the provider it shares");
+  check((await number(rclock)) === 0 && (await text("[data-testid=round-scene]")) === "1" && (await text(`${rstage} [data-slot=film-stage-time]`)) === "0:00 / 0:06", "the clock is read outside the stage as well as inside it");
+  check((await changes()) === "", "the scene the stage starts on is not reported as a change");
+  await page.waitForFunction((s) => [...document.querySelectorAll<HTMLAudioElement>(`${s} audio`)].every((audio) => audio.readyState >= 1), { timeout: 10_000 }, rstage).catch(() => {});
+  let heard = await sounds();
+  check((await count(`${rstage} audio`)) === 4 && (await attr(`${rstage} [data-slot=film-stage-mute]`, "disabled")) === null, "four sounds are attached at once, and mute is offered");
+  check(heard["bed"]?.volume === 0.3 && heard["one"]?.volume === 1, `a sound has the loudness it was given (${heard["bed"]?.volume})`);
+  check(Object.values(heard).every((sound) => sound.paused), "all are silent until the film plays");
+
+  // The scene keys and the event.
+  await kit.focus(rstage);
+  await keys("n");
+  check((await number(rclock)) === 2 && (await text("[data-testid=round-scene]")) === "2" && (await changes()) === "first>second#1", `a change of scene is reported, with the scene before it and its place (${await changes()})`);
+  check((await kit.announced()).includes("Second, scene 2 of 3") && (await text(`${rstrip}[aria-current=true] [data-slot=scene-strip-label]`)).startsWith("Second"), "it is read out, and the rstrip outside the stage marks it");
+
+  // Each sound has its own start and length.
+  await keys("ArrowRight", "ArrowRight");
+  heard = await sounds();
+  check((await number(rclock)) === 3 && near(heard["bed"]?.time ?? -1, 3, 0.03) && near(heard["two"]?.time ?? -1, 0.5, 0.03), `a seek moves every sound to its own moment: the bed to the clock's, a clip to the clock's less its start (bed ${heard["bed"]?.time}, clip ${heard["two"]?.time})`);
+  check(heard["one"]?.time === 0 && heard["three"]?.time === 0, "a clip whose moment is not now is left alone");
+  await kit.click(rplay);
+  await sleep(600);
+  heard = await sounds();
+  const at = await number(rclock);
+  check(!(heard["bed"] ?? silent).paused && !(heard["two"] ?? silent).paused && near(heard["two"]?.time ?? -1, at - 2.5, 0.4) && near(heard["bed"]?.time ?? -1, at, 0.4), `playing, the bed and the clip whose moment it is play in step with the clock (clock ${at}, bed ${heard["bed"]?.time.toFixed(2)}, clip ${heard["two"]?.time.toFixed(2)})`);
+  check((heard["one"] ?? silent).paused && (heard["three"] ?? silent).paused, "and the other clips wait");
+  await kit.focus(rstage);
+  await keys("m");
+  check(Object.values(await sounds()).every((sound) => sound.muted) && (await attr(`${rstage} [data-slot=film-stage-mute]`, "aria-pressed")) === "true", "M mutes every sound");
+  await keys("m");
+  check(Object.values(await sounds()).every((sound) => !sound.muted), "and unmutes them all");
+  await page.waitForFunction((s) => Number(document.querySelector(s)?.textContent) > 4.25 && Number(document.querySelector(s)?.textContent) < 5, { timeout: 6000 }, rclock).catch(() => {});
+  heard = await sounds();
+  const later = await number(rclock);
+  check((heard["two"] ?? silent).paused && !(heard["three"] ?? silent).paused && near(heard["three"]?.time ?? -1, later - 4, 0.4), `a clip stops at the end of its length, and the next starts at its own start (clock ${later}, clip ${heard["three"]?.time.toFixed(2)})`);
+  check((await changes()).endsWith("second>third#2"), "a change of scene made by playing is reported too");
+
+  // Loop: at the end it starts again, still playing.
+  await page.waitForFunction((s) => Number(document.querySelector(s)?.textContent) < 1.5, { timeout: 6000 }, rclock).catch(() => {});
+  await sleep(300);
+  heard = await sounds();
+  const again = await number(rclock);
+  check(again < 2.5 && (await text("[data-testid=round-running]")) === "running" && (await attr(rplay, "aria-label")) === "Pause", `with loop the film starts again at its end and goes on playing (${again})`);
+  check((await changes()).endsWith("third>first#0") && (await text("[data-testid=round-scene]")) === "1", `going round is a change of scene (${await changes()})`);
+  check(!(heard["bed"] ?? silent).paused && near(heard["bed"]?.time ?? -1, again, 0.4) && (heard["three"] ?? silent).paused, `and the sounds go round with it (clock ${again}, bed ${heard["bed"]?.time.toFixed(2)})`);
+  await kit.click(rplay);
+  check((await attr(rplay, "aria-label")) === "Play" && Object.values(await sounds()).every((sound) => sound.paused), "pausing pauses every sound");
+
+  // The scene buttons.
+  await kit.focus(rstage);
+  await keys("Home");
+  check((await attr(rprevious, "aria-label")) === "Previous scene" && (await attr(rnext, "aria-label")) === "Next scene", "there are buttons for the scene before and the scene after");
+  check((await attr(rprevious, "aria-disabled")) === "true" && (await attr(rnext, "aria-disabled")) === null, "at the very start the first says it is unavailable");
+  await kit.focus(rnext);
+  await keys("Enter");
+  check((await number(rclock)) === 2 && (await kit.focusIs(rnext)), "Next scene goes to the start of the next scene and keeps focus");
+  await keys("Enter");
+  check((await number(rclock)) === 4 && (await kit.announced()).includes("Scene 3 of 3"), "a scene with no name is read out by its place");
+  check((await attr(rnext, "aria-disabled")) === "true" && (await kit.focusIs(rnext)), "on the last scene it says it is unavailable, and still has focus");
+  await keys("Enter");
+  check((await number(rclock)) === 4, "and a press does nothing");
+  await kit.click(rprevious);
+  check((await number(rclock)) === 2, "Previous scene, at the start of a scene, goes to the scene before");
+  await kit.focus(rstage);
+  await keys("ArrowRight", "ArrowRight", "ArrowRight");
+  await kit.click(rprevious);
+  check((await number(rclock)) === 2, "more than a second in, it goes to the start of the scene on stage");
+  await kit.click(rprevious);
+  check((await number(rclock)) === 0 && (await attr(rprevious, "aria-disabled")) === "true", "and from there to the scene before");
+  if (kit.phone) {
+    const size = await page.evaluate((s) => document.querySelector(s)?.getBoundingClientRect().height ?? 0, rnext);
+    check(size >= 40, `on a touch screen the scene buttons are at least 40px (${size}px)`);
+  }
+
+  // A part outside the stage drives it.
+  await kit.click(`${rstrip}:nth-child(3)`);
+  check((await number(rclock)) === 4 && (await page.evaluate((s) => document.querySelector(`${s} [data-slot=film-stage-scene]`)?.getAttribute("data-scene"), rstage)) === "third", "pressing a scene in the rstrip outside the stage puts that scene on stage");
+  await kit.axe(round, "the stage with parts outside it");
+  await kit.screenshot("stage-round");
+
+  // ---- Drawn on request, with pictures that are lazy, hidden, broken, or never arrive.
+  const pictures = await kit.demo("Drawn on request: pictures that load late or never");
+  const result = "[data-testid=pictures-result]";
+  const loaded = (): Promise<string> =>
+    page.evaluate(() =>
+      ["far", "hidden"]
+        .map((name) => {
+          const picture = document.querySelector<HTMLImageElement>(`[data-testid=pictures-${name}]`);
+          return picture ? `${name}: ${picture.complete && picture.naturalWidth > 0 ? "loaded" : "not loaded"}, ${picture.loading}` : `${name}: absent`;
+        })
+        .join("; "),
+    );
+  await sleep(1200);
+  check((await loaded()) === "far: not loaded, lazy; hidden: not loaded, lazy", `a lazy picture that is clipped out of view, and one inside something not displayed, do not load by themselves (${await loaded()})`);
+  await kit.clickText(`${pictures} button`, "Draw the late pictures");
+  await page.waitForFunction((s) => document.querySelector(s)?.textContent !== "drawing", { timeout: 15_000 }, result).catch(() => {});
+  check((await text(result)) === "drawn 1", `renderAt resolves all the same (${await text(result)})`);
+  check((await loaded()) === "far: loaded, eager; hidden: loaded, eager", `having made them load: by the time it resolves they are in (${await loaded()})`);
+  check((await page.evaluate(() => (document.querySelector("[data-testid=pictures-missing]") as HTMLImageElement).naturalWidth)) === 0, "a picture whose file is broken does not hold it up");
+  await kit.clickText(`${pictures} button`, "Draw the one that never arrives");
+  await page.waitForFunction((s) => document.querySelector(s)?.textContent !== "drawing", { timeout: 15_000 }, result).catch(() => {});
+  const failure = await text(result);
+  const took = Number(/^failed after ([\d.]+)s/.exec(failure)?.[1] ?? "99");
+  check(/: FilmStage renderAt\(5\): a picture was not ready after 700 ms: <img src="[^"]*\/stall\?picture" alt="Never arrives"> in scene "stalled"$/.test(failure), `a picture that never arrives makes renderAt reject with an error that names it and its scene (${failure})`);
+  check(took >= 0.6 && took <= 3, `after the time it was given, not for ever (${took}s)`);
+  await kit.clickText(`${pictures} button`, "Draw the late pictures");
+  await page.waitForFunction((s) => document.querySelector(s)?.textContent !== "drawing", { timeout: 15_000 }, result).catch(() => {});
+  check((await text(result)) === "drawn 1" && (await count("[data-testid=pictures-stalled]")) === 0, "and the stage can go on to draw other moments");
+  await kit.axe(pictures, "the stage with late pictures");
 
   await kit.axe("main", "after the checks");
 }

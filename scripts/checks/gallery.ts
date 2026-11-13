@@ -70,6 +70,13 @@ export async function run(kit: Kit): Promise<void> {
   check((await text(`${dialog} [data-slot=lightbox-title]`)) === "Eight drawings", "the lightbox has a title");
   check((await counter()) === "2 of 8", `it opens at the picture pressed (${await counter()})`);
   check(await centred(), "the track is on that slide");
+  const fitted = await page.evaluate((d) => {
+    const image = document.querySelector(`${d} [data-slot=lightbox-slide][data-active] img`) as HTMLImageElement;
+    const a = image.getBoundingClientRect();
+    const b = (image.closest("[data-slot=lightbox-slide]") as HTMLElement).getBoundingClientRect();
+    return { inside: a.top >= b.top - 1 && a.bottom <= b.bottom + 1 && a.left >= b.left - 1 && a.right <= b.right + 1, shape: a.width / a.height, natural: image.naturalWidth / image.naturalHeight, sizes: `${Math.round(a.width)}x${Math.round(a.height)} in ${Math.round(b.width)}x${Math.round(b.height)}` };
+  }, dialog);
+  check(fitted.inside && Math.abs(fitted.shape - fitted.natural) < 0.03, `a picture taller than the slide is shown whole inside it, in its own proportions (${fitted.sizes})`);
   check((await attr(`${dialog} [data-slot=lightbox-counter]`, "aria-live")) === "polite", "the counter is a polite live region");
   check((await attr(`${dialog} [data-slot=lightbox-slide][data-active]`, "aria-roledescription")) === "slide" && (await attr(`${dialog} [data-slot=lightbox-slide][data-active]`, "aria-label")) === "2 of 8", "the slide is named by its position");
   check((await count(`${dialog} [data-slot=lightbox-slide][inert]`)) === 7, "slides out of view are inert");
@@ -264,6 +271,47 @@ export async function run(kit: Kit): Promise<void> {
   await kit.click(`${dialog} [data-slot=lightbox-close]`);
   await sleep(500);
   check((await count(dialog)) === 0, "the close button closes it");
+
+  // ---- Gallery: the project's own image component ----------------------------------------------------------
+  const own = await kit.demo("Gallery: the project's own image component");
+  const ownTile = `${own} [data-slot=gallery]:not([data-testid]) [data-slot=gallery-item]`;
+  await sleep(300);
+  const drawnBy = await page.evaluate(
+    (s) => [...document.querySelectorAll(`${s} img`)].map((image) => `${image.getAttribute("data-framework-image")}|${image.getAttribute("data-slot")}|${image.getAttribute("loading")}|${image.getAttribute("sizes") !== null}`),
+    ownTile,
+  );
+  check(drawnBy.length === 3 && drawnBy.every((image) => image === "fill|gallery-image|null|true"), `given a component to draw with, each tile's picture is drawn by it, with the props passed on and its own way of loading (${drawnBy[0]})`);
+  const fills = await page.evaluate((s) => {
+    const tile = document.querySelector(s) as HTMLElement;
+    const a = tile.getBoundingClientRect();
+    const b = (tile.querySelector("img") as HTMLElement).getBoundingClientRect();
+    return Math.abs(a.width - b.width) <= 1 && Math.abs(a.height - b.height) <= 1 && getComputedStyle(tile.querySelector("img") as Element).objectFit === "cover";
+  }, ownTile);
+  check(fills, "it fills its tile, cropped, as the plain picture does");
+  check((await nameOf(ownTile)) === "Open picture: A sun low over two hills", `the tile keeps its name (${await nameOf(ownTile)})`);
+  check((await text(`${ownTile}:nth-child(4) [data-slot=gallery-image-unavailable]`)).startsWith("Picture unavailable") && (await nameOf(`${ownTile}:nth-child(4)`)).includes("A picture whose file is missing"), "a picture it cannot load still gives way to the labelled placeholder");
+  await kit.click(`${ownTile}:nth-child(2)`);
+  await settled();
+  const slide = `${dialog} [data-slot=lightbox-slide][data-active] img`;
+  check((await counter()) === "2 of 4" && (await attr(slide, "data-framework-image")) === "sized" && (await attr(slide, "alt")) === "Three tall windows in a wall" && (await attr(slide, "width")) === "800" && (await attr(slide, "height")) === "1100", "in the viewer the slide is drawn by the same component, with the picture's description and its own size");
+  const whole = await page.evaluate((s) => {
+    const image = document.querySelector(s) as HTMLImageElement;
+    const a = image.getBoundingClientRect();
+    const b = (image.closest("[data-slot=lightbox-slide]") as HTMLElement).getBoundingClientRect();
+    return { inside: a.width <= b.width + 1 && a.height <= b.height + 1 && a.width > 40, shape: a.width / a.height, fit: getComputedStyle(image).objectFit, sizes: `${Math.round(a.width)}x${Math.round(a.height)} in ${Math.round(b.width)}x${Math.round(b.height)}` };
+  }, slide);
+  check(whole.inside && whole.fit === "contain" && Math.abs(whole.shape - 800 / 1100) < 0.03, `shown whole, inside the slide, in its own proportions (${whole.sizes}, ${whole.fit})`);
+  const strip = await page.evaluate((d) => [...document.querySelectorAll(`${d} [data-slot=lightbox-thumbnail] img`)].map((image) => `${image.getAttribute("data-framework-image")}|${image.getAttribute("alt")}`), dialog);
+  check(strip.length === 4 && strip.every((image) => image === "sized|"), `and so are the thumbnails, which stay decoration: their buttons carry the names (${strip[0]})`);
+  check((await attr(`${dialog} [data-slot=lightbox-thumbnail]:nth-child(2)`, "aria-label")) === "Show picture 2: Three tall windows in a wall", "each thumbnail's button is named after its picture");
+  await kit.axe(dialog, "the viewer drawn by the project's component");
+  await keys("Escape");
+  await sleep(700);
+  check((await count(dialog)) === 0 && (await nameOf(":focus")) === "Open picture: Three tall windows in a wall", "closing returns focus to the tile");
+  const parts = "[data-testid=own-parts] [data-slot=gallery-item]";
+  check((await attr(`${parts}:nth-child(1) img`, "data-framework-image")) === "fill" && (await attr(`${parts}:nth-child(1) img`, "loading")) === null, "GalleryImage takes the component as a part too");
+  check((await attr(`${parts}:nth-child(2) img`, "data-framework-image")) === null && (await attr(`${parts}:nth-child(2) img`, "loading")) === "lazy" && (await attr(`${parts}:nth-child(2) img`, "decoding")) === "async", "left alone it is a plain picture, loaded lazily, as before");
+  await kit.axe(own, "the gallery drawn by the project's component");
 
   // ---- React's ViewTransition ------------------------------------------------------------------------------
   const shared = await kit.demo("Shared element in a React transition");

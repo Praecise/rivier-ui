@@ -1,5 +1,6 @@
 "use client";
-// Showcase: virtual-list (a list of rows of any height, a grid, going to an item, coming back to a place).
+// Showcase: virtual-list (a list of rows of any height, a grid, going to an item, coming back to a place,
+// a count that changes, rows that move, and a list that scrolls with the page).
 //
 // Everything is made from the index, with no randomness, so the browser checks can say what row 5,000 holds.
 
@@ -16,6 +17,97 @@ const number = new Intl.NumberFormat("en");
 
 /** One to five sentences, by the index alone. */
 const sentences = (index: number): number => ((index * 7) % 5) + 1;
+
+type Note = { id: string; lines: number };
+const NOTE_SIZE = 72;
+/** Notes numbered from `from`, each one to five sentences long by its own number: a note keeps its height wherever it goes. */
+const notesFrom = (from: number, count: number): Note[] => Array.from({ length: count }, (_, at) => ({ id: `n${from + at}`, lines: sentences(from + at) }));
+
+/** A list whose count changes and whose rows move: rows are known by `getKey`, not by where they are. */
+function Changing() {
+  const [notes, setNotes] = useState<Note[]>(() => notesFrom(1, 300));
+  const [made, setMade] = useState(300);
+  const add = (count: number, where: "start" | "end"): void => {
+    const more = notesFrom(made + 1, count);
+    setMade(made + count);
+    setNotes((all) => (where === "start" ? [...more, ...all] : [...all, ...more]));
+  };
+  return (
+    <>
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <Button variant="outline" size="sm" onClick={() => add(100, "end")}>
+          Add 100 at the end
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => add(1, "start")}>
+          Add one at the start
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => setNotes((all) => [...all].reverse())}>
+          Reverse the order
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => setNotes((all) => all.slice(0, 3))}>
+          Keep only three
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => setNotes([])}>
+          Remove them all
+        </Button>
+      </div>
+      <VirtualList count={notes.length} estimateSize={NOTE_SIZE} getKey={(index) => notes[index]?.id ?? index} aria-label="Notes" className="h-80 rounded-surface border bg-background">
+        {(index) => {
+          const note = notes[index];
+          return note ? (
+            <div data-note={note.id} className="border-b px-4 py-3">
+              <p className="text-sm font-medium">Note {note.id.slice(1)}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{Array.from({ length: note.lines }, () => SENTENCE).join(" ")}</p>
+            </div>
+          ) : null;
+        }}
+      </VirtualList>
+      <p className="mt-3 text-sm text-muted-foreground">
+        Notes: <span data-testid="notes-count">{notes.length}</span>. First: <span data-testid="notes-first">{notes[0]?.id ?? "none"}</span>
+      </p>
+    </>
+  );
+}
+
+const RESULTS = 2_000;
+
+/** A list that is as long as its rows and scrolls with the page, not in a box of its own. */
+function WithThePage() {
+  const results = useRef<VirtualListHandle>(null);
+  const [range, setRange] = useState<VirtualRange>({ start: 0, end: 0 });
+  return (
+    <>
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <Button variant="outline" size="sm" data-testid="results-go" onClick={() => results.current?.scrollToIndex(999)}>
+          Go to result 1,000
+        </Button>
+        <Button variant="outline" size="sm" data-testid="results-centre" onClick={() => results.current?.scrollToIndex(499, { align: "center" })}>
+          Centre result 500
+        </Button>
+        <Button variant="outline" size="sm" data-testid="results-last" onClick={() => results.current?.scrollToIndex(RESULTS - 1, { align: "end" })}>
+          Go to the last result
+        </Button>
+      </div>
+      <p className="mb-3 truncate text-sm text-muted-foreground tabular-nums">
+        In view: <span data-testid="results-start">{range.start + 1}</span> to <span data-testid="results-end">{range.end + 1}</span> of {number.format(RESULTS)}
+      </p>
+      {/* The room the page's sticky header takes: a result that is gone to stops under it, not behind it. */}
+      <VirtualList scroll="window" handleRef={results} count={RESULTS} estimateSize={76} onRangeChange={setRange} aria-label="Two thousand results" className="scroll-mt-24 rounded-surface border bg-background">
+        {(index) => (
+          <div className="flex items-start justify-between gap-3 border-b px-4 py-3">
+            <div className="min-w-0">
+              <p className="text-sm font-medium">Result {number.format(index + 1)}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{Array.from({ length: sentences(index) }, () => SENTENCE).join(" ")}</p>
+            </div>
+            <Button variant="outline" size="sm" data-testid={index === RESULTS - 1 ? "results-back" : undefined} onClick={() => results.current?.scrollToIndex(0)}>
+              To the first
+            </Button>
+          </div>
+        )}
+      </VirtualList>
+    </>
+  );
+}
 
 export function Lists() {
   const list = useRef<VirtualListHandle>(null);
@@ -99,6 +191,14 @@ export function Lists() {
             </div>
           )}
         </VirtualList>
+      </Demo>
+
+      <Demo title="Virtual list: rows that come, go and move">
+        <Changing />
+      </Demo>
+
+      <Demo title="Virtual list: the page scrolls">
+        <WithThePage />
       </Demo>
     </div>
   );
