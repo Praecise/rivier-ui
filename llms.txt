@@ -968,6 +968,18 @@ Use it: Every control in a form. Put the control inside FieldControl; render Fie
 </Field>
 ```
 
+### flow-diagram
+
+A diagram of boxes joined by arrows that the person edits: nodes dragged or moved with the arrow keys, joined by pressing C and choosing the next node (or by pointer), removed with Delete, zoomed and panned; every change said aloud and the whole diagram also given as a list of steps and links.
+
+Use it: Processes, pipelines and simple node graphs the person builds or rearranges: an approval flow, a data pipeline, a decision tree. For a graph to look at, laid out automatically, use network-graph; for stages with amounts use sankey-chart; for work moving between columns use kanban.
+
+```tsx
+const [nodes, setNodes] = useState([{ id: "a", label: "Order placed", x: 40, y: 60 }, { id: "b", label: "Paid", x: 260, y: 60 }]);
+const [edges, setEdges] = useState([{ id: "a-b", source: "a", target: "b" }]);
+<FlowDiagram aria-label="Order flow" nodes={nodes} edges={edges} onNodesChange={setNodes} onEdgesChange={setEdges} />
+```
+
 ### form
 
 A form that checks itself with the browser's own rules (required, type, length, range, pattern) and the project's, shows each field's message in words under it, and after a failed submit lists every fault at the top as links to the fields, said once.
@@ -1302,6 +1314,23 @@ Use it: A site with sections that each hold several pages. For a few plain links
     <NavigationMenuItem><NavigationMenuLink href="/pricing">Pricing</NavigationMenuLink></NavigationMenuItem>
   </NavigationMenuList>
 </NavigationMenu>
+```
+
+### notification-list
+
+An inbox of notices: each with its kind, title, words and time ("5 min ago"), unread ones marked by a dot and the word "Unread", a switch between all and unread, marking one or all as read, and room for each notice's own action; every change said aloud.
+
+Use it: The list behind a bell in an app's header (put it in a popover or sheet), or an activity page. For a message that appears and goes by itself use toaster; for a problem on the page use alert; for a conversation use thread.
+
+```tsx
+<NotificationList
+  aria-label="Notifications"
+  now="2026-11-13T12:00:00Z"
+  defaultItems={[
+    { id: "1", title: "Report ready", body: "The October report can be downloaded.", time: "2026-11-13T11:55:00Z" },
+    { id: "2", title: "New comment", body: "On the map of the coast.", time: "2026-11-12T09:00:00Z", read: true },
+  ]}
+/>
 ```
 
 ### number-stepper
@@ -2121,6 +2150,23 @@ Use it: Naming an icon-only button or adding a short hint. It does not open on t
     <TooltipContent>Copy link</TooltipContent>
   </Tooltip>
 </TooltipProvider>
+```
+
+### tour
+
+A guided walk through an interface: a card beside each element in turn, with the element ringed, its step number ("2 of 5"), Back, Next and Skip, focus moved into the card, the element scrolled into view, and Escape to end at any point.
+
+Use it: Showing a new or changed interface once, on request or the first time: where things are, a new feature. Keep it to a few steps and let people leave at once; never block the page. For one hint use tooltip or popover; for a task done in steps use wizard.
+
+```tsx
+<Tour
+  open={touring}
+  onOpenChange={setTouring}
+  steps={[
+    { target: "#search", title: "Search", body: "Find any file by its name or its words." },
+    { target: "#share", title: "Share", body: "Send a link to the people you work with." },
+  ]}
+/>
 ```
 
 ### tree-view

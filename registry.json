@@ -1444,6 +1444,37 @@
       }
     },
     {
+      "name": "flow-diagram",
+      "type": "registry:ui",
+      "title": "Flow Diagram",
+      "description": "A diagram of boxes joined by arrows that the person edits: nodes dragged or moved with the arrow keys, joined by pressing C and choosing the next node (or by pointer), removed with Delete, zoomed and panned; every change said aloud and the whole diagram also given as a list of steps and links.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/flow-diagram.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/flow-diagram.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Processes, pipelines and simple node graphs the person builds or rearranges: an approval flow, a data pipeline, a decision tree. For a graph to look at, laid out automatically, use network-graph; for stages with amounts use sankey-chart; for work moving between columns use kanban.",
+        "example": "const [nodes, setNodes] = useState([{ id: \"a\", label: \"Order placed\", x: 40, y: 60 }, { id: \"b\", label: \"Paid\", x: 260, y: 60 }]);\nconst [edges, setEdges] = useState([{ id: \"a-b\", source: \"a\", target: \"b\" }]);\n<FlowDiagram aria-label=\"Order flow\" nodes={nodes} edges={edges} onNodesChange={setNodes} onEdgesChange={setEdges} />",
+        "client": true
+      }
+    },
+    {
       "name": "form",
       "type": "registry:ui",
       "title": "Form",
@@ -1929,6 +1960,37 @@
         "category": "ui",
         "when": "A site with sections that each hold several pages. For a few plain links use navbar (which also folds them into a sheet on phones); for commands use menubar or dropdown-menu. Below `md`, put the same links in navbar's sheet.",
         "example": "<NavigationMenu aria-label=\"Main\">\n  <NavigationMenuList>\n    <NavigationMenuItem>\n      <NavigationMenuTrigger>Products</NavigationMenuTrigger>\n      <NavigationMenuContent>\n        <NavigationMenuLink href=\"/maps\">Maps</NavigationMenuLink>\n        <NavigationMenuLink href=\"/charts\">Charts</NavigationMenuLink>\n      </NavigationMenuContent>\n    </NavigationMenuItem>\n    <NavigationMenuItem><NavigationMenuLink href=\"/pricing\">Pricing</NavigationMenuLink></NavigationMenuItem>\n  </NavigationMenuList>\n</NavigationMenu>",
+        "client": true
+      }
+    },
+    {
+      "name": "notification-list",
+      "type": "registry:ui",
+      "title": "Notification List",
+      "description": "An inbox of notices: each with its kind, title, words and time (\"5 min ago\"), unread ones marked by a dot and the word \"Unread\", a switch between all and unread, marking one or all as read, and room for each notice's own action; every change said aloud.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/notification-list.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/notification-list.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "The list behind a bell in an app's header (put it in a popover or sheet), or an activity page. For a message that appears and goes by itself use toaster; for a problem on the page use alert; for a conversation use thread.",
+        "example": "<NotificationList\n  aria-label=\"Notifications\"\n  now=\"2026-11-13T12:00:00Z\"\n  defaultItems={[\n    { id: \"1\", title: \"Report ready\", body: \"The October report can be downloaded.\", time: \"2026-11-13T11:55:00Z\" },\n    { id: \"2\", title: \"New comment\", body: \"On the map of the coast.\", time: \"2026-11-12T09:00:00Z\", read: true },\n  ]}\n/>",
         "client": true
       }
     },
@@ -3258,6 +3320,37 @@
         "category": "ui",
         "when": "Naming an icon-only button or adding a short hint. It does not open on touch, so never put anything needed there: the control keeps its own `aria-label`. For content people interact with use popover. Put one TooltipProvider around the app (root layout); every Tooltip must be inside one.",
         "example": "<TooltipProvider>\n  <Tooltip>\n    <TooltipTrigger asChild>\n      <Button variant=\"ghost\" size=\"icon\" aria-label=\"Copy link\"><Link2 /></Button>\n    </TooltipTrigger>\n    <TooltipContent>Copy link</TooltipContent>\n  </Tooltip>\n</TooltipProvider>",
+        "client": true
+      }
+    },
+    {
+      "name": "tour",
+      "type": "registry:ui",
+      "title": "Tour",
+      "description": "A guided walk through an interface: a card beside each element in turn, with the element ringed, its step number (\"2 of 5\"), Back, Next and Skip, focus moved into the card, the element scrolled into view, and Escape to end at any point.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/button",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/tour.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/tour.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Showing a new or changed interface once, on request or the first time: where things are, a new feature. Keep it to a few steps and let people leave at once; never block the page. For one hint use tooltip or popover; for a task done in steps use wizard.",
+        "example": "<Tour\n  open={touring}\n  onOpenChange={setTouring}\n  steps={[\n    { target: \"#search\", title: \"Search\", body: \"Find any file by its name or its words.\" },\n    { target: \"#share\", title: \"Share\", body: \"Send a link to the people you work with.\" },\n  ]}\n/>",
         "client": true
       }
     },
