@@ -3834,6 +3834,33 @@
       }
     },
     {
+      "name": "pattern",
+      "type": "registry:component",
+      "title": "Pattern",
+      "description": "A quiet background of dots, a grid or diagonal lines drawn in the theme's hairline colour, filling the box it sits in, behind the content and hidden from screen readers.",
+      "categories": [
+        "layout"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/layout/pattern.tsx",
+          "type": "registry:component",
+          "target": "components/layout/pattern.tsx"
+        }
+      ],
+      "meta": {
+        "category": "layout",
+        "when": "A section or a card that needs a texture to set it apart without a colour or a gradient: a hero, an empty state, a canvas. Keep it faint; for a photograph or an illustration use an image.",
+        "example": "<section className=\"relative overflow-hidden\">\n  <Pattern variant=\"grid\" />\n  <h2 className=\"relative\">Plans</h2>\n</section>",
+        "client": false
+      }
+    },
+    {
       "name": "section",
       "type": "registry:component",
       "title": "Section",
@@ -3918,6 +3945,62 @@
         "when": "Spacing a run of siblings evenly: form fields, a button row, a header with actions. For columns that reflow by width use grid; for unequal tiles use bento-grid.",
         "example": "<Stack gap=\"lg\">\n  <h2>Title</h2>\n  <p>Body</p>\n</Stack>\n<Stack direction=\"horizontal\" gap=\"sm\" align=\"center\" justify=\"between\" wrap>\n  <span>Plan</span>\n  <Button size=\"sm\">Change</Button>\n</Stack>\n<Stack asChild gap=\"xs\"><ul><li>One</li><li>Two</li></ul></Stack>",
         "client": false
+      }
+    },
+    {
+      "name": "animated-beam",
+      "type": "registry:component",
+      "title": "Animated Beam",
+      "description": "A flat line drawn between two elements inside a container, bowed if asked, along which a row of dots lights up in turn from the start to the end, showing that something flows from one to the other; it follows the elements as the layout changes and stands still under reduced motion.",
+      "categories": [
+        "motion"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/motion/animated-beam.tsx",
+          "type": "registry:component",
+          "target": "components/motion/animated-beam.tsx"
+        }
+      ],
+      "meta": {
+        "category": "motion",
+        "when": "A diagram in a page that says data or work moves between parts: a source feeding a product, a step handing to the next. Decoration: say the same in words nearby. For a real diagram the person edits use flow-diagram; for amounts use sankey-chart.",
+        "example": "const box = useRef(null), a = useRef(null), b = useRef(null);\n<div ref={box} className=\"relative flex justify-between\">\n  <div ref={a}>Source</div>\n  <div ref={b}>Product</div>\n  <AnimatedBeam containerRef={box} fromRef={a} toRef={b} curvature={40} />\n</div>",
+        "client": true
+      }
+    },
+    {
+      "name": "confetti",
+      "type": "registry:component",
+      "title": "Confetti",
+      "description": "A short burst of flat paper pieces in the chart colours from a point, falling and fading on a canvas over the page, started from code (the handle's `fire`) and never under reduced motion; it says nothing and takes no clicks.",
+      "categories": [
+        "motion"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/motion",
+        "@rivier-ui/theme-color"
+      ],
+      "files": [
+        {
+          "path": "registry/motion/confetti.tsx",
+          "type": "registry:component",
+          "target": "components/motion/confetti.tsx"
+        }
+      ],
+      "meta": {
+        "category": "motion",
+        "when": "Marking a rare success the person worked for: a first project published, a goal reached. Never for routine actions, never on page load. Say the success in words as well (a toast, a heading): the burst is decoration.",
+        "example": "const confetti = useRef<ConfettiHandle>(null);\n<Confetti handleRef={confetti} />\n<Button onClick={(e) => confetti.current?.fire({ x: e.clientX, y: e.clientY })}>Publish</Button>",
+        "client": true
       }
     },
     {
@@ -4107,6 +4190,33 @@
         "category": "motion",
         "when": "A headline statistic: customers, revenue, a percentage. Not for values that update live (render those directly), and not for more than a few on one screen.",
         "example": "<NumberTicker value={12480} />\n<NumberTicker value={0.9997} options={{ style: \"percent\", maximumFractionDigits: 2 }} />\n<NumberTicker value={48000} locale=\"de-DE\" options={{ style: \"currency\", currency: \"EUR\", maximumFractionDigits: 0 }} />",
+        "client": true
+      }
+    },
+    {
+      "name": "orbit",
+      "type": "registry:component",
+      "title": "Orbit",
+      "description": "Items set evenly on a ring around a centre that turns slowly, the items staying upright, with the centre in the middle; it pauses while hovered or focused, and under reduced motion the ring stands still.",
+      "categories": [
+        "motion"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/motion/orbit.tsx",
+          "type": "registry:component",
+          "target": "components/motion/orbit.tsx"
+        }
+      ],
+      "meta": {
+        "category": "motion",
+        "when": "Showing that several things connect to one: integrations around a product, sources around a result. Use few items (three to eight) of the same size, each with its own name. For a row of logos use marquee; for a real network use network-graph.",
+        "example": "<Orbit center={<Logo />} items={[<Icon key=\"a\" />, <Icon key=\"b\" />, <Icon key=\"c\" />]} itemLabels={[\"Maps\", \"Charts\", \"Films\"]} />",
         "client": true
       }
     },
@@ -4434,6 +4544,36 @@
       }
     },
     {
+      "name": "word-rotate",
+      "type": "registry:component",
+      "title": "Word Rotate",
+      "description": "One word in a sentence that changes to the next of a list in place, rising and fading, once through the list (or round and round with `loop`, pausing while hovered or focused); screen readers hear the whole list once, and under reduced motion the last word simply stands.",
+      "categories": [
+        "motion"
+      ],
+      "dependencies": [
+        "motion"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/motion"
+      ],
+      "files": [
+        {
+          "path": "registry/motion/word-rotate.tsx",
+          "type": "registry:component",
+          "target": "components/motion/word-rotate.tsx"
+        }
+      ],
+      "meta": {
+        "category": "motion",
+        "when": "A headline that names several things one after another: \"Charts for teams / schools / newsrooms\". Keep the words about the same length. For a whole heading appearing use text-reveal; for a number counting up use number-ticker.",
+        "example": "<h1>Maps for <WordRotate words={[\"teams\", \"schools\", \"newsrooms\"]} /></h1>",
+        "client": true
+      }
+    },
+    {
       "name": "floating-shapes",
       "type": "registry:component",
       "title": "Floating Shapes",
@@ -4496,6 +4636,39 @@
         "category": "three",
         "when": "Showing reach or places at a glance: offices, regions, where requests come from. Use it inside scene. For exact values per place use a table or bar-chart; the globe is not a chart.",
         "example": "<Scene aspect={1} className=\"max-w-lg\" label=\"A globe with markers on Amsterdam, Kochi and San Francisco\">\n  <Globe\n    markers={[\n      { lat: 52.37, lon: 4.9 },\n      { lat: 9.93, lon: 76.27 },\n      { lat: 37.77, lon: -122.42 },\n    ]}\n  />\n</Scene>",
+        "client": true
+      }
+    },
+    {
+      "name": "model-annotations",
+      "type": "registry:component",
+      "title": "Model Annotations",
+      "description": "Labels pinned to points on a 3D model that follow them as the model turns, each a button that opens its note, hidden while its point is behind the camera or out of view; the same notes are always given as a list, so nobody has to find them by turning.",
+      "categories": [
+        "three"
+      ],
+      "dependencies": [
+        "@react-three/fiber",
+        "three"
+      ],
+      "devDependencies": [
+        "@types/three"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/three/model-annotations.tsx",
+          "type": "registry:component",
+          "target": "components/three/model-annotations.tsx"
+        }
+      ],
+      "meta": {
+        "category": "three",
+        "when": "Pointing out parts of a 3D object: the parts of a machine, features of a building, finds on a scan. Put the tracker inside the scene and the labels over it, in the same positioned box. For a flat picture use hotspots; for a model with no notes use model-viewer.",
+        "example": "const store = useAnnotationStore();\n<div className=\"relative\">\n  <Scene label=\"A vase\" aspect={1}>\n    <ModelStage><Vase /></ModelStage>\n    <ModelAnnotationTracker store={store} points={[{ id: \"handle\", position: [0.6, 0.4, 0] }]} />\n  </Scene>\n  <ModelAnnotations store={store} annotations={[{ id: \"handle\", label: \"Handle\", note: \"Added later, in a darker clay.\" }]} />\n</div>",
         "client": true
       }
     },
@@ -4631,6 +4804,40 @@
         "category": "three",
         "when": "A quiet moving ground behind a hero or a section. Use it inside scene and keep text on top readable. For one focal object use orb; for data use the viz components, never particles.",
         "example": "<Scene className=\"absolute inset-0\">\n  <ParticleField />\n</Scene>\n\n<Scene aspect={2}>\n  <ParticleField count={400} color=\"--foreground\" size={0.03} spread={10} />\n</Scene>",
+        "client": true
+      }
+    },
+    {
+      "name": "point-cloud",
+      "type": "registry:component",
+      "title": "Point Cloud",
+      "description": "Data as points in 3D: three numbers place each point inside a framed cube, a fourth field gives its group colour from the chart series; it goes inside scene (and model-stage to turn it), with PointCloudTable as its text alternative.",
+      "categories": [
+        "three"
+      ],
+      "dependencies": [
+        "@react-three/fiber",
+        "three"
+      ],
+      "devDependencies": [
+        "@types/three"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/theme-color"
+      ],
+      "files": [
+        {
+          "path": "registry/three/point-cloud.tsx",
+          "type": "registry:component",
+          "target": "components/three/point-cloud.tsx"
+        }
+      ],
+      "meta": {
+        "category": "three",
+        "when": "Three measures that belong together and are best turned in space: a scan, positions in a volume, an embedding. It is harder to read exactly than a 2D chart, so pass a scatter-chart as the scene's fallback and keep the table. For two measures use scatter-chart; for thousands of points in 2D use density-chart.",
+        "example": "<Scene label=\"Samples by depth, width and height\" aspect={4 / 3} fallback={<ScatterChart label=\"Samples\" data={rows} x=\"width\" y=\"height\" />}>\n  <ModelStage><PointCloud data={rows} x=\"width\" y=\"height\" z=\"depth\" group=\"kind\" /></ModelStage>\n</Scene>\n<PointCloudTable caption=\"Samples\" data={rows} x=\"width\" y=\"height\" z=\"depth\" group=\"kind\" />",
         "client": true
       }
     },

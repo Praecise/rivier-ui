@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "pattern",
+  "type": "registry:component",
+  "title": "Pattern",
+  "description": "A quiet background of dots, a grid or diagonal lines drawn in the theme's hairline colour, filling the box it sits in, behind the content and hidden from screen readers.",
+  "categories": [
+    "layout"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/layout/pattern.tsx",
+      "type": "registry:component",
+      "target": "components/layout/pattern.tsx",
+      "content": "/**\n * @name pattern\n * @category layout\n * @description A quiet background of dots, a grid or diagonal lines drawn in the theme's hairline colour, filling the box it sits in, behind the content and hidden from screen readers.\n * @when A section or a card that needs a texture to set it apart without a colour or a gradient: a hero, an empty state, a canvas. Keep it faint; for a photograph or an illustration use an image.\n * @example\n * <section className=\"relative overflow-hidden\">\n *   <Pattern variant=\"grid\" />\n *   <h2 className=\"relative\">Plans</h2>\n * </section>\n */\nimport { useId, type ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport type PatternProps = Omit<ComponentProps<\"svg\">, \"children\"> & {\n  variant?: \"dots\" | \"grid\" | \"lines\";\n  /** The distance between marks in pixels. Default 20. */\n  size?: number;\n};\n\nexport function Pattern({ variant = \"dots\", size = 20, className, ...props }: PatternProps) {\n  const id = `pattern-${useId().replace(/[^a-zA-Z0-9]/g, \"\")}`;\n  return (\n    <svg data-slot=\"pattern\" aria-hidden=\"true\" className={cn(\"pointer-events-none absolute inset-0 -z-10 size-full\", className)} {...props}>\n      <defs>\n        <pattern id={id} width={size} height={size} patternUnits=\"userSpaceOnUse\">\n          {variant === \"dots\" ? <circle cx={size / 2} cy={size / 2} r={1} className=\"fill-border-strong\" /> : null}\n          {variant === \"grid\" ? <path d={`M${size} 0V${size}H0`} fill=\"none\" className=\"stroke-border\" strokeWidth={1} /> : null}\n          {variant === \"lines\" ? <path d={`M0 ${size}L${size} 0`} fill=\"none\" className=\"stroke-border\" strokeWidth={1} /> : null}\n        </pattern>\n      </defs>\n      <rect width=\"100%\" height=\"100%\" fill={`url(#${id})`} />\n    </svg>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "layout",
+    "when": "A section or a card that needs a texture to set it apart without a colour or a gradient: a hero, an empty state, a canvas. Keep it faint; for a photograph or an illustration use an image.",
+    "example": "<section className=\"relative overflow-hidden\">\n  <Pattern variant=\"grid\" />\n  <h2 className=\"relative\">Plans</h2>\n</section>",
+    "client": false
+  }
+}
