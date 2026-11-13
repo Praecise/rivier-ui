@@ -2,6 +2,26 @@
 
 Prelaunch. There are no version numbers yet: entries are dated, newest first. Numbering starts at launch.
 
+## 2026-11-13: full ground
+
+Charts, maps, explainers and the other gaps found by the audit in `docs/GAPS-2026-11-13.md`. Everything is
+added: no item, prop or part was removed or renamed.
+
+New packages, each open source, with no hosted service and nothing sent anywhere (the owner's consent for
+full ground covers MIT, ISC, BSD and Apache-2.0 packages of that kind):
+
+| Package | Licence | Why |
+| --- | --- | --- |
+| `d3-array` | ISC | Bins, quantiles and extents: histogram, box plot, fan chart, density |
+| `d3-hierarchy` | ISC | Treemap, sunburst and circle-pack layouts |
+| `d3-sankey` | BSD-3-Clause | Sankey node and link layout |
+| `d3-force` | ISC | The network graph's layout, run to rest before it is drawn |
+| `d3-contour` | ISC | Density contours |
+| `d3-delaunay` | ISC | The nearest point under the pointer in scatter, density and map layers |
+| `d3-geo` | ISC | Map projections, paths, the graticule and great-circle routes |
+| `@tanstack/react-table` | MIT | The data grid's state: sorting, filtering, grouping, pinning, selection, pages |
+| `@tanstack/react-virtual` | MIT | Rows of the data grid drawn only when in view |
+
 ## 2026-11-13
 
 More that the existing components can do. Every change is an added prop or part with the old behaviour

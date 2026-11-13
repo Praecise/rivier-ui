@@ -47,6 +47,13 @@ export const TYPES: Readonly<Record<string, string>> = {
   three: "@types/three",
   "d3-scale": "@types/d3-scale",
   "d3-shape": "@types/d3-shape",
+  "d3-array": "@types/d3-array",
+  "d3-contour": "@types/d3-contour",
+  "d3-delaunay": "@types/d3-delaunay",
+  "d3-force": "@types/d3-force",
+  "d3-geo": "@types/d3-geo",
+  "d3-hierarchy": "@types/d3-hierarchy",
+  "d3-sankey": "@types/d3-sankey",
 };
 
 /** Whether an installed package carries type declarations. undefined when it is not installed here, so it cannot be told. */
