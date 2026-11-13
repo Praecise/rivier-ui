@@ -1,0 +1,40 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "chart-brush",
+  "type": "registry:component",
+  "title": "Chart Brush",
+  "description": "A small overview of a whole series with a window over it whose two handles are dragged or moved by arrow keys to choose the stretch another chart shows: the range is two row indexes, so it fits any chart.",
+  "categories": [
+    "viz"
+  ],
+  "dependencies": [
+    "d3-scale",
+    "d3-shape",
+    "radix-ui"
+  ],
+  "devDependencies": [
+    "@types/d3-scale",
+    "@types/d3-shape"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/chart",
+    "@rivier-ui/cn",
+    "@rivier-ui/use-controllable-state",
+    "@rivier-ui/use-size"
+  ],
+  "files": [
+    {
+      "path": "registry/viz/chart-brush.tsx",
+      "type": "registry:component",
+      "target": "components/viz/chart-brush.tsx",
+      "content": "\"use client\";\n/**\n * @name chart-brush\n * @category viz\n * @description A small overview of a whole series with a window over it whose two handles are dragged or moved by arrow keys to choose the stretch another chart shows: the range is two row indexes, so it fits any chart.\n * @when Letting people zoom a long time series to a part of it: a year of daily values shown a month at a time. Give the chart above only the rows between the two indexes. For a fixed set of periods use segmented-control or tabs; for choosing dates use date-picker.\n * @example\n * const [range, setRange] = useState<[number, number]>([0, 29]);\n * <LineChart label=\"Visits\" data={days.slice(range[0], range[1] + 1)} x=\"day\" series={[{ key: \"visits\", label: \"Visits\" }]} />\n * <ChartBrush data={days} x=\"day\" y=\"visits\" value={range} onValueChange={setRange} labels={{ start: \"From\", end: \"To\" }} />\n */\nimport { scaleLinear } from \"d3-scale\";\nimport { area } from \"d3-shape\";\nimport { Slider } from \"radix-ui\";\nimport { useMemo, type ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\nimport { useControllableState } from \"@/lib/use-controllable-state\";\nimport { dateFormatter, formatNumber, readNumber } from \"@/components/viz/chart\";\nimport { useSize } from \"@/lib/use-size\";\n\nexport type ChartBrushLabels = { start: string; end: string; group: string };\n\nexport type ChartBrushProps<T extends object> = Omit<ComponentProps<\"div\">, \"defaultValue\" | \"onChange\"> & {\n  /** Every row, in order along x. */\n  data: readonly T[];\n  /** The field holding x, for the words of the handles: a Date, a number or a text. */\n  x: keyof T & string;\n  /** The field drawn in the overview. */\n  y: keyof T & string;\n  /** The first and last row index in the window. Controlled with `onValueChange`. */\n  value?: [number, number];\n  defaultValue?: [number, number];\n  onValueChange?: (value: [number, number]) => void;\n  /** The fewest rows the window can hold. Default 2. */\n  minRows?: number;\n  /** The overview's height in pixels. Default 48. */\n  height?: number;\n  labels?: Partial<ChartBrushLabels>;\n  locale?: string;\n  timeZone?: string;\n  /** Replaces the format of x in what the handles say. */\n  formatX?: (value: unknown) => string;\n};\n\nconst LABELS: ChartBrushLabels = { start: \"Start\", end: \"End\", group: \"Range shown\" };\n\nexport function ChartBrush<T extends object>({\n  data,\n  x,\n  y,\n  value,\n  defaultValue,\n  onValueChange,\n  minRows = 2,\n  height = 48,\n  labels: given,\n  locale = \"en-US\",\n  timeZone = \"UTC\",\n  formatX,\n  className,\n  ...props\n}: ChartBrushProps<T>) {\n  const labels = { ...LABELS, ...given };\n  const last = Math.max(0, data.length - 1);\n  const [range, setRange] = useControllableState<[number, number]>({ value, defaultValue: defaultValue ?? [0, last], onChange: onValueChange });\n  const { ref, width } = useSize<HTMLDivElement>();\n  const xText = useMemo(() => {\n    const values = data.map((row) => (row as Record<string, unknown>)[x]);\n    const dates = values.filter((v): v is Date => v instanceof Date);\n    const span = dates.length > 1 ? Math.abs((dates[dates.length - 1]?.getTime() ?? 0) - (dates[0]?.getTime() ?? 0)) : 0;\n    const date = dateFormatter(Math.min(span, 300 * 86400000), \"full\", locale, timeZone);\n    return values.map((v) => (formatX ? formatX(v) : v instanceof Date ? date(v) : typeof v === \"number\" ? formatNumber(v, locale) : String(v ?? \"\")));\n  }, [data, x, formatX, locale, timeZone]);\n  const path = useMemo(() => {\n    if (width <= 0 || data.length < 2) return \"\";\n    const ys = data.map((row) => readNumber(row, y) ?? 0);\n    const sy = scaleLinear()\n      .domain([Math.min(0, ...ys), Math.max(...ys) || 1])\n      .range([height - 2, 2]);\n    const sx = scaleLinear().domain([0, last]).range([0, width]);\n    return (\n      area<number>()\n        .x((_, i) => sx(i))\n        .y0(sy(0))\n        .y1((v) => sy(v))(ys) ?? \"\"\n    );\n  }, [data, y, width, height, last]);\n  const start = Math.max(0, Math.min(last, range[0]));\n  const end = Math.max(start, Math.min(last, range[1]));\n\n  return (\n    <div data-slot=\"chart-brush\" className={cn(\"flex w-full min-w-0 flex-col gap-1\", className)} {...props}>\n      <div ref={ref} className=\"relative w-full\" style={{ height }}>\n        <svg aria-hidden=\"true\" width={width} height={height} className=\"absolute inset-0 block\">\n          <path d={path} className=\"fill-chart-1\" fillOpacity={0.25} />\n        </svg>\n        <Slider.Root\n          value={[start, end]}\n          min={0}\n          max={last}\n          step={1}\n          minStepsBetweenThumbs={Math.max(0, minRows - 1)}\n          onValueChange={(next) => setRange([next[0] ?? 0, next[1] ?? last])}\n          aria-label={labels.group}\n          dir=\"ltr\"\n          className=\"absolute inset-0 flex touch-none select-none items-center\"\n        >\n          <Slider.Track className=\"relative h-full grow rounded-[min(var(--radius),4px)] border border-border\">\n            <Slider.Range className=\"absolute h-full border-x-2 border-foreground bg-highlight-soft opacity-60\" />\n          </Slider.Track>\n          {[start, end].map((index, thumb) => (\n            <Slider.Thumb\n              key={thumb}\n              aria-label={thumb === 0 ? labels.start : labels.end}\n              aria-valuetext={xText[index] ?? \"\"}\n              className=\"block h-[calc(100%+8px)] w-3 rounded-control border-2 border-foreground bg-background transition-transform duration-instant motion-reduce:transition-none focus-visible:scale-110 pointer-coarse:w-6\"\n            />\n          ))}\n        </Slider.Root>\n      </div>\n      <div aria-hidden=\"true\" className=\"flex justify-between gap-2 text-xs tabular-nums text-muted-foreground\">\n        <span className=\"truncate\">{xText[start]}</span>\n        <span className=\"truncate\">{xText[end]}</span>\n      </div>\n    </div>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "viz",
+    "when": "Letting people zoom a long time series to a part of it: a year of daily values shown a month at a time. Give the chart above only the rows between the two indexes. For a fixed set of periods use segmented-control or tabs; for choosing dates use date-picker.",
+    "example": "const [range, setRange] = useState<[number, number]>([0, 29]);\n<LineChart label=\"Visits\" data={days.slice(range[0], range[1] + 1)} x=\"day\" series={[{ key: \"visits\", label: \"Visits\" }]} />\n<ChartBrush data={days} x=\"day\" y=\"visits\" value={range} onValueChange={setRange} labels={{ start: \"From\", end: \"To\" }} />",
+    "client": true
+  }
+}

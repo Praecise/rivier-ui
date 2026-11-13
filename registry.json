@@ -3894,6 +3894,44 @@
       }
     },
     {
+      "name": "chart-brush",
+      "type": "registry:component",
+      "title": "Chart Brush",
+      "description": "A small overview of a whole series with a window over it whose two handles are dragged or moved by arrow keys to choose the stretch another chart shows: the range is two row indexes, so it fits any chart.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale",
+        "d3-shape",
+        "radix-ui"
+      ],
+      "devDependencies": [
+        "@types/d3-scale",
+        "@types/d3-shape"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state",
+        "@rivier-ui/use-size"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/chart-brush.tsx",
+          "type": "registry:component",
+          "target": "components/viz/chart-brush.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Letting people zoom a long time series to a part of it: a year of daily values shown a month at a time. Give the chart above only the rows between the two indexes. For a fixed set of periods use segmented-control or tabs; for choosing dates use date-picker.",
+        "example": "const [range, setRange] = useState<[number, number]>([0, 29]);\n<LineChart label=\"Visits\" data={days.slice(range[0], range[1] + 1)} x=\"day\" series={[{ key: \"visits\", label: \"Visits\" }]} />\n<ChartBrush data={days} x=\"day\" y=\"visits\" value={range} onValueChange={setRange} labels={{ start: \"From\", end: \"To\" }} />",
+        "client": true
+      }
+    },
+    {
       "name": "chart",
       "type": "registry:component",
       "title": "Chart",
@@ -4484,6 +4522,39 @@
       }
     },
     {
+      "name": "slope-chart",
+      "type": "registry:component",
+      "title": "Slope Chart",
+      "description": "Each thing's value at two moments joined by a line, so what rose, what fell and how the ranking changed read at once: names and values at both ends, rises solid and falls dashed so direction never rests on colour.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale"
+      ],
+      "devDependencies": [
+        "@types/d3-scale"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/slope-chart.tsx",
+          "type": "registry:component",
+          "target": "components/viz/slope-chart.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Comparing many things between exactly two moments or conditions: this year and last, before and after a change. For many moments use line-chart or small-multiples; for one thing's change use a stat with its delta; for a few categories use dot-plot dumbbell.",
+        "example": "<SlopeChart\n  label=\"Share of trips by mode\"\n  data={[\n    { mode: \"Car\", y2016: 52, y2026: 41 },\n    { mode: \"Bike\", y2016: 9, y2026: 18 },\n    { mode: \"Transit\", y2016: 24, y2026: 27 },\n  ]}\n  name=\"mode\"\n  from=\"y2016\"\n  to=\"y2026\"\n  fromLabel=\"2016\"\n  toLabel=\"2026\"\n/>",
+        "client": true
+      }
+    },
+    {
       "name": "small-multiples",
       "type": "registry:component",
       "title": "Small Multiples",
@@ -4551,6 +4622,41 @@
         "category": "viz",
         "when": "The shape of a trend beside a number that carries the value. Size it with classes (`h-8 w-24` by default). When the reader needs to read values off it, use line-chart or bar-chart.",
         "example": "<Sparkline data={[4, 6, 5, 9, 12, 10, 14]} label=\"Signups, last 7 days\" />\n<Sparkline data={[3, 8, 2, 7, 5]} type=\"bar\" className=\"h-6 w-16\" />",
+        "client": true
+      }
+    },
+    {
+      "name": "stream-chart",
+      "type": "registry:component",
+      "title": "Stream Chart",
+      "description": "Several series stacked as flowing layers around a centre line instead of a baseline (a streamgraph), so the rise and fall of each layer and of the whole read as a shape over time; arrow keys read every moment.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale",
+        "d3-shape"
+      ],
+      "devDependencies": [
+        "@types/d3-scale",
+        "@types/d3-shape"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/stream-chart.tsx",
+          "type": "registry:component",
+          "target": "components/viz/stream-chart.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing how the mix of up to five categories shifts over a long time, where the overall shape matters more than exact values: listening by genre, topics over years. For exact totals use area-chart stacked (with a baseline); for exact values per series use line-chart.",
+        "example": "<StreamChart\n  label=\"Plays by genre\"\n  data={[\n    { year: 2020, jazz: 20, folk: 30, rock: 50 },\n    { year: 2021, jazz: 28, folk: 34, rock: 44 },\n    { year: 2022, jazz: 40, folk: 30, rock: 38 },\n  ]}\n  x=\"year\"\n  series={[{ key: \"jazz\", label: \"Jazz\" }, { key: \"folk\", label: \"Folk\" }, { key: \"rock\", label: \"Rock\" }]}\n/>",
         "client": true
       }
     },

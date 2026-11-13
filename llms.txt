@@ -2622,6 +2622,18 @@ Use it: Showing the range and the direction of a value within each period: price
 />
 ```
 
+### chart-brush
+
+A small overview of a whole series with a window over it whose two handles are dragged or moved by arrow keys to choose the stretch another chart shows: the range is two row indexes, so it fits any chart.
+
+Use it: Letting people zoom a long time series to a part of it: a year of daily values shown a month at a time. Give the chart above only the rows between the two indexes. For a fixed set of periods use segmented-control or tabs; for choosing dates use date-picker.
+
+```tsx
+const [range, setRange] = useState<[number, number]>([0, 29]);
+<LineChart label="Visits" data={days.slice(range[0], range[1] + 1)} x="day" series={[{ key: "visits", label: "Visits" }]} />
+<ChartBrush data={days} x="day" y="visits" value={range} onValueChange={setRange} labels={{ start: "From", end: "To" }} />
+```
+
 ### chart
 
 The shared parts every chart is built from: a container that measures itself and carries the text alternative, an SVG root, a tooltip, a legend, series styles, and axis and format helpers.
@@ -2969,6 +2981,28 @@ Use it: Showing how two measures relate across many things: does one rise with t
 />
 ```
 
+### slope-chart
+
+Each thing's value at two moments joined by a line, so what rose, what fell and how the ranking changed read at once: names and values at both ends, rises solid and falls dashed so direction never rests on colour.
+
+Use it: Comparing many things between exactly two moments or conditions: this year and last, before and after a change. For many moments use line-chart or small-multiples; for one thing's change use a stat with its delta; for a few categories use dot-plot dumbbell.
+
+```tsx
+<SlopeChart
+  label="Share of trips by mode"
+  data={[
+    { mode: "Car", y2016: 52, y2026: 41 },
+    { mode: "Bike", y2016: 9, y2026: 18 },
+    { mode: "Transit", y2016: 24, y2026: 27 },
+  ]}
+  name="mode"
+  from="y2016"
+  to="y2026"
+  fromLabel="2016"
+  toLabel="2026"
+/>
+```
+
 ### small-multiples
 
 The same small chart repeated for each group (a region, a product) in a grid that fits its width, every panel on one shared scale so they can be compared at a glance, each read by arrow keys.
@@ -2998,6 +3032,25 @@ Use it: The shape of a trend beside a number that carries the value. Size it wit
 ```tsx
 <Sparkline data={[4, 6, 5, 9, 12, 10, 14]} label="Signups, last 7 days" />
 <Sparkline data={[3, 8, 2, 7, 5]} type="bar" className="h-6 w-16" />
+```
+
+### stream-chart
+
+Several series stacked as flowing layers around a centre line instead of a baseline (a streamgraph), so the rise and fall of each layer and of the whole read as a shape over time; arrow keys read every moment.
+
+Use it: Showing how the mix of up to five categories shifts over a long time, where the overall shape matters more than exact values: listening by genre, topics over years. For exact totals use area-chart stacked (with a baseline); for exact values per series use line-chart.
+
+```tsx
+<StreamChart
+  label="Plays by genre"
+  data={[
+    { year: 2020, jazz: 20, folk: 30, rock: 50 },
+    { year: 2021, jazz: 28, folk: 34, rock: 44 },
+    { year: 2022, jazz: 40, folk: 30, rock: 38 },
+  ]}
+  x="year"
+  series={[{ key: "jazz", label: "Jazz" }, { key: "folk", label: "Folk" }, { key: "rock", label: "Rock" }]}
+/>
 ```
 
 ### sunburst
