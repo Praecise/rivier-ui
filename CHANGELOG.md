@@ -116,6 +116,13 @@ tile server. Shown at `/maps` and checked by `scripts/checks/maps.ts`. CONVENTIO
   **`currency-input`** (the locale's decimal mark, grouping and symbol; a plain number out),
   **`color-picker`** (OKLCH: a field drawn from the maths, a slider per axis, swatches, OKLCH or hex),
   **`rating`** (on Radix RadioGroup; read-only with the score in words). Shown at `/entry`.
+- **`alert-dialog`**, **`hover-card`**, **`collapsible`**, **`menubar`**, **`navigation-menu`**, **`toolbar`**:
+  the Radix primitives the library lacked, in the theme's look, with their keyboard patterns.
+- **`button-group`** (joined buttons, a text slot), **`resizable`** (the window splitter pattern: drag,
+  arrows, Home, End, Enter to fold), **`sidebar`** (folds to a rail of icons whose names are still read,
+  Ctrl/⌘+B, a sheet on narrow screens), **`visually-hidden`**, **`skip-link`**, and **`use-hotkeys`** (lib:
+  shortcuts and sequences by the key's place on any layout, never while typing, and `formatHotkey`). Shown
+  at `/surfaces`.
 - Showcase: the header's row of page links scrolls sideways when there are more pages than fit.
 
 ## 2026-11-13
