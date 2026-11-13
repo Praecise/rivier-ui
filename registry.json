@@ -3795,6 +3795,39 @@
       }
     },
     {
+      "name": "calendar-heatmap",
+      "type": "registry:component",
+      "title": "Calendar Heatmap",
+      "description": "A value per day laid out as a calendar, a column for each week and a row for each weekday, coloured on one hue from faint to strong, with month and weekday names and arrow keys that move by day and by week.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale"
+      ],
+      "devDependencies": [
+        "@types/d3-scale"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/calendar-heatmap.tsx",
+          "type": "registry:component",
+          "target": "components/viz/calendar-heatmap.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing a daily measure over months: activity, sales per day, rainfall, where the pattern by weekday and season matters. For a few weeks with exact values use bar-chart; for a trend use line-chart; to pick a day use calendar.",
+        "example": "<CalendarHeatmap\n  label=\"Workouts per day\"\n  data={[{ day: \"2026-01-05\", count: 1 }, { day: \"2026-01-06\", count: 2 }, { day: \"2026-01-09\", count: 1 }]}\n  day=\"day\"\n  value=\"count\"\n  from=\"2026-01-01\"\n  to=\"2026-03-31\"\n/>",
+        "client": true
+      }
+    },
+    {
       "name": "chart",
       "type": "registry:component",
       "title": "Chart",
@@ -4033,6 +4066,39 @@
       }
     },
     {
+      "name": "network-graph",
+      "type": "registry:component",
+      "title": "Network Graph",
+      "description": "Things and the links between them, placed by a force layout that is run to rest before it is drawn (so it is the same every time and never moves on its own), with each node's links lit on hover or focus and every node reachable by arrow keys.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-force"
+      ],
+      "devDependencies": [
+        "@types/d3-force"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/network-graph.tsx",
+          "type": "registry:component",
+          "target": "components/viz/network-graph.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing who or what is connected to what: clusters, bridges between groups, the most linked items. Keep it to a few hundred nodes. For amounts flowing in one direction use sankey-chart; for a hierarchy use treemap or tree-view; for a process the person edits use flow-diagram.",
+        "example": "<NetworkGraph\n  label=\"Libraries and what they use\"\n  nodes={[{ id: \"app\", group: \"Apps\" }, { id: \"ui\", group: \"Libraries\" }, { id: \"charts\", group: \"Libraries\" }, { id: \"maths\", group: \"Libraries\" }]}\n  links={[{ source: \"app\", target: \"ui\" }, { source: \"app\", target: \"charts\" }, { source: \"charts\", target: \"maths\" }]}\n/>",
+        "client": true
+      }
+    },
+    {
       "name": "radial-progress",
       "type": "registry:component",
       "title": "Radial Progress",
@@ -4057,6 +4123,39 @@
         "category": "viz",
         "when": "One ratio: a quota used, a score, a goal reached. Size it with a width class (`w-32` by default). For several ratios side by side use a list of bars (bar-chart horizontal), not a ring each; for parts of a whole use donut-chart.",
         "example": "<RadialProgress value={72} label=\"Storage used\" />\n<RadialProgress value={3} max={5} label=\"Steps done\" formatValue={(value) => `${value} of 5`} className=\"w-40\" />",
+        "client": true
+      }
+    },
+    {
+      "name": "sankey-chart",
+      "type": "registry:component",
+      "title": "Sankey Chart",
+      "description": "Flows between stages as bands whose widths are the amounts: where a total comes from, where it goes and what is lost on the way, with every node and band reachable by arrow keys.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-sankey"
+      ],
+      "devDependencies": [
+        "@types/d3-sankey"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/sankey-chart.tsx",
+          "type": "registry:component",
+          "target": "components/viz/sankey-chart.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing how amounts move through steps or between categories: a budget from sources to uses, visitors through a sign-up, energy from fuel to use. For a single funnel of shrinking steps use funnel-chart; for links without amounts use network-graph; for two-way flows between the same groups use chord-diagram.",
+        "example": "<SankeyChart\n  label=\"Where the money goes\"\n  nodes={[{ id: \"income\", label: \"Income\" }, { id: \"rent\", label: \"Rent\" }, { id: \"food\", label: \"Food\" }, { id: \"saved\", label: \"Saved\" }]}\n  links={[\n    { source: \"income\", target: \"rent\", value: 1200 },\n    { source: \"income\", target: \"food\", value: 500 },\n    { source: \"income\", target: \"saved\", value: 300 },\n  ]}\n/>",
         "client": true
       }
     },

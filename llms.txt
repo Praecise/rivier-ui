@@ -2571,6 +2571,23 @@ Use it: Comparing distributions across groups: which is higher, which is wider, 
 />
 ```
 
+### calendar-heatmap
+
+A value per day laid out as a calendar, a column for each week and a row for each weekday, coloured on one hue from faint to strong, with month and weekday names and arrow keys that move by day and by week.
+
+Use it: Showing a daily measure over months: activity, sales per day, rainfall, where the pattern by weekday and season matters. For a few weeks with exact values use bar-chart; for a trend use line-chart; to pick a day use calendar.
+
+```tsx
+<CalendarHeatmap
+  label="Workouts per day"
+  data={[{ day: "2026-01-05", count: 1 }, { day: "2026-01-06", count: 2 }, { day: "2026-01-09", count: 1 }]}
+  day="day"
+  value="count"
+  from="2026-01-01"
+  to="2026-03-31"
+/>
+```
+
 ### chart
 
 The shared parts every chart is built from: a container that measures itself and carries the text alternative, an SVG root, a tooltip, a legend, series styles, and axis and format helpers.
@@ -2715,6 +2732,20 @@ Use it: Change over time or along a number, for up to about five series on one s
 />
 ```
 
+### network-graph
+
+Things and the links between them, placed by a force layout that is run to rest before it is drawn (so it is the same every time and never moves on its own), with each node's links lit on hover or focus and every node reachable by arrow keys.
+
+Use it: Showing who or what is connected to what: clusters, bridges between groups, the most linked items. Keep it to a few hundred nodes. For amounts flowing in one direction use sankey-chart; for a hierarchy use treemap or tree-view; for a process the person edits use flow-diagram.
+
+```tsx
+<NetworkGraph
+  label="Libraries and what they use"
+  nodes={[{ id: "app", group: "Apps" }, { id: "ui", group: "Libraries" }, { id: "charts", group: "Libraries" }, { id: "maths", group: "Libraries" }]}
+  links={[{ source: "app", target: "ui" }, { source: "app", target: "charts" }, { source: "charts", target: "maths" }]}
+/>
+```
+
 ### radial-progress
 
 A ring gauge for one value against a limit, with the value and a label in the centre.
@@ -2724,6 +2755,24 @@ Use it: One ratio: a quota used, a score, a goal reached. Size it with a width c
 ```tsx
 <RadialProgress value={72} label="Storage used" />
 <RadialProgress value={3} max={5} label="Steps done" formatValue={(value) => `${value} of 5`} className="w-40" />
+```
+
+### sankey-chart
+
+Flows between stages as bands whose widths are the amounts: where a total comes from, where it goes and what is lost on the way, with every node and band reachable by arrow keys.
+
+Use it: Showing how amounts move through steps or between categories: a budget from sources to uses, visitors through a sign-up, energy from fuel to use. For a single funnel of shrinking steps use funnel-chart; for links without amounts use network-graph; for two-way flows between the same groups use chord-diagram.
+
+```tsx
+<SankeyChart
+  label="Where the money goes"
+  nodes={[{ id: "income", label: "Income" }, { id: "rent", label: "Rent" }, { id: "food", label: "Food" }, { id: "saved", label: "Saved" }]}
+  links={[
+    { source: "income", target: "rent", value: 1200 },
+    { source: "income", target: "food", value: 500 },
+    { source: "income", target: "saved", value: 300 },
+  ]}
+/>
 ```
 
 ### scatter-chart
