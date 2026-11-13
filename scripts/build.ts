@@ -8,7 +8,7 @@
 
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { CATEGORIES, libraryDir, loadItems, readTheme, type Category, type Item } from "./registry.ts";
+import { CATEGORIES, TYPES, carriesTypes, libraryDir, loadItems, readTheme, type Category, type Item } from "./registry.ts";
 
 /** The namespace other tools use for this registry: "@rivier-ui/button". */
 const NAMESPACE = "@rivier-ui";
@@ -44,6 +44,7 @@ function registryItem(item: Item, withContent: boolean): Record<string, unknown>
     description: item.description,
     categories: [item.category],
     dependencies: item.dependencies,
+    ...(item.devDependencies.length > 0 ? { devDependencies: item.devDependencies } : {}),
     registryDependencies: ["theme", ...item.registryDependencies].map((name) => `${NAMESPACE}/${name}`),
     files: [{ path: `registry/${item.file}`, type: TYPE[item.category], target: item.target, ...(withContent ? { content: item.source } : {}) }],
     meta: { category: item.category, when: item.when, example: item.example, client: item.client },
@@ -89,8 +90,18 @@ function llms(items: Item[]): string {
   return lines.join("\n");
 }
 
+/** Every dependency either carries its types or is listed with the package that does: otherwise a project's type-check fails on the copied file. */
+function checkTypes(items: Item[]): void {
+  for (const name of new Set(items.flatMap((item) => item.dependencies))) {
+    if (name in TYPES || carriesTypes(name) !== false) continue;
+    const user = items.find((item) => item.dependencies.includes(name));
+    throw new Error(`registry/${user?.file ?? ""}: "${name}" has no types of its own. Add it to TYPES in scripts/registry.ts with the package that carries them, so that "add" installs both.`);
+  }
+}
+
 try {
   const items = loadItems();
+  checkTypes(items);
   const counts = CATEGORIES.map((category) => `${items.filter((item) => item.category === category).length} ${category}`).join(", ");
   if (process.argv[2] === "check") {
     console.log(`Rivier UI registry is sound: ${items.length} items (${counts})`);
