@@ -959,6 +959,35 @@
       }
     },
     {
+      "name": "currency-input",
+      "type": "registry:ui",
+      "title": "Currency Input",
+      "description": "An amount of money typed the way the locale writes it (its decimal mark, its grouping, its symbol before or after), shown formatted when the field is left, kept as a plain number, with Up and Down to step it and a range it is held to.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/input",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/currency-input.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/currency-input.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Prices, budgets, transfers, any amount in a currency. Also numbers with a unit through `unit` instead of `currency` (kilograms, percent). For a small whole number with buttons use number-stepper; for a range use slider.",
+        "example": "<CurrencyInput aria-label=\"Budget\" currency=\"EUR\" locale=\"de-DE\" defaultValue={1250.5} min={0} name=\"budget\" />",
+        "client": true
+      }
+    },
+    {
       "name": "data-grid",
       "type": "registry:ui",
       "title": "Data Grid",
@@ -1266,6 +1295,36 @@
         "category": "ui",
         "when": "Every control in a form. Put the control inside FieldControl; render FieldError only when there is a message and the field turns invalid by itself. Use orientation=\"horizontal\" for a checkbox or switch beside its label, and FieldControl group for a radio group, toggle group or slider.",
         "example": "<Field>\n  <FieldLabel>Email</FieldLabel>\n  <FieldControl><Input type=\"email\" /></FieldControl>\n  <FieldDescription>We only use it to reply.</FieldDescription>\n  <FieldError>{error}</FieldError>\n</Field>\n<Field orientation=\"horizontal\">\n  <FieldControl><Switch /></FieldControl>\n  <FieldLabel>Weekly summary</FieldLabel>\n</Field>\n<Field>\n  <FieldLabel>Plan</FieldLabel>\n  <FieldControl group>\n    <RadioGroup defaultValue=\"pro\">\n      <Label><RadioGroupItem value=\"free\" /> Free</Label>\n      <Label><RadioGroupItem value=\"pro\" /> Pro</Label>\n    </RadioGroup>\n  </FieldControl>\n</Field>",
+        "client": true
+      }
+    },
+    {
+      "name": "form",
+      "type": "registry:ui",
+      "title": "Form",
+      "description": "A form that checks itself with the browser's own rules (required, type, length, range, pattern) and the project's, shows each field's message in words under it, and after a failed submit lists every fault at the top as links to the fields, said once.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/form.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/form.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Any form with rules: sign-up, checkout, settings. The rules live on the controls (`required`, `type=\"email\"`, `min`) or in a `match` function; a server's answer goes in `serverInvalid` with its message. For a single field with no rules, field is enough; for a guided form over several steps use wizard.",
+        "example": "<Form onSubmit={(event) => { event.preventDefault(); save(new FormData(event.currentTarget)); }}>\n  <FormErrorSummary title=\"There is a problem\" />\n  <FormField name=\"email\">\n    <FormLabel>Email</FormLabel>\n    <FormControl asChild><Input type=\"email\" required /></FormControl>\n    <FormMessage match=\"valueMissing\">Enter your email address.</FormMessage>\n    <FormMessage match=\"typeMismatch\">Enter an email address like name@example.com.</FormMessage>\n  </FormField>\n  <FormSubmit asChild><Button>Create account</Button></FormSubmit>\n</Form>",
         "client": true
       }
     },
@@ -1637,6 +1696,35 @@
       }
     },
     {
+      "name": "otp-input",
+      "type": "registry:ui",
+      "title": "Otp Input",
+      "description": "A one-time code typed into a row of single-character boxes: typing moves on, Backspace goes back, arrow keys move between boxes, a pasted or autofilled code fills them all, and the whole code is one value.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/direction",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/otp-input.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/otp-input.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "A short code sent by message or shown by an app: sign-in, confirming an email or a phone. For a password use password-input; for any other short text use input.",
+        "example": "<OtpInput aria-label=\"Code from the message\" length={6} onComplete={(code) => verify(code)} name=\"code\" />",
+        "client": true
+      }
+    },
+    {
       "name": "pagination",
       "type": "registry:ui",
       "title": "Pagination",
@@ -1697,6 +1785,37 @@
         "category": "ui",
         "when": "An assistant's reply contains something to look at or work in, not only words, and that thing changes over the conversation. The frame holds its size while it loads, says \"Saving\" in words while a change is on its way, shrinks to a one-line stub when a newer frame replaces it, and can open its content full screen. For a static card use card; for words use message; for a flow of steps put steps or a wizard inside it.",
         "example": "<PartFrame state={plan.state} replacementRef={newerPlan}>\n  <PartFrameHeader>\n    <PartFrameTitle>Plan for Saturday</PartFrameTitle>\n    <PartFrameExpand title=\"Plan for Saturday\"><PlanEditor plan={plan} roomy /></PartFrameExpand>\n  </PartFrameHeader>\n  <PartFrameContent className=\"min-h-40\"><PlanEditor plan={plan} /></PartFrameContent>\n  <PartFrameFooter><Button size=\"sm\">Confirm</Button></PartFrameFooter>\n</PartFrame>\n\n// Replaced by a newer one: a stub that says so and points to it\n<PartFrame state=\"superseded\" supersededBy={<a href=\"#plan-2\">See the new plan</a>}>\n  <PartFrameHeader><PartFrameTitle>Plan for Saturday</PartFrameTitle></PartFrameHeader>\n  <PartFrameContent>…</PartFrameContent>\n</PartFrame>",
+        "client": true
+      }
+    },
+    {
+      "name": "password-input",
+      "type": "registry:ui",
+      "title": "Password Input",
+      "description": "A password field with a button that shows and hides what was typed, a note when Caps Lock is on, and an optional list of the project's rules, each marked met or not met in words as the person types.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/input",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/password-input.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/password-input.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Signing in (current-password) or choosing a password (new-password, with `rules`). For a one-time code use otp-input; for other secrets that must never be shown, a plain input of type password.",
+        "example": "<PasswordInput\n  aria-label=\"New password\"\n  autoComplete=\"new-password\"\n  rules={[\n    { label: \"At least 12 characters\", test: (v) => v.length >= 12 },\n    { label: \"A number\", test: (v) => /\\d/.test(v) },\n  ]}\n/>",
         "client": true
       }
     },
@@ -2403,6 +2522,37 @@
         "category": "ui",
         "when": "Views of the same thing that people switch between without leaving the page. `variant=\"underline\"` (the default) for sections of a page; `variant=\"pill\"` for a compact switch between two to four views. For moving between pages use links (navbar, breadcrumb); for stacked sections that can be open together use accordion.",
         "example": "<Tabs defaultValue=\"overview\">\n  <TabsList aria-label=\"Project\">\n    <TabsTrigger value=\"overview\">Overview</TabsTrigger>\n    <TabsTrigger value=\"activity\">Activity</TabsTrigger>\n  </TabsList>\n  <TabsContent value=\"overview\">The overview.</TabsContent>\n  <TabsContent value=\"activity\">The activity.</TabsContent>\n</Tabs>\n\n<Tabs defaultValue=\"month\">\n  <TabsList variant=\"pill\" aria-label=\"Billing period\">\n    <TabsTrigger value=\"month\">Monthly</TabsTrigger>\n    <TabsTrigger value=\"year\">Yearly</TabsTrigger>\n  </TabsList>\n  <TabsContent value=\"month\">Billed every month.</TabsContent>\n  <TabsContent value=\"year\">Billed once a year.</TabsContent>\n</Tabs>",
+        "client": true
+      }
+    },
+    {
+      "name": "tags-input",
+      "type": "registry:ui",
+      "title": "Tags Input",
+      "description": "A field that collects several short values as removable tags: typed and added with Enter or a comma, pasted as a list, picked from suggestions, removed by their button or with Backspace, each change said aloud.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/tags-input.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/tags-input.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Free-form lists of words: labels on a note, email addresses to invite, skills. For choosing from a fixed list use combobox or chips; for one value use input.",
+        "example": "<TagsInput aria-label=\"Labels\" defaultValue={[\"urgent\"]} suggestions={[\"design\", \"bug\", \"later\"]} name=\"labels\" />",
         "client": true
       }
     },

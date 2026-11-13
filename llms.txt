@@ -640,6 +640,16 @@ Use it: Something the person holds for a limited time: a reserved seat, a price 
 </p>
 ```
 
+### currency-input
+
+An amount of money typed the way the locale writes it (its decimal mark, its grouping, its symbol before or after), shown formatted when the field is left, kept as a plain number, with Up and Down to step it and a range it is held to.
+
+Use it: Prices, budgets, transfers, any amount in a currency. Also numbers with a unit through `unit` instead of `currency` (kilograms, percent). For a small whole number with buttons use number-stepper; for a range use slider.
+
+```tsx
+<CurrencyInput aria-label="Budget" currency="EUR" locale="de-DE" defaultValue={1250.5} min={0} name="budget" />
+```
+
 ### data-grid
 
 A table of records a person works in: sorting by one or several columns, a filter per column and a search across all, grouping with totals, columns pinned to the start, shown and hidden, rows chosen by checkbox, pages or a window of rows for thousands, and cells edited in place; one tab stop and arrow keys from cell to cell, to the WAI-ARIA grid pattern.
@@ -885,6 +895,25 @@ Use it: Every control in a form. Put the control inside FieldControl; render Fie
     </RadioGroup>
   </FieldControl>
 </Field>
+```
+
+### form
+
+A form that checks itself with the browser's own rules (required, type, length, range, pattern) and the project's, shows each field's message in words under it, and after a failed submit lists every fault at the top as links to the fields, said once.
+
+Use it: Any form with rules: sign-up, checkout, settings. The rules live on the controls (`required`, `type="email"`, `min`) or in a `match` function; a server's answer goes in `serverInvalid` with its message. For a single field with no rules, field is enough; for a guided form over several steps use wizard.
+
+```tsx
+<Form onSubmit={(event) => { event.preventDefault(); save(new FormData(event.currentTarget)); }}>
+  <FormErrorSummary title="There is a problem" />
+  <FormField name="email">
+    <FormLabel>Email</FormLabel>
+    <FormControl asChild><Input type="email" required /></FormControl>
+    <FormMessage match="valueMissing">Enter your email address.</FormMessage>
+    <FormMessage match="typeMismatch">Enter an email address like name@example.com.</FormMessage>
+  </FormField>
+  <FormSubmit asChild><Button>Create account</Button></FormSubmit>
+</Form>
 ```
 
 ### gallery
@@ -1155,6 +1184,16 @@ Use it: A small whole number that is usually changed by a step or two: people in
 </NumberStepper>
 ```
 
+### otp-input
+
+A one-time code typed into a row of single-character boxes: typing moves on, Backspace goes back, arrow keys move between boxes, a pasted or autofilled code fills them all, and the whole code is one value.
+
+Use it: A short code sent by message or shown by an app: sign-in, confirming an email or a phone. For a password use password-input; for any other short text use input.
+
+```tsx
+<OtpInput aria-label="Code from the message" length={6} onComplete={(code) => verify(code)} name="code" />
+```
+
 ### pagination
 
 Links to the previous, next and numbered pages of a long list, with the look of buttons.
@@ -1195,6 +1234,23 @@ Use it: An assistant's reply contains something to look at or work in, not only 
   <PartFrameHeader><PartFrameTitle>Plan for Saturday</PartFrameTitle></PartFrameHeader>
   <PartFrameContent>…</PartFrameContent>
 </PartFrame>
+```
+
+### password-input
+
+A password field with a button that shows and hides what was typed, a note when Caps Lock is on, and an optional list of the project's rules, each marked met or not met in words as the person types.
+
+Use it: Signing in (current-password) or choosing a password (new-password, with `rules`). For a one-time code use otp-input; for other secrets that must never be shown, a plain input of type password.
+
+```tsx
+<PasswordInput
+  aria-label="New password"
+  autoComplete="new-password"
+  rules={[
+    { label: "At least 12 characters", test: (v) => v.length >= 12 },
+    { label: "A number", test: (v) => /\d/.test(v) },
+  ]}
+/>
 ```
 
 ### popover
@@ -1653,6 +1709,16 @@ Use it: Views of the same thing that people switch between without leaving the p
   <TabsContent value="month">Billed every month.</TabsContent>
   <TabsContent value="year">Billed once a year.</TabsContent>
 </Tabs>
+```
+
+### tags-input
+
+A field that collects several short values as removable tags: typed and added with Enter or a comma, pasted as a list, picked from suggestions, removed by their button or with Backspace, each change said aloud.
+
+Use it: Free-form lists of words: labels on a note, email addresses to invite, skills. For choosing from a fixed list use combobox or chips; for one value use input.
+
+```tsx
+<TagsInput aria-label="Labels" defaultValue={["urgent"]} suggestions={["design", "bug", "later"]} name="labels" />
 ```
 
 ### textarea

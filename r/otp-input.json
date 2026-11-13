@@ -1,0 +1,31 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "otp-input",
+  "type": "registry:ui",
+  "title": "Otp Input",
+  "description": "A one-time code typed into a row of single-character boxes: typing moves on, Backspace goes back, arrow keys move between boxes, a pasted or autofilled code fills them all, and the whole code is one value.",
+  "categories": [
+    "ui"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn",
+    "@rivier-ui/direction",
+    "@rivier-ui/use-controllable-state"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/otp-input.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/otp-input.tsx",
+      "content": "\"use client\";\n/**\n * @name otp-input\n * @category ui\n * @description A one-time code typed into a row of single-character boxes: typing moves on, Backspace goes back, arrow keys move between boxes, a pasted or autofilled code fills them all, and the whole code is one value.\n * @when A short code sent by message or shown by an app: sign-in, confirming an email or a phone. For a password use password-input; for any other short text use input.\n * @example\n * <OtpInput aria-label=\"Code from the message\" length={6} onComplete={(code) => verify(code)} name=\"code\" />\n */\nimport { useId, useRef, type ComponentProps, type KeyboardEvent } from \"react\";\nimport { cn } from \"@/lib/cn\";\nimport { useControllableState } from \"@/lib/use-controllable-state\";\nimport { inlineStep } from \"@/lib/direction\";\n\nexport type OtpInputProps = Omit<ComponentProps<\"div\">, \"defaultValue\" | \"onChange\"> & {\n  /** How many characters. Default 6. */\n  length?: number;\n  value?: string;\n  defaultValue?: string;\n  onValueChange?: (value: string) => void;\n  /** Called once every box is filled. */\n  onComplete?: (value: string) => void;\n  /** \"numeric\" accepts digits only and opens the number pad; \"alphanumeric\" accepts letters too. */\n  mode?: \"numeric\" | \"alphanumeric\";\n  /** The name of the hidden field that carries the code in a form. */\n  name?: string;\n  disabled?: boolean;\n  /** Marks every box invalid, for a code that was refused. */\n  invalid?: boolean;\n  /** The name of each box: \"Character 2 of 6\". */\n  boxLabel?: (position: number, length: number) => string;\n};\n\nexport function OtpInput({\n  length = 6,\n  value,\n  defaultValue = \"\",\n  onValueChange,\n  onComplete,\n  mode = \"numeric\",\n  name,\n  disabled,\n  invalid,\n  boxLabel = (position, total) => `Character ${position} of ${total}`,\n  className,\n  ...props\n}: OtpInputProps) {\n  const [code, setCode] = useControllableState<string>({ value, defaultValue, onChange: onValueChange });\n  const boxes = useRef<(HTMLInputElement | null)[]>([]);\n  const id = useId();\n  const allowed = mode === \"numeric\" ? /[0-9]/ : /[0-9a-zA-Z]/;\n  const clean = (text: string): string =>\n    [...text]\n      .filter((ch) => allowed.test(ch))\n      .join(\"\")\n      .slice(0, length);\n  const chars = Array.from({ length }, (_, i) => code[i] ?? \"\");\n  const focusBox = (index: number): void => {\n    const box = boxes.current[Math.max(0, Math.min(length - 1, index))];\n    box?.focus();\n    box?.select();\n  };\n  const write = (next: string): void => {\n    setCode(next);\n    if (next.length === length && !next.includes(\" \")) onComplete?.(next);\n  };\n  const putAt = (index: number, text: string): void => {\n    const typed = clean(text);\n    if (!typed) return;\n    const next = [...chars];\n    [...typed].forEach((ch, offset) => {\n      if (index + offset < length) next[index + offset] = ch;\n    });\n    write(next.join(\"\").trimEnd());\n    focusBox(index + typed.length);\n  };\n  const onKeyDown = (index: number, event: KeyboardEvent<HTMLInputElement>): void => {\n    const step = inlineStep(event.key, event.currentTarget);\n    if (step !== 0) {\n      event.preventDefault();\n      focusBox(index + step);\n    } else if (event.key === \"Backspace\") {\n      event.preventDefault();\n      const next = [...chars];\n      if (next[index]) next[index] = \"\";\n      else if (index > 0) {\n        next[index - 1] = \"\";\n        focusBox(index - 1);\n      }\n      setCode(next.join(\"\").trimEnd());\n    } else if (event.key === \"Home\") {\n      event.preventDefault();\n      focusBox(0);\n    } else if (event.key === \"End\") {\n      event.preventDefault();\n      focusBox(length - 1);\n    }\n  };\n\n  return (\n    <div data-slot=\"otp-input\" role=\"group\" className={cn(\"flex gap-2\", className)} {...props}>\n      {chars.map((char, index) => (\n        <input\n          key={index}\n          ref={(node) => {\n            boxes.current[index] = node;\n          }}\n          id={`${id}-${index}`}\n          aria-label={boxLabel(index + 1, length)}\n          aria-invalid={invalid || undefined}\n          inputMode={mode === \"numeric\" ? \"numeric\" : \"text\"}\n          autoComplete={index === 0 ? \"one-time-code\" : \"off\"}\n          // Room for a whole pasted or autofilled code in any box.\n          maxLength={length}\n          value={char}\n          disabled={disabled}\n          onFocus={(event) => event.currentTarget.select()}\n          onChange={(event) => putAt(index, event.target.value.replace(char, \"\") || event.target.value)}\n          onPaste={(event) => {\n            event.preventDefault();\n            putAt(0, event.clipboardData.getData(\"text\"));\n          }}\n          onKeyDown={(event) => onKeyDown(index, event)}\n          className=\"aspect-square h-auto w-full max-w-11 min-w-0 flex-1 rounded-control border border-input bg-background text-center text-lg font-medium tabular-nums aria-invalid:border-destructive disabled:opacity-50\"\n        />\n      ))}\n      {name ? <input type=\"hidden\" name={name} value={code} /> : null}\n    </div>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "A short code sent by message or shown by an app: sign-in, confirming an email or a phone. For a password use password-input; for any other short text use input.",
+    "example": "<OtpInput aria-label=\"Code from the message\" length={6} onComplete={(code) => verify(code)} name=\"code\" />",
+    "client": true
+  }
+}
