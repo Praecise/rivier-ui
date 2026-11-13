@@ -166,34 +166,38 @@ export type ChartTable = {
 
 /** The data as a table for assistive technology. It is in the server markup, so it is there before the chart draws. */
 export function ChartDataTable({ caption, columns, rows }: ChartTable) {
+  // Hidden by a wrapper, not on the table itself: a table cannot be narrower than its content and ignores
+  // overflow, so a wide one marked sr-only would still widen the page.
   return (
-    <table data-slot="chart-table" className="sr-only">
-      {caption ? <caption>{caption}</caption> : null}
-      <thead>
-        <tr>
-          {columns.map((column, index) => (
-            <th key={index} scope="col">
-              {column}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row, rowIndex) => (
-          <tr key={rowIndex}>
-            {row.map((cell, index) =>
-              index === 0 ? (
-                <th key={index} scope="row">
-                  {cell}
-                </th>
-              ) : (
-                <td key={index}>{cell}</td>
-              ),
-            )}
+    <div className="sr-only">
+      <table data-slot="chart-table">
+        {caption ? <caption>{caption}</caption> : null}
+        <thead>
+          <tr>
+            {columns.map((column, index) => (
+              <th key={index} scope="col">
+                {column}
+              </th>
+            ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {rows.map((row, rowIndex) => (
+            <tr key={rowIndex}>
+              {row.map((cell, index) =>
+                index === 0 ? (
+                  <th key={index} scope="row">
+                    {cell}
+                  </th>
+                ) : (
+                  <td key={index}>{cell}</td>
+                ),
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -213,13 +217,7 @@ export type ChartContainerProps = Omit<ComponentProps<"div">, "children"> & {
 export function ChartContainer({ aspect = 16 / 9, height, table, announcement, className, style, children, ...props }: ChartContainerProps) {
   const { ref, width, height: measuredHeight } = useSize<HTMLDivElement>();
   return (
-    <div
-      ref={ref}
-      data-slot="chart"
-      className={cn("relative w-full min-w-0", className)}
-      style={{ ...(height === undefined ? { aspectRatio: String(aspect) } : { height }), ...style }}
-      {...props}
-    >
+    <div ref={ref} data-slot="chart" className={cn("relative w-full min-w-0", className)} style={{ ...(height === undefined ? { aspectRatio: String(aspect) } : { height }), ...style }} {...props}>
       {/*
         The drawing sits in a layer that takes no part in layout. If it were in the flow, a drawing one pixel
         taller than the box (rounding) would stretch the box, which would be measured again and drawn taller:
@@ -259,6 +257,10 @@ export function ChartSvg({ label, width, height, interactive = false, className,
       width={width}
       height={height}
       viewBox={`0 0 ${width} ${height}`}
+      // A chart's axes do not mirror in a right-to-left page, and SVG text anchors follow the direction:
+      // drawn left to right, "start" and "end" mean what the drawing code means. Words in a right-to-left
+      // script still read right to left inside their label.
+      direction="ltr"
       className={cn("block overflow-visible text-xs animate-in fade-in-0 motion-reduce:animate-none", interactive && "touch-pan-y select-none", className)}
       {...props}
     >
@@ -583,7 +585,11 @@ export function ChartTrail({ trail, onNavigate, className, ...props }: ChartTrai
                 {name}
               </span>
             ) : (
-              <button type="button" onClick={() => onNavigate(depth)} className="min-h-10 truncate rounded-control px-1 text-muted-foreground underline underline-offset-4 hover:text-foreground sm:min-h-0">
+              <button
+                type="button"
+                onClick={() => onNavigate(depth)}
+                className="min-h-10 truncate rounded-control px-1 text-muted-foreground underline underline-offset-4 hover:text-foreground sm:min-h-0"
+              >
                 {name}
               </button>
             )}

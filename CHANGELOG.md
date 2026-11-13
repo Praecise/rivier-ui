@@ -22,6 +22,42 @@ full ground covers MIT, ISC, BSD and Apache-2.0 packages of that kind):
 | `@tanstack/react-table` | MIT | The data grid's state: sorting, filtering, grouping, pinning, selection, pages |
 | `@tanstack/react-virtual` | MIT | Rows of the data grid drawn only when in view |
 
+### Charts (`viz`)
+
+Each is drawn from d3 maths in the theme's series colours, measured by its container, read item by item by
+arrow keys (Home, End, Escape) with what it reads said in its live region and shown in a tooltip, carries its
+data as a table for screen readers, and fades in once, not at all under reduced motion. Shown at `/charts`
+and checked by `scripts/checks/charts.ts`.
+
+- **`scatter-chart`**: points by two numbers, a bubble chart with `size`, groups in fixed colours and shapes,
+  the nearest point under the pointer (d3-delaunay).
+- **`histogram`**: equal bins (d3-array), counts or shares.
+- **`box-plot`**: quartiles, whiskers at 1.5 boxes and outliers per group, or `variant="violin"`.
+- **`fan-chart`**: observed values, then a median forecast with nested interval bands and a forecast rule.
+- **`small-multiples`**: a panel per group on one shared scale, line, area or bars, in a grid that fits.
+- **`treemap`**, **`sunburst`**, **`circle-pack`**: a tree (`ChartTreeNode`) as rectangles, rings or
+  circles; Enter or a click opens a group, Backspace or the trail goes back (`path`, `defaultPath`,
+  `onPathChange`).
+- **`sankey-chart`**: flows between stages (d3-sankey), nodes and bands both readable.
+- **`network-graph`**: a force layout run to rest before drawing (d3-force), a node's links lit with it.
+- **`calendar-heatmap`**: a value per "YYYY-MM-DD" day as a calendar; Down is the next day, Right a week on.
+- **`gantt-chart`**: tasks under groups with progress, dependencies, milestones and a line for today.
+- **`density-chart`**: contour bands of where points crowd (d3-contour), points optionally on top.
+- **`radar-chart`**, **`waterfall-chart`**, **`funnel-chart`**, **`bullet-chart`**, **`candlestick-chart`**,
+  **`chord-diagram`**, **`parallel-coordinates`**, **`dot-plot`** (dots, lollipop, dumbbell, beeswarm),
+  **`stream-chart`**, **`slope-chart`**: the other forms the audit found missing. Direction (rise or fall,
+  up or down a day) is always said in words or drawn as a shape, never by colour alone.
+- **`chart-brush`**: an overview with two handles (Radix Slider) that choose the rows another chart shows.
+- **`bar-chart`**: `normalize` stacks each category to 100 %; the tooltip and the table keep the amounts
+  and add the share.
+- **`chart`**: new shared parts for charts of a project's own: `ChartBaseProps`, `ChartEmpty`,
+  `useChartCursor`, `chartSequential`, `chartDiverging`, `chartLinear`, `widestText`, `fitText`, the tree
+  helpers and `ChartTrail`.
+- **Fixed in `chart`, for every chart.** In a right-to-left page the SVG took the page's direction, which
+  turns SVG text anchors round: axis labels were drawn on the wrong side of their tick. The SVG is now drawn
+  left to right (words in a right-to-left script still read right to left inside a label). The hidden data
+  table is now hidden by a wrapper: on the table itself, a wide table still widened the page on a phone.
+
 ## 2026-11-13
 
 More that the existing components can do. Every change is an added prop or part with the old behaviour
