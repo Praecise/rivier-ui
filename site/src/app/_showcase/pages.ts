@@ -23,5 +23,6 @@ export const PAGES = [
   { href: "/surfaces", title: "Surfaces and navigation", description: "Alert dialog, hover card, collapsible, menubar, navigation menu, toolbar, resizable panels, sidebar, skip link." },
   { href: "/boards", title: "Trees, boards and diagrams", description: "A tree view, a kanban board, a flow diagram, a guided tour and a notification inbox." },
   { href: "/editors", title: "Code, text and pictures", description: "A code block, a Markdown editor, an image cropper and an image annotator." },
+  { href: "/effects", title: "Effects and 3D data", description: "Word rotate, pattern, animated beam, orbit, confetti, a 3D point cloud and notes pinned to a model." },
   { href: "/stage", title: "Stage for timed scenes", description: "A sequence of timed scenes with a transport and a clock, and frames drawn on request for export." },
 ] as const;

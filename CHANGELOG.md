@@ -135,6 +135,14 @@ tile server. Shown at `/maps` and checked by `scripts/checks/maps.ts`. CONVENTIO
   minus, held to a shape; fractions and pixels out) and **`image-annotator`** (areas drawn or added by a
   button, moved and resized by keys, named in a list). Resizing is never on Alt with an arrow, which is
   the browser's Back and Forward. Shown at `/editors`.
+- **`pattern`** (layout: dots, grid or lines in the hairline colour), **`word-rotate`** (once through its
+  words by default, the whole list said once, pauses on hover and focus), **`orbit`**, **`animated-beam`**
+  (a flat line whose dots light up in turn: opacity only, no gradient) and **`confetti`** (a canvas burst in
+  the chart colours, never under reduced motion). Gradient glows, shimmer and meteors stay out: the theme is
+  flat.
+- **`point-cloud`** (three: data as points in a framed cube, group colours from the series, with
+  `PointCloudTable`) and **`model-annotations`** (labels that follow points on a model, written straight to
+  the page each frame, and the same notes as a list). Shown at `/effects`.
 - Showcase: the header's row of page links scrolls sideways when there are more pages than fit.
 
 ## 2026-11-13
