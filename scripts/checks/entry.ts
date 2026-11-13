@@ -32,8 +32,8 @@ export async function run(kit: Kit): Promise<void> {
   await page.keyboard.type("Ada");
   await kit.focus(`${form} input[name=email]`);
   await page.keyboard.type("not-an-address");
-  // Submitting from the field with Enter, the way many people send a form.
-  await keys("Enter");
+  // A click right after editing: leaving the field shows its message and moves the button as it is pressed.
+  await kit.clickText(`${form} button`, "Send");
   await kit.sleep(300);
   check((await text(`${form} [data-slot=form-error-summary]`)).includes("like name@example.com"), `form: a wrong kind of value has its own message (${await text(`${form} [data-slot=form-error-summary]`)})`);
   await kit.focus(`${form} input[name=email]`);

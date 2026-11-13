@@ -137,6 +137,28 @@ export function FormMessage({ className, ...props }: ComponentProps<typeof FormP
   return <FormPrimitive.Message data-slot="form-message" className={cn("flex items-start gap-1 text-sm text-destructive before:content-['!'] before:font-bold", className)} {...props} />;
 }
 
-export function FormSubmit(props: ComponentProps<typeof FormPrimitive.Submit>) {
-  return <FormPrimitive.Submit data-slot="form-submit" {...props} />;
+/**
+ * The submit button. A field is checked when it is left, so its message can appear just as the button is
+ * pressed and move it down: the press then ends off the button and the browser sends no click. A press that
+ * ends where the button was when it began still submits.
+ */
+export function FormSubmit({ onPointerDown, ...props }: ComponentProps<typeof FormPrimitive.Submit>) {
+  return (
+    <FormPrimitive.Submit
+      data-slot="form-submit"
+      onPointerDown={(event) => {
+        onPointerDown?.(event);
+        if (event.button !== 0) return;
+        const button = event.currentTarget as HTMLButtonElement;
+        const before = button.getBoundingClientRect();
+        const finish = (up: PointerEvent): void => {
+          const inside = up.clientX >= before.left && up.clientX <= before.right && up.clientY >= before.top && up.clientY <= before.bottom;
+          // Only when the release missed the button: a release on it is an ordinary click.
+          if (inside && !button.contains(up.target as Node) && !button.disabled) button.form?.requestSubmit(button);
+        };
+        window.addEventListener("pointerup", finish, { once: true });
+      }}
+      {...props}
+    />
+  );
 }

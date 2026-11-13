@@ -111,7 +111,9 @@ tile server. Shown at `/maps` and checked by `scripts/checks/maps.ts`. CONVENTIO
   wrapping its typed feature registry in a generic grid without `any` cost more than the behaviour.
   `@tanstack/react-virtual` was removed with it. Shown at `/grid`.
 - **`form`**: on Radix Form: the browser's rules and the project's `match`, messages in words under each
-  field, and `FormErrorSummary`, the faults of a failed submit as links to the fields, said once.
+  field, and `FormErrorSummary`, the faults of a failed submit as links to the fields, said once. Radix
+  checks a field when it is left, so a message can appear just as the submit button is pressed and move it:
+  `FormSubmit` still submits when the press ends where the button was.
 - **`tags-input`**, **`otp-input`**, **`password-input`** (show and hide, Caps Lock, rules marked in words),
   **`currency-input`** (the locale's decimal mark, grouping and symbol; a plain number out),
   **`color-picker`** (OKLCH: a field drawn from the maths, a slider per axis, swatches, OKLCH or hex),
