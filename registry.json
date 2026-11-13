@@ -3897,6 +3897,41 @@
       }
     },
     {
+      "name": "density-chart",
+      "type": "registry:component",
+      "title": "Density Chart",
+      "description": "Where many points crowd together, drawn as filled contour bands of one hue from faint to strong (like the lines of a height map), with the points optionally on top and each point reachable by arrow keys.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-contour",
+        "d3-delaunay"
+      ],
+      "devDependencies": [
+        "@types/d3-contour",
+        "@types/d3-delaunay"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/density-chart.tsx",
+          "type": "registry:component",
+          "target": "components/viz/density-chart.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Two measures over hundreds or thousands of points, where a scatter-chart would be a blot: where the bulk lies, whether there are two clusters. For under a few hundred points use scatter-chart; for one measure's spread use histogram.",
+        "example": "<DensityChart\n  label=\"Trip length against fare\"\n  data={[{ km: 2, fare: 8 }, { km: 3, fare: 10 }, { km: 2.5, fare: 9 }, { km: 12, fare: 31 }, { km: 11, fare: 29 }]}\n  x=\"km\"\n  y=\"fare\"\n  xLabel=\"Distance (km)\"\n  yLabel=\"Fare\"\n  showPoints\n/>",
+        "client": true
+      }
+    },
+    {
       "name": "donut-chart",
       "type": "registry:component",
       "title": "Donut Chart",
@@ -3961,6 +3996,39 @@
         "category": "viz",
         "when": "Showing a prediction or an estimate with its uncertainty: a forecast, a model's range, a confidence band around a trend. For a series with no uncertainty use line-chart; for the spread of measured values use box-plot.",
         "example": "<FanChart\n  label=\"Visitors, observed and forecast\"\n  data={[\n    { week: 1, observed: 120 },\n    { week: 2, observed: 132 },\n    { week: 3, observed: 128, median: 128, low90: 128, high90: 128, low50: 128, high50: 128 },\n    { week: 4, median: 136, low90: 118, high90: 152, low50: 128, high50: 143 },\n    { week: 5, median: 141, low90: 110, high90: 170, low50: 126, high50: 155 },\n  ]}\n  x=\"week\"\n  observed=\"observed\"\n  median=\"median\"\n  intervals={[\n    { low: \"low90\", high: \"high90\", label: \"90% interval\" },\n    { low: \"low50\", high: \"high50\", label: \"50% interval\" },\n  ]}\n  forecastFrom={3}\n  labels={{ observed: \"Observed\", median: \"Forecast (median)\", forecast: \"Forecast\" }}\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "gantt-chart",
+      "type": "registry:component",
+      "title": "Gantt Chart",
+      "description": "Tasks as bars along a time axis, one row each, under optional group headings: how far each has got, which must finish before another starts (arrows), milestones as diamonds and a line for today, with Up and Down reading each task.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale"
+      ],
+      "devDependencies": [
+        "@types/d3-scale"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/gantt-chart.tsx",
+          "type": "registry:component",
+          "target": "components/viz/gantt-chart.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Planning or reporting work over time: a project plan, a release schedule, a timeline of events with lengths. For events without length use timeline (a list) or a line-chart annotation; for a calendar of single days use calendar or calendar-heatmap.",
+        "example": "<GanttChart\n  label=\"Launch plan\"\n  tasks={[\n    { id: \"design\", label: \"Design\", start: \"2026-03-02\", end: \"2026-03-13\", group: \"Product\", progress: 1 },\n    { id: \"build\", label: \"Build\", start: \"2026-03-09\", end: \"2026-04-03\", group: \"Product\", progress: 0.4, dependsOn: [\"design\"] },\n    { id: \"launch\", label: \"Launch\", start: \"2026-04-06\", end: \"2026-04-06\", group: \"Marketing\", milestone: true, dependsOn: [\"build\"] },\n  ]}\n  today=\"2026-03-20\"\n/>",
         "client": true
       }
     },

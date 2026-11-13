@@ -2625,6 +2625,24 @@ Use it: Showing groups and their members when the grouping matters more than pre
 />
 ```
 
+### density-chart
+
+Where many points crowd together, drawn as filled contour bands of one hue from faint to strong (like the lines of a height map), with the points optionally on top and each point reachable by arrow keys.
+
+Use it: Two measures over hundreds or thousands of points, where a scatter-chart would be a blot: where the bulk lies, whether there are two clusters. For under a few hundred points use scatter-chart; for one measure's spread use histogram.
+
+```tsx
+<DensityChart
+  label="Trip length against fare"
+  data={[{ km: 2, fare: 8 }, { km: 3, fare: 10 }, { km: 2.5, fare: 9 }, { km: 12, fare: 31 }, { km: 11, fare: 29 }]}
+  x="km"
+  y="fare"
+  xLabel="Distance (km)"
+  yLabel="Fare"
+  showPoints
+/>
+```
+
 ### donut-chart
 
 A ring showing how one whole splits into at most five parts, with a label in the centre and each part's value and share in the legend.
@@ -2670,6 +2688,24 @@ Use it: Showing a prediction or an estimate with its uncertainty: a forecast, a 
   ]}
   forecastFrom={3}
   labels={{ observed: "Observed", median: "Forecast (median)", forecast: "Forecast" }}
+/>
+```
+
+### gantt-chart
+
+Tasks as bars along a time axis, one row each, under optional group headings: how far each has got, which must finish before another starts (arrows), milestones as diamonds and a line for today, with Up and Down reading each task.
+
+Use it: Planning or reporting work over time: a project plan, a release schedule, a timeline of events with lengths. For events without length use timeline (a list) or a line-chart annotation; for a calendar of single days use calendar or calendar-heatmap.
+
+```tsx
+<GanttChart
+  label="Launch plan"
+  tasks={[
+    { id: "design", label: "Design", start: "2026-03-02", end: "2026-03-13", group: "Product", progress: 1 },
+    { id: "build", label: "Build", start: "2026-03-09", end: "2026-04-03", group: "Product", progress: 0.4, dependsOn: ["design"] },
+    { id: "launch", label: "Launch", start: "2026-04-06", end: "2026-04-06", group: "Marketing", milestone: true, dependsOn: ["build"] },
+  ]}
+  today="2026-03-20"
 />
 ```
 
