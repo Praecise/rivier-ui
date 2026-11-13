@@ -295,6 +295,37 @@
       }
     },
     {
+      "name": "alert-dialog",
+      "type": "registry:ui",
+      "title": "Alert Dialog",
+      "description": "A modal question that must be answered before anything else: a title, what will happen, and two buttons, with focus starting on the safe one and Escape choosing it. It cannot be dismissed by clicking outside.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "class-variance-authority",
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/button",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/alert-dialog.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/alert-dialog.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Confirming something that cannot be undone or costs something: deleting, leaving with unsaved work, paying. For a window of content use dialog; for a change that can be undone, do it and offer undo-line instead of asking.",
+        "example": "<AlertDialog>\n  <AlertDialogTrigger asChild><Button variant=\"destructive\">Delete the project</Button></AlertDialogTrigger>\n  <AlertDialogContent>\n    <AlertDialogHeader>\n      <AlertDialogTitle>Delete the project?</AlertDialogTitle>\n      <AlertDialogDescription>Its 14 files are deleted for everyone. This cannot be undone.</AlertDialogDescription>\n    </AlertDialogHeader>\n    <AlertDialogFooter>\n      <AlertDialogCancel>Keep it</AlertDialogCancel>\n      <AlertDialogAction variant=\"destructive\" onClick={remove}>Delete</AlertDialogAction>\n    </AlertDialogFooter>\n  </AlertDialogContent>\n</AlertDialog>",
+        "client": true
+      }
+    },
+    {
       "name": "alert",
       "type": "registry:ui",
       "title": "Alert",
@@ -711,6 +742,36 @@
         "category": "ui",
         "when": "Filters in effect above a list (Chip with ChipRemove), suggested replies or refinements under a message or a search (ChipButton), and choosing one or several short options such as moods, tags or times of day (ChipGroup). For a status that cannot be pressed use badge; for two to five views of the same thing use segmented-control; for long labels use checkboxes or radio-group.",
         "example": "// Filters in effect\n<Chip>Under 50 <ChipRemove aria-label=\"Remove the filter: under 50\" onClick={clearPrice} /></Chip>\n\n// Suggestions\n<ChipButton onClick={() => ask(\"Only this weekend\")}>Only this weekend</ChipButton>\n\n// A set of choices: several can be on (type=\"multiple\") or one (type=\"single\")\n<ChipGroup type=\"multiple\" defaultValue={[\"calm\"]} aria-label=\"Mood\">\n  <ChipGroupItem value=\"calm\">Calm</ChipGroupItem>\n  <ChipGroupItem value=\"lively\">Lively</ChipGroupItem>\n</ChipGroup>",
+        "client": true
+      }
+    },
+    {
+      "name": "collapsible",
+      "type": "registry:ui",
+      "title": "Collapsible",
+      "description": "One section of content that opens and closes under a button that says whether it is open: the disclosure pattern.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react",
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/collapsible.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/collapsible.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Hiding detail that only some people need: more options, the rest of a long answer, a transcript. For several such sections in a column use accordion; for a menu of actions use dropdown-menu.",
+        "example": "<Collapsible>\n  <CollapsibleTrigger>More options</CollapsibleTrigger>\n  <CollapsibleContent>…</CollapsibleContent>\n</Collapsible>",
         "client": true
       }
     },
@@ -1419,6 +1480,35 @@
       }
     },
     {
+      "name": "hover-card",
+      "type": "registry:ui",
+      "title": "Hover Card",
+      "description": "A small card of more about a link (a person's profile, a page's summary) that opens after a pause on hover or keyboard focus, and stays while the pointer moves onto it.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/hover-card.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/hover-card.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "A preview that sighted pointer users can do without: the link itself must lead to the same content, because touch screens and screen readers do not get the card. For a few words use tooltip; for content people act on use popover.",
+        "example": "<HoverCard>\n  <HoverCardTrigger asChild><a href=\"/team/ada\">Ada</a></HoverCardTrigger>\n  <HoverCardContent>Designer on the maps team since 2024.</HoverCardContent>\n</HoverCard>",
+        "client": true
+      }
+    },
+    {
       "name": "input-group",
       "type": "registry:ui",
       "title": "Input Group",
@@ -1634,6 +1724,36 @@
       }
     },
     {
+      "name": "menubar",
+      "type": "registry:ui",
+      "title": "Menubar",
+      "description": "A row of menus that stays on screen, as in a desktop application: File, Edit, View, each opening a menu of items, checkbox and radio items and sub-menus, moved through with the arrow keys from one menu to the next.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react",
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/menubar.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/menubar.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "An editor or tool with many commands grouped by kind. For a site's navigation use navbar or navigation-menu; for one button's actions use dropdown-menu; on a phone, prefer a toolbar or a single menu.",
+        "example": "<Menubar>\n  <MenubarMenu>\n    <MenubarTrigger>File</MenubarTrigger>\n    <MenubarContent>\n      <MenubarItem>New <MenubarShortcut>⌘N</MenubarShortcut></MenubarItem>\n      <MenubarSeparator />\n      <MenubarItem>Print</MenubarItem>\n    </MenubarContent>\n  </MenubarMenu>\n</Menubar>",
+        "client": true
+      }
+    },
+    {
       "name": "message",
       "type": "registry:ui",
       "title": "Message",
@@ -1693,6 +1813,36 @@
         "category": "ui",
         "when": "The top of a site or app with up to about seven top-level links. The links are written once, as NavbarLink children, and shown in the bar or in the sheet. The sheet closes when a link in it is followed, and focus returns to the menu button. Mark the current page with `current`. With a router link, pass it through `asChild`. For navigation inside a page use tabs; for the path to a page use breadcrumb.",
         "example": "<Navbar\n  brand={<a href=\"/\" className=\"text-base font-medium\">Rivier</a>}\n  actions={<Button size=\"sm\" asChild><a href=\"/contact\">Contact</a></Button>}\n>\n  <NavbarLink href=\"/work\" current>Work</NavbarLink>\n  <NavbarLink href=\"/studio\">Studio</NavbarLink>\n  <NavbarLink href=\"/about\">About</NavbarLink>\n</Navbar>",
+        "client": true
+      }
+    },
+    {
+      "name": "navigation-menu",
+      "type": "registry:ui",
+      "title": "Navigation Menu",
+      "description": "A site's main links where some open a panel of further links (a mega menu): the panel opens on hover or on Enter, and the arrow keys move between the top links, to the Radix navigation pattern.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react",
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/navigation-menu.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/navigation-menu.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "A site with sections that each hold several pages. For a few plain links use navbar (which also folds them into a sheet on phones); for commands use menubar or dropdown-menu. Below `md`, put the same links in navbar's sheet.",
+        "example": "<NavigationMenu aria-label=\"Main\">\n  <NavigationMenuList>\n    <NavigationMenuItem>\n      <NavigationMenuTrigger>Products</NavigationMenuTrigger>\n      <NavigationMenuContent>\n        <NavigationMenuLink href=\"/maps\">Maps</NavigationMenuLink>\n        <NavigationMenuLink href=\"/charts\">Charts</NavigationMenuLink>\n      </NavigationMenuContent>\n    </NavigationMenuItem>\n    <NavigationMenuItem><NavigationMenuLink href=\"/pricing\">Pricing</NavigationMenuLink></NavigationMenuItem>\n  </NavigationMenuList>\n</NavigationMenu>",
         "client": true
       }
     },
@@ -2876,6 +3026,35 @@
         "category": "ui",
         "when": "A toolbar state such as bold, mute or pin. For a setting use switch; for several toggles that belong together, or a pick-one row, use toggle-group.",
         "example": "<Toggle aria-label=\"Italic\"><Italic strokeWidth={1.5} /></Toggle>\n<Toggle variant=\"outline\" size=\"sm\" defaultPressed>Pinned</Toggle>",
+        "client": true
+      }
+    },
+    {
+      "name": "toolbar",
+      "type": "registry:ui",
+      "title": "Toolbar",
+      "description": "A row of controls (buttons, toggles, toggle groups, links, separators) that is one stop in the Tab order and moved through with the arrow keys, to the WAI-ARIA toolbar pattern.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/toolbar.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/toolbar.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "A cluster of related commands over a piece of content: text formatting over an editor, tools over a canvas, actions over a list. For a site's links use navbar; for two to five choices of which one is on use segmented-control.",
+        "example": "<Toolbar aria-label=\"Formatting\">\n  <ToolbarToggleGroup type=\"multiple\" aria-label=\"Style\">\n    <ToolbarToggleItem value=\"bold\" aria-label=\"Bold\"><Bold /></ToolbarToggleItem>\n    <ToolbarToggleItem value=\"italic\" aria-label=\"Italic\"><Italic /></ToolbarToggleItem>\n  </ToolbarToggleGroup>\n  <ToolbarSeparator />\n  <ToolbarButton>Share</ToolbarButton>\n</Toolbar>",
         "client": true
       }
     },

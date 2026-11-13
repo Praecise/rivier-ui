@@ -163,6 +163,28 @@ Use it: Questions and answers, or long settings where people need a few sections
 </Accordion>
 ```
 
+### alert-dialog
+
+A modal question that must be answered before anything else: a title, what will happen, and two buttons, with focus starting on the safe one and Escape choosing it. It cannot be dismissed by clicking outside.
+
+Use it: Confirming something that cannot be undone or costs something: deleting, leaving with unsaved work, paying. For a window of content use dialog; for a change that can be undone, do it and offer undo-line instead of asking.
+
+```tsx
+<AlertDialog>
+  <AlertDialogTrigger asChild><Button variant="destructive">Delete the project</Button></AlertDialogTrigger>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Delete the project?</AlertDialogTitle>
+      <AlertDialogDescription>Its 14 files are deleted for everyone. This cannot be undone.</AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel>Keep it</AlertDialogCancel>
+      <AlertDialogAction variant="destructive" onClick={remove}>Delete</AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+```
+
 ### alert
 
 A message in the page with an icon, a title, a description and an optional action. Four variants: info, success, warning, destructive.
@@ -440,6 +462,19 @@ Use it: Filters in effect above a list (Chip with ChipRemove), suggested replies
   <ChipGroupItem value="calm">Calm</ChipGroupItem>
   <ChipGroupItem value="lively">Lively</ChipGroupItem>
 </ChipGroup>
+```
+
+### collapsible
+
+One section of content that opens and closes under a button that says whether it is open: the disclosure pattern.
+
+Use it: Hiding detail that only some people need: more options, the rest of a long answer, a transcript. For several such sections in a column use accordion; for a menu of actions use dropdown-menu.
+
+```tsx
+<Collapsible>
+  <CollapsibleTrigger>More options</CollapsibleTrigger>
+  <CollapsibleContent>…</CollapsibleContent>
+</Collapsible>
 ```
 
 ### color-picker
@@ -986,6 +1021,19 @@ const spots = [
 </VideoPlayerProvider>
 ```
 
+### hover-card
+
+A small card of more about a link (a person's profile, a page's summary) that opens after a pause on hover or keyboard focus, and stays while the pointer moves onto it.
+
+Use it: A preview that sighted pointer users can do without: the link itself must lead to the same content, because touch screens and screen readers do not get the card. For a few words use tooltip; for content people act on use popover.
+
+```tsx
+<HoverCard>
+  <HoverCardTrigger asChild><a href="/team/ada">Ada</a></HoverCardTrigger>
+  <HoverCardContent>Designer on the maps team since 2024.</HoverCardContent>
+</HoverCard>
+```
+
 ### input-group
 
 An input with a leading or trailing icon, text or button inside one shared border.
@@ -1130,6 +1178,25 @@ const row: MediaRow = {
 <MediaRowList aria-label="Clips" items={[row]} variant="lines" onAltChange={describe} onPause={pause} onResume={resume} onDropped={({ values }) => save(values)} />
 ```
 
+### menubar
+
+A row of menus that stays on screen, as in a desktop application: File, Edit, View, each opening a menu of items, checkbox and radio items and sub-menus, moved through with the arrow keys from one menu to the next.
+
+Use it: An editor or tool with many commands grouped by kind. For a site's navigation use navbar or navigation-menu; for one button's actions use dropdown-menu; on a phone, prefer a toolbar or a single menu.
+
+```tsx
+<Menubar>
+  <MenubarMenu>
+    <MenubarTrigger>File</MenubarTrigger>
+    <MenubarContent>
+      <MenubarItem>New <MenubarShortcut>⌘N</MenubarShortcut></MenubarItem>
+      <MenubarSeparator />
+      <MenubarItem>Print</MenubarItem>
+    </MenubarContent>
+  </MenubarMenu>
+</Menubar>
+```
+
 ### message
 
 One message in a conversation, from the person, the assistant or the system, with parts for an avatar, the words, the time and sending state, a toolbar of actions, and suggested replies.
@@ -1174,6 +1241,27 @@ Use it: The top of a site or app with up to about seven top-level links. The lin
   <NavbarLink href="/studio">Studio</NavbarLink>
   <NavbarLink href="/about">About</NavbarLink>
 </Navbar>
+```
+
+### navigation-menu
+
+A site's main links where some open a panel of further links (a mega menu): the panel opens on hover or on Enter, and the arrow keys move between the top links, to the Radix navigation pattern.
+
+Use it: A site with sections that each hold several pages. For a few plain links use navbar (which also folds them into a sheet on phones); for commands use menubar or dropdown-menu. Below `md`, put the same links in navbar's sheet.
+
+```tsx
+<NavigationMenu aria-label="Main">
+  <NavigationMenuList>
+    <NavigationMenuItem>
+      <NavigationMenuTrigger>Products</NavigationMenuTrigger>
+      <NavigationMenuContent>
+        <NavigationMenuLink href="/maps">Maps</NavigationMenuLink>
+        <NavigationMenuLink href="/charts">Charts</NavigationMenuLink>
+      </NavigationMenuContent>
+    </NavigationMenuItem>
+    <NavigationMenuItem><NavigationMenuLink href="/pricing">Pricing</NavigationMenuLink></NavigationMenuItem>
+  </NavigationMenuList>
+</NavigationMenu>
 ```
 
 ### number-stepper
@@ -1907,6 +1995,23 @@ Use it: A toolbar state such as bold, mute or pin. For a setting use switch; for
 ```tsx
 <Toggle aria-label="Italic"><Italic strokeWidth={1.5} /></Toggle>
 <Toggle variant="outline" size="sm" defaultPressed>Pinned</Toggle>
+```
+
+### toolbar
+
+A row of controls (buttons, toggles, toggle groups, links, separators) that is one stop in the Tab order and moved through with the arrow keys, to the WAI-ARIA toolbar pattern.
+
+Use it: A cluster of related commands over a piece of content: text formatting over an editor, tools over a canvas, actions over a list. For a site's links use navbar; for two to five choices of which one is on use segmented-control.
+
+```tsx
+<Toolbar aria-label="Formatting">
+  <ToolbarToggleGroup type="multiple" aria-label="Style">
+    <ToolbarToggleItem value="bold" aria-label="Bold"><Bold /></ToolbarToggleItem>
+    <ToolbarToggleItem value="italic" aria-label="Italic"><Italic /></ToolbarToggleItem>
+  </ToolbarToggleGroup>
+  <ToolbarSeparator />
+  <ToolbarButton>Share</ToolbarButton>
+</Toolbar>
 ```
 
 ### tooltip
