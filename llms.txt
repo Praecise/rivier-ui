@@ -2552,6 +2552,25 @@ Use it: Comparing amounts across categories. Use `orientation="horizontal"` for 
 />
 ```
 
+### box-plot
+
+The spread of a measure in each of several groups side by side: a box from the first to the third quartile, the median across it, whiskers to the furthest values within 1.5 boxes, and the values beyond them as points; or, as a violin, the shape of each spread.
+
+Use it: Comparing distributions across groups: which is higher, which is wider, which has outliers. For one group's full shape use histogram; for a few exact numbers per group use bar-chart or dot-plot.
+
+```tsx
+<BoxPlot
+  label="Response time by region"
+  data={[
+    { region: "North", ms: 120 }, { region: "North", ms: 140 }, { region: "North", ms: 135 }, { region: "North", ms: 310 },
+    { region: "South", ms: 90 }, { region: "South", ms: 110 }, { region: "South", ms: 105 }, { region: "South", ms: 98 },
+  ]}
+  group="region"
+  value="ms"
+  valueLabel="Milliseconds"
+/>
+```
+
 ### chart
 
 The shared parts every chart is built from: a container that measures itself and carries the text alternative, an SVG root, a tooltip, a legend, series styles, and axis and format helpers.
@@ -2611,6 +2630,22 @@ Use it: Spotting patterns across two categories at once: when it is busy, which 
 />
 ```
 
+### histogram
+
+How the values of one measure are spread: the range cut into equal bins, each bar as tall as the number of values that fall in it, with arrow-key reading of each bin.
+
+Use it: Seeing the shape of a distribution: where most values are, how wide, whether there are two humps or a long tail. To compare the spread of several groups use box-plot; to compare totals across categories use bar-chart.
+
+```tsx
+<Histogram
+  label="Delivery times"
+  data={[{ minutes: 22 }, { minutes: 31 }, { minutes: 28 }, { minutes: 45 }, { minutes: 26 }, { minutes: 33 }]}
+  value="minutes"
+  valueLabel="Minutes"
+  bins={8}
+/>
+```
+
 ### line-chart
 
 A line chart of one or more series over a numeric or time x, with a crosshair tooltip, arrow-key reading and labels at the line ends.
@@ -2642,6 +2677,30 @@ Use it: One ratio: a quota used, a score, a goal reached. Size it with a width c
 ```tsx
 <RadialProgress value={72} label="Storage used" />
 <RadialProgress value={3} max={5} label="Steps done" formatValue={(value) => `${value} of 5`} className="w-40" />
+```
+
+### scatter-chart
+
+Points placed by two numbers, optionally sized by a third (a bubble chart) and grouped by a category, with the nearest point read under the pointer and every point reachable by arrow keys.
+
+Use it: Showing how two measures relate across many things: does one rise with the other, which stand apart. Give `size` for a third measure as bubble area. For change over time use line-chart; for one measure across categories use bar-chart or dot-plot; for thousands of overlapping points use density-chart.
+
+```tsx
+<ScatterChart
+  label="Price against rating"
+  data={[
+    { name: "Alder", price: 12, rating: 4.1, sold: 320, kind: "Tea" },
+    { name: "Birch", price: 18, rating: 4.6, sold: 120, kind: "Tea" },
+    { name: "Cedar", price: 9, rating: 3.8, sold: 540, kind: "Coffee" },
+  ]}
+  x="price"
+  y="rating"
+  size="sold"
+  group="kind"
+  name="name"
+  xLabel="Price"
+  yLabel="Rating"
+/>
 ```
 
 ### sparkline

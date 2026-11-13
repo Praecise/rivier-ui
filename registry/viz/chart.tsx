@@ -16,7 +16,8 @@
  * <ChartLegend items={[{ label: "Signups", index: 0 }]} mark="rect" />
  */
 import { symbol, symbolCircle, symbolCross, symbolDiamond, symbolSquare, symbolStar, symbolTriangle, type SymbolType } from "d3-shape";
-import type { ComponentProps, ReactNode } from "react";
+import { scaleLinear, type ScaleLinear } from "d3-scale";
+import { useState, type ComponentProps, type FocusEvent, type KeyboardEvent, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import { useSize, type Size } from "@/lib/use-size";
 
@@ -378,4 +379,138 @@ export function ChartLegend({ items, mark = "line", orientation = "horizontal", 
       ))}
     </ul>
   );
+}
+
+/* Shared by the charts added on 2026-11-13: base props, a reading cursor, colour scales, a linear axis. */
+
+/** What every chart takes besides its data. */
+export type ChartBaseProps = Omit<ComponentProps<"div">, "children"> &
+  Omit<ChartFormat, "timeZone"> & {
+    /** What the chart shows, for assistive technology. */
+    label: string;
+    /** Width / height of the plot. */
+    aspect?: number;
+    /** A fixed plot height in pixels instead of a ratio. */
+    height?: number;
+    /** Shown where the plot would be when there is nothing to draw. Default "No data". */
+    emptyLabel?: string;
+  };
+
+/** The words in the plot's place when there is nothing to draw. */
+export function ChartEmpty({ children = "No data" }: { children?: ReactNode }) {
+  return (
+    <p data-slot="chart-empty" className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">
+      {children}
+    </p>
+  );
+}
+
+export type ChartCursor = {
+  /** The item being read, by index, or null. */
+  active: number | null;
+  /** True when the item was reached by keyboard (then it is announced). */
+  keyboard: boolean;
+  /** Moves the cursor from the pointer (not announced). */
+  point: (index: number | null) => void;
+  /** Moves the cursor from code, as if by keyboard (announced). */
+  select: (index: number | null) => void;
+  /** Spread on `ChartSvg` with `interactive`: arrow keys, Home, End, Escape, focus and leave. */
+  svgProps: {
+    onKeyDown: (event: KeyboardEvent<SVGSVGElement>) => void;
+    onFocus: (event: FocusEvent<SVGSVGElement>) => void;
+    onBlur: () => void;
+    onPointerLeave: () => void;
+  };
+};
+
+/**
+ * Reading a chart item by item, by pointer and by keys: Right and Down go to the next item, Left and Up to the
+ * one before, Home and End to the ends, Escape lets go. With `columns`, Up and Down move a whole row of a grid.
+ * The axis of a chart does not mirror in a right-to-left page, so neither do its keys.
+ */
+export function useChartCursor(count: number, options: { columns?: number } = {}): ChartCursor {
+  const [active, setActive] = useState<number | null>(null);
+  const [keyboard, setKeyboard] = useState(false);
+  const columns = options.columns;
+  const clamp = (index: number): number => Math.max(0, Math.min(count - 1, index));
+  const move = (step: number | "first" | "last"): void => {
+    if (count <= 0) return;
+    setKeyboard(true);
+    setActive((index) => {
+      if (step === "first") return 0;
+      if (step === "last") return count - 1;
+      if (index === null || index >= count) return step > 0 ? 0 : count - 1;
+      return clamp(index + step);
+    });
+  };
+  return {
+    active: active !== null && active < count ? active : null,
+    keyboard,
+    point(index) {
+      setKeyboard(false);
+      setActive(index);
+    },
+    select(index) {
+      setKeyboard(true);
+      setActive(index === null ? null : clamp(index));
+    },
+    svgProps: {
+      onKeyDown(event) {
+        const row = columns ?? 1;
+        if (event.key === "ArrowRight") move(1);
+        else if (event.key === "ArrowLeft") move(-1);
+        else if (event.key === "ArrowDown") move(row);
+        else if (event.key === "ArrowUp") move(-row);
+        else if (event.key === "Home") move("first");
+        else if (event.key === "End") move("last");
+        else if (event.key === "Escape") setActive(null);
+        else return;
+        event.preventDefault();
+      },
+      onFocus(event) {
+        if (event.currentTarget.matches(":focus-visible")) move("first");
+      },
+      onBlur: () => setActive(null),
+      onPointerLeave: () => setActive(null),
+    },
+  };
+}
+
+/**
+ * One hue by amount (0 to 1), for magnitude: a line through OKLab from the muted surface to the highlight
+ * colour. More is darker in the light theme and lighter in the dark one: more contrast with the ground.
+ */
+export function chartSequential(amount: number): string {
+  return `color-mix(in oklab, var(--highlight) ${Math.round(14 + 86 * Math.max(0, Math.min(1, amount)))}%, var(--muted))`;
+}
+
+/**
+ * Two hues and a neutral middle, for values on either side of a midpoint (-1 to 1): series 1 below, series 2
+ * above, the muted surface at zero. Never a hue at the midpoint.
+ */
+export function chartDiverging(amount: number): string {
+  const clamped = Math.max(-1, Math.min(1, amount));
+  const share = Math.round(Math.abs(clamped) * 100);
+  return `color-mix(in oklab, var(${clamped < 0 ? "--chart-1" : "--chart-2"}) ${share}%, var(--muted))`;
+}
+
+/** A linear scale over [low, high] made nice for about one tick per `spacing` pixels, with its ticks. */
+export function chartLinear(low: number, high: number, range: readonly [number, number], spacing = 56): { scale: ScaleLinear<number, number>; ticks: number[] } {
+  const wanted = Math.max(2, Math.floor(Math.abs(range[1] - range[0]) / spacing));
+  const scale = scaleLinear()
+    .domain(low === high ? [low - 1, high + 1] : [low, high])
+    .range([range[0], range[1]])
+    .nice(wanted);
+  return { scale, ticks: scale.ticks(wanted) };
+}
+
+/** The widest of some labels at the axis text size, in whole pixels. */
+export function widestText(texts: readonly string[], fontSize = 12): number {
+  return Math.ceil(Math.max(0, ...texts.map((text) => estimateTextWidth(text, fontSize))));
+}
+
+/** A label cut to fit a width at the axis text size, with an ellipsis. The full text stays in the table. */
+export function fitText(text: string, width: number, fontSize = 12): string {
+  const fits = Math.max(2, Math.floor(width / (fontSize * 0.58)));
+  return text.length > fits ? `${text.slice(0, fits - 1)}…` : text;
 }

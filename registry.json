@@ -3760,6 +3760,41 @@
       }
     },
     {
+      "name": "box-plot",
+      "type": "registry:component",
+      "title": "Box Plot",
+      "description": "The spread of a measure in each of several groups side by side: a box from the first to the third quartile, the median across it, whiskers to the furthest values within 1.5 boxes, and the values beyond them as points; or, as a violin, the shape of each spread.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-array",
+        "d3-shape"
+      ],
+      "devDependencies": [
+        "@types/d3-array",
+        "@types/d3-shape"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/box-plot.tsx",
+          "type": "registry:component",
+          "target": "components/viz/box-plot.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Comparing distributions across groups: which is higher, which is wider, which has outliers. For one group's full shape use histogram; for a few exact numbers per group use bar-chart or dot-plot.",
+        "example": "<BoxPlot\n  label=\"Response time by region\"\n  data={[\n    { region: \"North\", ms: 120 }, { region: \"North\", ms: 140 }, { region: \"North\", ms: 135 }, { region: \"North\", ms: 310 },\n    { region: \"South\", ms: 90 }, { region: \"South\", ms: 110 }, { region: \"South\", ms: 105 }, { region: \"South\", ms: 98 },\n  ]}\n  group=\"region\"\n  value=\"ms\"\n  valueLabel=\"Milliseconds\"\n/>",
+        "client": true
+      }
+    },
+    {
       "name": "chart",
       "type": "registry:component",
       "title": "Chart",
@@ -3768,9 +3803,11 @@
         "viz"
       ],
       "dependencies": [
+        "d3-scale",
         "d3-shape"
       ],
       "devDependencies": [
+        "@types/d3-scale",
         "@types/d3-shape"
       ],
       "registryDependencies": [
@@ -3859,6 +3896,39 @@
       }
     },
     {
+      "name": "histogram",
+      "type": "registry:component",
+      "title": "Histogram",
+      "description": "How the values of one measure are spread: the range cut into equal bins, each bar as tall as the number of values that fall in it, with arrow-key reading of each bin.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-array"
+      ],
+      "devDependencies": [
+        "@types/d3-array"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/histogram.tsx",
+          "type": "registry:component",
+          "target": "components/viz/histogram.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Seeing the shape of a distribution: where most values are, how wide, whether there are two humps or a long tail. To compare the spread of several groups use box-plot; to compare totals across categories use bar-chart.",
+        "example": "<Histogram\n  label=\"Delivery times\"\n  data={[{ minutes: 22 }, { minutes: 31 }, { minutes: 28 }, { minutes: 45 }, { minutes: 26 }, { minutes: 33 }]}\n  value=\"minutes\"\n  valueLabel=\"Minutes\"\n  bins={8}\n/>",
+        "client": true
+      }
+    },
+    {
       "name": "line-chart",
       "type": "registry:component",
       "title": "Line Chart",
@@ -3918,6 +3988,41 @@
         "category": "viz",
         "when": "One ratio: a quota used, a score, a goal reached. Size it with a width class (`w-32` by default). For several ratios side by side use a list of bars (bar-chart horizontal), not a ring each; for parts of a whole use donut-chart.",
         "example": "<RadialProgress value={72} label=\"Storage used\" />\n<RadialProgress value={3} max={5} label=\"Steps done\" formatValue={(value) => `${value} of 5`} className=\"w-40\" />",
+        "client": true
+      }
+    },
+    {
+      "name": "scatter-chart",
+      "type": "registry:component",
+      "title": "Scatter Chart",
+      "description": "Points placed by two numbers, optionally sized by a third (a bubble chart) and grouped by a category, with the nearest point read under the pointer and every point reachable by arrow keys.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-delaunay",
+        "d3-scale"
+      ],
+      "devDependencies": [
+        "@types/d3-delaunay",
+        "@types/d3-scale"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/scatter-chart.tsx",
+          "type": "registry:component",
+          "target": "components/viz/scatter-chart.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing how two measures relate across many things: does one rise with the other, which stand apart. Give `size` for a third measure as bubble area. For change over time use line-chart; for one measure across categories use bar-chart or dot-plot; for thousands of overlapping points use density-chart.",
+        "example": "<ScatterChart\n  label=\"Price against rating\"\n  data={[\n    { name: \"Alder\", price: 12, rating: 4.1, sold: 320, kind: \"Tea\" },\n    { name: \"Birch\", price: 18, rating: 4.6, sold: 120, kind: \"Tea\" },\n    { name: \"Cedar\", price: 9, rating: 3.8, sold: 540, kind: \"Coffee\" },\n  ]}\n  x=\"price\"\n  y=\"rating\"\n  size=\"sold\"\n  group=\"kind\"\n  name=\"name\"\n  xLabel=\"Price\"\n  yLabel=\"Rating\"\n/>",
         "client": true
       }
     },
