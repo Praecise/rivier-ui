@@ -2640,6 +2640,24 @@ Use it: Building a chart of your own that should match the others. For the commo
 <ChartLegend items={[{ label: "Signups", index: 0 }]} mark="rect" />
 ```
 
+### chord-diagram
+
+Flows between the members of one group, both ways, around a circle: each member an arc sized by all it sends, each ribbon joining two members with ends as wide as what goes each way, lit with its member on hover or focus.
+
+Use it: Showing exchanges within a set where both directions matter: moves between regions, trade between countries, messages between teams. Keep it to about a dozen members. For flows in one direction through stages use sankey-chart; for links without amounts use network-graph.
+
+```tsx
+<ChordDiagram
+  label="Moves between neighbourhoods"
+  names={["North", "South", "East"]}
+  matrix={[
+    [0, 120, 40],
+    [80, 0, 60],
+    [30, 90, 0],
+  ]}
+/>
+```
+
 ### circle-pack
 
 A hierarchy as circles inside circles: each group an outline holding its parts, each part a circle whose area is its size, with zooming into a group by click or Enter and back out by the trail or Backspace.
@@ -2694,6 +2712,26 @@ Use it: Parts of a whole at a glance, when there are few parts and they differ c
   name="source"
   value="visits"
   centerLabel="Visits"
+/>
+```
+
+### dot-plot
+
+Values as dots along a shared axis, one row per category: plain dots for one or more series, a lollipop (a stick to the dot), a dumbbell (two values joined, for a before and after), or a beeswarm (every single value as its own dot, packed so none overlap).
+
+Use it: Comparing values across categories with less ink than bars, especially when zero is not meaningful (dot, dumbbell), showing a change between two moments per category (dumbbell), or showing every observation in a few groups (beeswarm). For totals from zero use bar-chart; for a summary of spread use box-plot.
+
+```tsx
+<DotPlot
+  label="Satisfaction before and after"
+  data={[
+    { team: "Support", before: 62, after: 78 },
+    { team: "Sales", before: 70, after: 74 },
+    { team: "Product", before: 55, after: 71 },
+  ]}
+  y="team"
+  series={[{ key: "before", label: "Before" }, { key: "after", label: "After" }]}
+  variant="dumbbell"
 />
 ```
 
@@ -2833,6 +2871,26 @@ Use it: Showing who or what is connected to what: clusters, bridges between grou
   label="Libraries and what they use"
   nodes={[{ id: "app", group: "Apps" }, { id: "ui", group: "Libraries" }, { id: "charts", group: "Libraries" }, { id: "maths", group: "Libraries" }]}
   links={[{ source: "app", target: "ui" }, { source: "app", target: "charts" }, { source: "charts", target: "maths" }]}
+/>
+```
+
+### parallel-coordinates
+
+Many measures of many things at once: one upright axis per measure, each thing a line that crosses every axis at its value, so trade-offs and clusters show as patterns of crossing or parallel lines; each line lit and read by arrow keys.
+
+Use it: Comparing things across four to ten measures with different units: cars by price, power and weight; plans by cost and limits. For two measures use scatter-chart; for a few things on one scale use radar-chart; for exact values use table or data-grid.
+
+```tsx
+<ParallelCoordinates
+  label="Laptops compared"
+  data={[
+    { name: "Alder", price: 900, weight: 1.3, battery: 12, kind: "Light" },
+    { name: "Birch", price: 1400, weight: 2.1, battery: 8, kind: "Power" },
+    { name: "Cedar", price: 700, weight: 1.6, battery: 10, kind: "Light" },
+  ]}
+  dimensions={[{ key: "price", label: "Price" }, { key: "weight", label: "Weight (kg)" }, { key: "battery", label: "Battery (h)" }]}
+  name="name"
+  group="kind"
 />
 ```
 

@@ -3929,6 +3929,39 @@
       }
     },
     {
+      "name": "chord-diagram",
+      "type": "registry:component",
+      "title": "Chord Diagram",
+      "description": "Flows between the members of one group, both ways, around a circle: each member an arc sized by all it sends, each ribbon joining two members with ends as wide as what goes each way, lit with its member on hover or focus.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-shape"
+      ],
+      "devDependencies": [
+        "@types/d3-shape"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/chord-diagram.tsx",
+          "type": "registry:component",
+          "target": "components/viz/chord-diagram.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing exchanges within a set where both directions matter: moves between regions, trade between countries, messages between teams. Keep it to about a dozen members. For flows in one direction through stages use sankey-chart; for links without amounts use network-graph.",
+        "example": "<ChordDiagram\n  label=\"Moves between neighbourhoods\"\n  names={[\"North\", \"South\", \"East\"]}\n  matrix={[\n    [0, 120, 40],\n    [80, 0, 60],\n    [30, 90, 0],\n  ]}\n/>",
+        "client": true
+      }
+    },
+    {
       "name": "circle-pack",
       "type": "registry:component",
       "title": "Circle Pack",
@@ -4027,6 +4060,39 @@
         "category": "viz",
         "when": "Parts of a whole at a glance, when there are few parts and they differ clearly. To compare parts that are close in size, or more than five, use bar-chart with `orientation=\"horizontal\"`; for one ratio against a limit use radial-progress.",
         "example": "<DonutChart\n  label=\"Traffic by source\"\n  data={[\n    { source: \"Search\", visits: 5200 },\n    { source: \"Direct\", visits: 3100 },\n    { source: \"Referral\", visits: 1400 },\n  ]}\n  name=\"source\"\n  value=\"visits\"\n  centerLabel=\"Visits\"\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "dot-plot",
+      "type": "registry:component",
+      "title": "Dot Plot",
+      "description": "Values as dots along a shared axis, one row per category: plain dots for one or more series, a lollipop (a stick to the dot), a dumbbell (two values joined, for a before and after), or a beeswarm (every single value as its own dot, packed so none overlap).",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale"
+      ],
+      "devDependencies": [
+        "@types/d3-scale"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/dot-plot.tsx",
+          "type": "registry:component",
+          "target": "components/viz/dot-plot.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Comparing values across categories with less ink than bars, especially when zero is not meaningful (dot, dumbbell), showing a change between two moments per category (dumbbell), or showing every observation in a few groups (beeswarm). For totals from zero use bar-chart; for a summary of spread use box-plot.",
+        "example": "<DotPlot\n  label=\"Satisfaction before and after\"\n  data={[\n    { team: \"Support\", before: 62, after: 78 },\n    { team: \"Sales\", before: 70, after: 74 },\n    { team: \"Product\", before: 55, after: 71 },\n  ]}\n  y=\"team\"\n  series={[{ key: \"before\", label: \"Before\" }, { key: \"after\", label: \"After\" }]}\n  variant=\"dumbbell\"\n/>",
         "client": true
       }
     },
@@ -4257,6 +4323,39 @@
         "category": "viz",
         "when": "Showing who or what is connected to what: clusters, bridges between groups, the most linked items. Keep it to a few hundred nodes. For amounts flowing in one direction use sankey-chart; for a hierarchy use treemap or tree-view; for a process the person edits use flow-diagram.",
         "example": "<NetworkGraph\n  label=\"Libraries and what they use\"\n  nodes={[{ id: \"app\", group: \"Apps\" }, { id: \"ui\", group: \"Libraries\" }, { id: \"charts\", group: \"Libraries\" }, { id: \"maths\", group: \"Libraries\" }]}\n  links={[{ source: \"app\", target: \"ui\" }, { source: \"app\", target: \"charts\" }, { source: \"charts\", target: \"maths\" }]}\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "parallel-coordinates",
+      "type": "registry:component",
+      "title": "Parallel Coordinates",
+      "description": "Many measures of many things at once: one upright axis per measure, each thing a line that crosses every axis at its value, so trade-offs and clusters show as patterns of crossing or parallel lines; each line lit and read by arrow keys.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale"
+      ],
+      "devDependencies": [
+        "@types/d3-scale"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/parallel-coordinates.tsx",
+          "type": "registry:component",
+          "target": "components/viz/parallel-coordinates.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Comparing things across four to ten measures with different units: cars by price, power and weight; plans by cost and limits. For two measures use scatter-chart; for a few things on one scale use radar-chart; for exact values use table or data-grid.",
+        "example": "<ParallelCoordinates\n  label=\"Laptops compared\"\n  data={[\n    { name: \"Alder\", price: 900, weight: 1.3, battery: 12, kind: \"Light\" },\n    { name: \"Birch\", price: 1400, weight: 2.1, battery: 8, kind: \"Power\" },\n    { name: \"Cedar\", price: 700, weight: 1.6, battery: 10, kind: \"Light\" },\n  ]}\n  dimensions={[{ key: \"price\", label: \"Price\" }, { key: \"weight\", label: \"Weight (kg)\" }, { key: \"battery\", label: \"Battery (h)\" }]}\n  name=\"name\"\n  group=\"kind\"\n/>",
         "client": true
       }
     },
