@@ -736,6 +736,7 @@ export function ModelViewer({
         src,
         kind,
         ar,
+        // eslint-disable-next-line @next/next/no-img-element -- The library is not tied to one framework: a poster given as an address is a plain element, and `poster` also takes an element (the framework's image component).
         poster: typeof poster === "string" ? <img src={poster} alt="" draggable={false} className="size-full object-contain" /> : poster,
       }}
     >

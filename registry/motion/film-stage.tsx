@@ -3,7 +3,7 @@
  * @name film-stage
  * @category motion
  * @description A stage for a sequence of timed scenes with a transport: it owns the clock and the chrome (play, time bar, speed, sound), mounts the scene for the current moment, cuts or crossfades between scenes, and can draw any moment on request for export.
- * @when Content the project draws itself from a time: an animated explainer, a story in scenes, a slideshow with narration, a film assembled from markup, SVG or canvas. Each scene gets its own local time and draws from it, so any frame can be drawn again exactly. The stage is the clock other things follow: scrubber, scene-strip, captions and hotspots work inside it as they do inside video-player, and narration audio is kept in step. For a video or sound file use video-player or audio-player; for motion tied to scrolling use scroll-scene; for a set of pictures a person pages through use carousel.
+ * @when Content the project draws itself from a time: an animated explainer, a story in scenes, a slideshow with narration, a film assembled from markup, SVG or canvas. Each scene gets its own local time and draws from it, so any frame can be drawn again exactly. The stage is the clock other things follow: scrubber, scene-strip, captions and hotspots work inside it as they do inside video-player, and any number of sounds (a clip for each narrated line, a bed under them) are kept in step, each from its own start for its own length. For a video or sound file use video-player or audio-player; for motion tied to scrolling use scroll-scene; for a set of pictures a person pages through use carousel.
  * @example
  * const scenes = [
  *   { id: "title", duration: 4, label: "Title", children: <h2 className="p-8 text-3xl">How a pot is thrown</h2> },
@@ -17,7 +17,9 @@
  *   <FilmStageControls>
  *     <FilmStageScrubber />
  *     <FilmStageControlsRow>
+ *       <FilmStagePreviousScene />
  *       <FilmStagePlay />
+ *       <FilmStageNextScene />
  *       <FilmStageMute />
  *       <FilmStageTime />
  *       <FilmStageRate className="ms-auto" />
@@ -26,17 +28,25 @@
  *   <FilmStageSceneStrip />
  * </FilmStage>
  *
+ * // One clip for each narrated line and a bed under them; each follows the clock, the speed, a seek and the mute
+ * <FilmStage scenes={scenes} loop onSceneChange={(scene) => track(scene.id)} aria-label="How a pot is thrown">
+ *   <FilmStageFrame />
+ *   <FilmStageAudio src="/bed.mp3" volume={0.3} />
+ *   {lines.map((line) => <FilmStageAudio key={line.id} src={line.src} start={line.start} duration={line.length} />)}
+ * </FilmStage>
+ *
  * // Export: a headless browser draws each frame, with no timer running on the page
  * <FilmStage scenes={scenes} deterministic exportName="main" aria-label="How a pot is thrown">…</FilmStage>
  * // in the page, from the exporter: await window.__filmStage.main.renderAt(frame / 30), then take the picture
  */
-import { Captions as CaptionsIcon, CaptionsOff, Pause, Play, Volume2, VolumeX } from "lucide-react";
+import { Captions as CaptionsIcon, CaptionsOff, Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
 import {
   createContext,
   use,
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
+  useRef,
   useState,
   useSyncExternalStore,
   type ComponentProps,
@@ -97,7 +107,7 @@ export type FilmClock = {
 };
 
 /** What the newest render knows, for callbacks that outlive it: the frame loop and the handle. */
-type Bound = { advance: (seconds: number) => void; actions: FilmStageActions; renderAt: (time: number) => Promise<number>; scenes: () => { id: string; start: number; duration: number }[] };
+type Bound = { advance: (seconds: number) => void; actions: FilmStageActions; renderAt: FilmStageHandle["renderAt"]; scenes: () => { id: string; start: number; duration: number }[] };
 
 type ClockStore = FilmClock & {
   set: (time: number) => void;
@@ -106,6 +116,10 @@ type ClockStore = FilmClock & {
   bind: (bound: Bound) => void;
   advance: (seconds: number) => void;
   handle: FilmStageHandle;
+  /** A sound element joined the stage. Returns the function that takes it away again. */
+  addSound: (element: HTMLAudioElement) => () => void;
+  /** How many sounds are attached. */
+  sounds: () => number;
 };
 
 function createClock(initial: number): ClockStore {
@@ -114,6 +128,7 @@ function createClock(initial: number): ClockStore {
   let rate = 1;
   let duration = 0;
   let bound: Bound | undefined;
+  const sounds = new Set<HTMLAudioElement>();
   const listeners = new Set<() => void>();
   const emit = (): void => {
     for (const listener of [...listeners]) listener();
@@ -136,6 +151,15 @@ function createClock(initial: number): ClockStore {
       bound = next;
     },
     advance: (seconds) => bound?.advance(seconds),
+    addSound(element) {
+      sounds.add(element);
+      emit();
+      return () => {
+        sounds.delete(element);
+        emit();
+      };
+    },
+    sounds: () => sounds.size,
     handle: {
       clock,
       play: () => bound?.actions.play(),
@@ -146,7 +170,9 @@ function createClock(initial: number): ClockStore {
       setRate: (next) => bound?.actions.setRate(next),
       setMuted: (next) => bound?.actions.setMuted(next),
       toggleMuted: () => bound?.actions.toggleMuted(),
-      renderAt: (moment) => (bound ? bound.renderAt(moment) : Promise.resolve(time)),
+      previousScene: () => bound?.actions.previousScene(),
+      nextScene: () => bound?.actions.nextScene(),
+      renderAt: (moment, options) => (bound ? bound.renderAt(moment, options) : Promise.resolve(time)),
       scenes: () => bound?.scenes() ?? [],
     },
     set(next) {
@@ -176,6 +202,10 @@ export type FilmStageLabels = {
   captions: string;
   controls: string;
   scenes: string;
+  previousScene: string;
+  nextScene: string;
+  /** Read out after going to a scene with the keys or the buttons: its place, and its name when it has one. */
+  sceneOf: (position: number, total: number, name?: string) => string;
 };
 
 const LABELS: FilmStageLabels = {
@@ -189,6 +219,9 @@ const LABELS: FilmStageLabels = {
   captions: "Captions",
   controls: "Playback controls",
   scenes: "Scenes",
+  previousScene: "Previous scene",
+  nextScene: "Next scene",
+  sceneOf: (position, total, name) => (name ? `${name}, scene ${position} of ${total}` : `Scene ${position} of ${total}`),
 };
 
 export type FilmStageActions = {
@@ -202,17 +235,38 @@ export type FilmStageActions = {
   setRate: (rate: number) => void;
   setMuted: (muted: boolean) => void;
   toggleMuted: () => void;
+  /** Goes to the start of the scene on stage, or, within its first second, to the start of the one before. */
+  previousScene: () => void;
+  /** Goes to the start of the next scene. Nothing on the last one. */
+  nextScene: () => void;
+};
+
+/** What `onSceneChange` is given. */
+export type FilmSceneChange = {
+  /** The scene now on stage. */
+  id: string;
+  /** Its place among the scenes, from 0. */
+  index: number;
+  /** When it starts and how long it lasts, in seconds. */
+  start: number;
+  duration: number;
+  label: string | undefined;
+  /** The id of the scene that was on stage before. */
+  previous: string | undefined;
 };
 
 /** What the stage hands to code outside it (`handleRef`), and, with `exportName`, to the page's `window`. */
 export type FilmStageHandle = FilmStageActions & {
   clock: FilmClock;
   /**
-   * Draws the frame for `time` now, synchronously, without starting any timer, and resolves (with the time
-   * drawn, kept inside the film) once the frame is in the page and the fonts and pictures inside the stage
-   * are decoded. Take the picture after it resolves.
+   * Draws the frame for `time` now, synchronously, and resolves (with the time drawn, kept inside the
+   * film) once the frame is in the page and the fonts and pictures inside the stage are decoded. Take the
+   * picture after it resolves. Pictures marked `loading="lazy"` are loaded at once, off screen or hidden as
+   * they may be: they would otherwise never arrive. It rejects, naming the picture and its scene, when one
+   * is still not ready after `timeout` milliseconds (default 10000) rather than waiting for ever; a picture
+   * whose file is missing does not hold it up. That wait is the only timer it starts.
    */
-  renderAt: (time: number) => Promise<number>;
+  renderAt: (time: number, options?: { timeout?: number }) => Promise<number>;
   /** Where each scene starts and how long it lasts. */
   scenes: () => { id: string; start: number; duration: number }[];
 };
@@ -230,8 +284,14 @@ type FilmStageContextValue = {
   running: boolean;
   rate: number;
   muted: boolean;
-  audio: HTMLAudioElement | null;
-  setAudio: (audio: HTMLAudioElement | null) => void;
+  /** How many FilmStageAudio are attached. */
+  sounds: number;
+  /** A FilmStageAudio joins with its element; the function returned takes it away. */
+  attachSound: (element: HTMLAudioElement) => () => void;
+  /** The place of the scene on stage, from 0 (-1 when there are no scenes). */
+  sceneIndex: number;
+  /** The scene a step back or forward leads to, if there is one. */
+  sceneAfter: (by: 1 | -1) => Placed | undefined;
   /** Tells the clock which element to watch: it stops while that element is off screen. */
   watch: (root: HTMLElement | null) => void;
   deterministic: boolean;
@@ -259,9 +319,9 @@ function useFilmStage(part: string): FilmStageContextValue {
  * re-renders every frame), the length, whether it is running, and the `clock` itself for code that would
  * rather subscribe than re-render.
  */
-export function useFilmClock(): { time: number; duration: number; playing: boolean; running: boolean; rate: number; clock: FilmClock; actions: FilmStageActions } {
-  const { time, duration, playing, running, rate, clock, actions } = useFilmStage("useFilmClock");
-  return { time, duration, playing, running, rate, clock, actions };
+export function useFilmClock(): { time: number; duration: number; playing: boolean; running: boolean; rate: number; sceneIndex: number; clock: FilmClock; actions: FilmStageActions } {
+  const { time, duration, playing, running, rate, sceneIndex, clock, actions } = useFilmStage("useFilmClock");
+  return { time, duration, playing, running, rate, sceneIndex, clock, actions };
 }
 
 export type FilmStageOptions = {
@@ -284,6 +344,8 @@ export type FilmStageOptions = {
   onRateChange?: ((rate: number) => void) | undefined;
   /** Start again at the end instead of stopping. */
   loop?: boolean | undefined;
+  /** Called when another scene comes on stage, however it got there: playing, a seek, the scene buttons, `renderAt`. Not called for the scene the stage starts on. */
+  onSceneChange?: ((scene: FilmSceneChange) => void) | undefined;
   /** Whether attached sound is muted: controlled. */
   muted?: boolean | undefined;
   defaultMuted?: boolean | undefined;
@@ -329,25 +391,59 @@ const subscribeReduced = (onChange: () => void): (() => void) => {
 const reducedNow = (): boolean => window.matchMedia(REDUCED).matches;
 const yes = (): boolean => true;
 const no = (): boolean => false;
+const zero = (): number => 0;
 const nothing = (): void => {};
 const NO_RANGES: [number, number][] = [];
 const NO_TRACKS: MediaContextValue["state"]["tracks"] = [];
 
-/** Resolves when the fonts and the pictures inside `scope` are ready to be drawn. No timer is used. */
-async function settle(scope: ParentNode): Promise<void> {
+/** How long `renderAt` waits for a picture before it gives up, in milliseconds. */
+const PICTURE_TIMEOUT = 10_000;
+
+/** A picture as an error message names it: its address, its description, the scene it is in. */
+function describePicture(picture: HTMLImageElement): string {
+  const address = picture.currentSrc || picture.getAttribute("src") || picture.getAttribute("srcset") || "";
+  const scene = picture.closest<HTMLElement>("[data-scene]")?.dataset["scene"];
+  return `<img src="${address.length > 120 ? `${address.slice(0, 117)}...` : address}"${picture.alt ? ` alt="${picture.alt}"` : ""}>${scene ? ` in scene "${scene}"` : ""}`;
+}
+
+/** Resolves when one picture can be drawn: loaded and decoded, or known to be broken. A lazy picture is made to load now. */
+function pictureReady(picture: HTMLImageElement): Promise<void> {
+  // Off screen, or inside something that is not displayed, a lazy picture never starts to load by itself.
+  if (picture.loading === "lazy") picture.loading = "eager";
+  if (picture.complete) return picture.decode().catch(nothing);
+  return new Promise<void>((done) => {
+    picture.addEventListener("load", () => void picture.decode().catch(nothing).then(done), { once: true });
+    picture.addEventListener("error", () => done(), { once: true });
+  });
+}
+
+/**
+ * Resolves when the fonts and the pictures inside `scope` are ready to be drawn, and rejects, naming the
+ * picture, when one is not ready in time. The only timer is the one that gives up.
+ */
+async function settle(scope: ParentNode, moment: number, timeout: number): Promise<void> {
   if (document.fonts.status === "loading") await document.fonts.ready;
-  const pictures = [...scope.querySelectorAll("img")].filter((picture) => picture.getAttribute("src"));
+  const pictures = [...scope.querySelectorAll("img")].filter((picture) => picture.getAttribute("src") || picture.getAttribute("srcset"));
   await Promise.all(
-    pictures.map((picture) =>
-      picture.complete
-        ? picture.decode().catch(nothing)
-        : new Promise<void>((done) => {
-            picture.addEventListener("load", () => done(), { once: true });
-            picture.addEventListener("error", () => done(), { once: true });
-          }),
-    ),
+    pictures.map((picture) => {
+      let timer = 0;
+      const late = new Promise<never>((_, fail) => {
+        timer = window.setTimeout(() => fail(new Error(`FilmStage renderAt(${moment}): a picture was not ready after ${timeout} ms: ${describePicture(picture)}`)), timeout);
+      });
+      return Promise.race([pictureReady(picture), late]).finally(() => window.clearTimeout(timer));
+    }),
   );
 }
+
+/** The place of the scene on stage at a time: the last one that has started. -1 when there are none. */
+function sceneIndexAt(scenes: readonly { start: number }[], time: number): number {
+  let index = -1;
+  for (let at = 0; at < scenes.length; at += 1) if ((scenes[at]?.start ?? 0) <= time) index = at;
+  return index;
+}
+
+/** How far into a scene, in seconds, "previous" still means the scene before rather than this one's start. */
+const RESTART_AFTER = 1;
 
 type ExportRegistry = Record<string, FilmStageHandle | undefined>;
 const exportRegistry = (): ExportRegistry => {
@@ -380,7 +476,7 @@ function useFilmStageState(options: Omit<FilmStageOptions, "handleRef">): { stag
   const [rate, setRate] = useControllableState({ value: options.rate, defaultValue: options.defaultRate ?? 1, onChange: options.onRateChange });
   const [muted, setMuted] = useControllableState({ value: options.muted, defaultValue: options.defaultMuted ?? false, onChange: options.onMutedChange });
   const [captions, setCaptions] = useControllableState({ value: options.captions, defaultValue: options.defaultCaptions ?? true, onChange: options.onCaptionsChange });
-  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+  const sounds = useSyncExternalStore(store.subscribe, store.sounds, zero);
   const [root, setRoot] = useState<HTMLElement | null>(null);
   /** Whether the stage is on screen. True until an observer says otherwise. */
   const [inView, setInView] = useState(true);
@@ -413,6 +509,19 @@ function useFilmStageState(options: Omit<FilmStageOptions, "handleRef">): { stag
     }
     commit(next);
   };
+  const sceneIndex = sceneIndexAt(placed, time);
+  const sceneAfter = (by: 1 | -1): Placed | undefined => {
+    const now = store.now();
+    const at = sceneIndexAt(placed, now);
+    const current = placed[at];
+    if (!current) return undefined;
+    if (by === 1) return placed[at + 1];
+    return at === 0 || now - current.start > RESTART_AFTER ? current : placed[at - 1];
+  };
+  const stepScene = (by: 1 | -1): void => {
+    const scene = sceneAfter(by);
+    if (scene) commit(scene.start);
+  };
   const actions: FilmStageActions = {
     play: () => {
       if (deterministic) return;
@@ -426,12 +535,30 @@ function useFilmStageState(options: Omit<FilmStageOptions, "handleRef">): { stag
     setRate,
     setMuted,
     toggleMuted: () => setMuted(!muted),
+    previousScene: () => stepScene(-1),
+    nextScene: () => stepScene(1),
   };
-  const renderAt = (moment: number): Promise<number> => {
+  const renderAt: FilmStageHandle["renderAt"] = (moment, given) => {
     const target = within(moment);
     flushSync(() => commit(target));
-    return settle(root ?? document).then(() => target);
+    return settle(root ?? document, target, Math.max(0, given?.timeout ?? PICTURE_TIMEOUT)).then(() => target);
   };
+
+  // Another scene came on stage: say so once, after the frame that shows it.
+  const scene = placed[sceneIndex];
+  const sceneId = scene?.id;
+  const sceneSeen = useRef(sceneId);
+  const sceneReport = useRef<() => void>(nothing);
+  useEffect(() => {
+    sceneReport.current = () => {
+      const previous = sceneSeen.current;
+      sceneSeen.current = sceneId;
+      if (scene && previous !== sceneId) options.onSceneChange?.({ id: scene.id, index: sceneIndex, start: scene.start, duration: Math.max(0, scene.duration), label: scene.label, previous });
+    };
+  });
+  useEffect(() => {
+    sceneReport.current();
+  }, [sceneId]);
 
   useEffect(() => {
     store.bind({ advance, actions, renderAt, scenes: () => placed.map((scene) => ({ id: scene.id, start: scene.start, duration: scene.duration })) });
@@ -474,8 +601,10 @@ function useFilmStageState(options: Omit<FilmStageOptions, "handleRef">): { stag
     running,
     rate,
     muted,
-    audio,
-    setAudio,
+    sounds,
+    attachSound: store.addSound,
+    sceneIndex,
+    sceneAfter,
     watch: setRoot,
     deterministic,
     transition,
@@ -532,8 +661,8 @@ export type FilmStageProps = Omit<ComponentProps<"div">, "children"> &
 /**
  * The stage: a named group (give it `aria-label`: what the film is) that holds the clock and the keyboard
  * for everything inside it. Space or K plays and pauses, Left and Right go back and forward by `seekStep`
- * (time runs left to right in every language, like the bar), Home and End go to the start and the end, and M
- * mutes when sound is attached. The keys are left alone while typing in a field; a slider or a toolbar
+ * (time runs left to right in every language, like the bar), Home and End go to the start and the end, N
+ * and P go to the next and the previous scene (which is then read out), and M mutes when sound is attached. The keys are left alone while typing in a field; a slider or a toolbar
  * inside keeps its own arrows and a button its own Space. The clock stops while the tab is hidden or the
  * stage is off screen and goes on when it is back, and nothing plays until asked unless `defaultPlaying`
  * says so. It is not announced scene by scene: with narration playing a screen reader would talk over it.
@@ -553,6 +682,7 @@ export function FilmStage({
   defaultRate,
   onRateChange,
   loop,
+  onSceneChange,
   muted,
   defaultMuted,
   onMutedChange,
@@ -584,6 +714,7 @@ export function FilmStage({
     defaultRate,
     onRateChange,
     loop,
+    onSceneChange,
     muted,
     defaultMuted,
     onMutedChange,
@@ -616,7 +747,9 @@ export function FilmStage({
     const target = event.target as HTMLElement;
     const onSlider = target.closest("[role=slider]") !== null;
     const onButton = target.closest("button, a, [role=button]") !== null;
-    const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+    // A letter typed on a keyboard of another script is found by the key's place instead.
+    const placed = event.key.length === 1 && event.key.charCodeAt(0) > 127 ? /^Key([A-Z])$/.exec(event.code)?.[1] : undefined;
+    const key = placed ? placed.toLowerCase() : event.key.length === 1 ? event.key.toLowerCase() : event.key;
     const act: Record<string, (() => void) | undefined> = {
       " ": onButton ? undefined : actions.toggle,
       k: actions.toggle,
@@ -624,12 +757,15 @@ export function FilmStage({
       ArrowRight: onSlider ? undefined : () => actions.seekBy(stage.seekStep),
       Home: onSlider ? undefined : () => actions.seek(0),
       End: onSlider ? undefined : () => actions.seek(stage.duration),
-      m: stage.audio
-        ? () => {
-            announce(stage.muted ? stage.labels.unmuted : stage.labels.muted);
-            actions.toggleMuted();
-          }
-        : undefined,
+      n: () => goToScene(stage, 1),
+      p: () => goToScene(stage, -1),
+      m:
+        stage.sounds > 0
+          ? () => {
+              announce(stage.muted ? stage.labels.unmuted : stage.labels.muted);
+              actions.toggleMuted();
+            }
+          : undefined,
     };
     const run = act[key];
     if (!run) return;
@@ -659,12 +795,20 @@ export function FilmStage({
   );
 }
 
+/** Goes a scene back or forward and says where that is: no focus move reads it out. */
+function goToScene(stage: FilmStageContextValue, by: 1 | -1): void {
+  const scene = stage.sceneAfter(by);
+  if (!scene) return;
+  if (by === 1) stage.actions.nextScene();
+  else stage.actions.previousScene();
+  announce(stage.labels.sceneOf(stage.scenes.indexOf(scene) + 1, stage.scenes.length, scene.label));
+}
+
 type Layer = { scene: Placed; local: FilmSceneTime; opacity: number };
 
 /** The scenes on stage at a moment, bottom first: the current one, and under it the one it is fading in over. */
 function layersAt(scenes: readonly Placed[], time: number, fallback: FilmTransition, fade: number, still: boolean): Layer[] {
-  let index = -1;
-  for (let at = 0; at < scenes.length; at += 1) if ((scenes[at]?.start ?? 0) <= time) index = at;
+  const index = sceneIndexAt(scenes, time);
   const scene = scenes[index];
   if (!scene) return [];
   const length = Math.max(0, scene.duration);
@@ -725,9 +869,12 @@ export function FilmStageFrame({ className, style, aspect = 16 / 9, children, ..
 const DRIFT = 0.3;
 
 /** Puts a sound element in step with the clock. Outside any component: the element is the browser's, changed in place. */
-function followClock(element: HTMLAudioElement, clock: FilmClock, offset: number): void {
+function followClock(element: HTMLAudioElement, clock: FilmClock, offset: number, length: number | undefined, volume: number | undefined): void {
+  if (volume !== undefined && element.volume !== volume) element.volume = volume;
   const at = clock.now() - offset;
-  const inside = at >= 0 && (!Number.isFinite(element.duration) || at < element.duration);
+  // It sounds from its start for its length, or to the end of its file, whichever comes first.
+  const end = Math.min(length ?? Number.POSITIVE_INFINITY, Number.isFinite(element.duration) ? element.duration : Number.POSITIVE_INFINITY);
+  const inside = at >= 0 && at < end;
   if (clock.running() && inside) {
     if (Math.abs(element.currentTime - at) > DRIFT) element.currentTime = at;
     if (element.playbackRate !== clock.rate()) element.playbackRate = clock.rate();
@@ -742,20 +889,29 @@ function followClock(element: HTMLAudioElement, clock: FilmClock, offset: number
 export type FilmStageAudioProps = Omit<ComponentProps<"audio">, "muted" | "autoPlay" | "loop" | "controls"> & {
   /** The moment of the film, in seconds, at which the sound starts. Default 0. */
   start?: number;
+  /** How long it sounds for, in seconds, from its `start`. Left out, to the end of its file. */
+  duration?: number;
+  /** How loud it is, from 0 to 1: a bed under narration is quieter than the voice. Left out, the element's own (1). */
+  volume?: number;
 };
 
 /**
  * Narration or music. The stage's clock leads and the sound follows: it plays while the clock runs, at the
  * clock's speed, pauses with it, goes where it is sought, and is moved back in step whenever it is more
- * than three tenths of a second away. It is silent in `deterministic` mode (an exporter adds the sound
- * file itself). With it attached, M and FilmStageMute mute it. It draws nothing.
+ * than three tenths of a second away. Any number may be attached at once, each with its own `start` and
+ * `duration`: one clip for each narrated line, a bed under them all. It is silent in `deterministic` mode
+ * (an exporter adds the sound files itself). With any attached, M and FilmStageMute mute them all. It
+ * draws nothing.
  */
-export function FilmStageAudio({ start = 0, ref, ...props }: FilmStageAudioProps) {
-  const { clock, audio, setAudio, muted } = useFilmStage("FilmStageAudio");
+export function FilmStageAudio({ start = 0, duration, volume, ref, ...props }: FilmStageAudioProps) {
+  const { clock, attachSound, muted } = useFilmStage("FilmStageAudio");
+  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   useImperativeHandle(ref, () => audio as HTMLAudioElement, [audio]);
+  const level = volume === undefined ? undefined : Math.min(1, Math.max(0, volume));
+  useEffect(() => (audio ? attachSound(audio) : undefined), [audio, attachSound]);
   useEffect(() => {
     if (!audio) return;
-    const follow = (): void => followClock(audio, clock, start);
+    const follow = (): void => followClock(audio, clock, start, duration, level);
     follow();
     audio.addEventListener("loadedmetadata", follow);
     const stop = clock.subscribe(follow);
@@ -764,8 +920,8 @@ export function FilmStageAudio({ start = 0, ref, ...props }: FilmStageAudioProps
       stop();
       audio.pause();
     };
-  }, [audio, clock, start]);
-  return <audio ref={setAudio} data-slot="film-stage-audio" preload="auto" muted={muted} {...props} />;
+  }, [audio, clock, start, duration, level]);
+  return <audio ref={setAudio} data-slot="film-stage-audio" data-start={start} preload="auto" muted={muted} {...props} />;
 }
 
 /** The transport under the picture: a named group. Arrange the parts inside it. */
@@ -794,7 +950,7 @@ function ControlButton({ className, ...props }: ControlButtonProps) {
     <button
       type="button"
       className={cn(
-        "inline-flex h-8 min-w-8 shrink-0 items-center justify-center gap-1 rounded-control px-1.5 text-sm font-medium text-foreground transition-[background-color,opacity] duration-instant ease-out select-none hover:bg-accent disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none pointer-coarse:h-(--control-h) pointer-coarse:min-w-(--control-h) [&_svg]:size-4 [&_svg]:shrink-0",
+        "inline-flex h-8 min-w-8 shrink-0 items-center justify-center gap-1 rounded-control px-1.5 text-sm font-medium text-foreground transition-[background-color,opacity] duration-instant ease-out select-none hover:bg-accent disabled:pointer-events-none disabled:opacity-50 aria-disabled:opacity-50 motion-reduce:transition-none pointer-coarse:h-(--control-h) pointer-coarse:min-w-(--control-h) [&_svg]:size-4 [&_svg]:shrink-0",
         className,
       )}
       {...props}
@@ -819,6 +975,41 @@ export function FilmStagePlay({ children, onClick, disabled, ...props }: Control
       {children ?? (playing ? <Pause aria-hidden="true" strokeWidth={1.5} /> : <Play aria-hidden="true" strokeWidth={1.5} />)}
     </ControlButton>
   );
+}
+
+function SceneButton({ by, children, onClick, ...props }: ControlButtonProps & { by: 1 | -1 }) {
+  const stage = useFilmStage(by === 1 ? "FilmStageNextScene" : "FilmStagePreviousScene");
+  // Nowhere to go: the last scene has no next, and the very start has no previous.
+  const stuck = by === 1 ? stage.sceneIndex >= stage.scenes.length - 1 : stage.time <= 0;
+  return (
+    <ControlButton
+      data-slot={by === 1 ? "film-stage-next-scene" : "film-stage-previous-scene"}
+      aria-label={by === 1 ? stage.labels.nextScene : stage.labels.previousScene}
+      // Unavailable, but still focusable: the film reaching its last scene must not drop the keyboard's place.
+      aria-disabled={stuck || undefined}
+      onClick={(event) => {
+        onClick?.(event);
+        if (!event.defaultPrevented && !stuck) goToScene(stage, by);
+      }}
+      {...props}
+    >
+      {children ?? (by === 1 ? <SkipForward aria-hidden="true" strokeWidth={1.5} /> : <SkipBack aria-hidden="true" strokeWidth={1.5} />)}
+    </ControlButton>
+  );
+}
+
+/**
+ * Goes to the start of the scene on stage, or, pressed within its first second, to the start of the scene
+ * before it, as the same button does in a music player. The scene arrived at is read out. At the very
+ * start it says it is unavailable.
+ */
+export function FilmStagePreviousScene(props: ControlButtonProps) {
+  return <SceneButton by={-1} {...props} />;
+}
+
+/** Goes to the start of the next scene, which is read out. On the last scene it says it is unavailable. */
+export function FilmStageNextScene(props: ControlButtonProps) {
+  return <SceneButton by={1} {...props} />;
 }
 
 /** Elapsed and total time, in figures of equal width so the row does not shift. Not a live region: the scrubber says the time when asked. */
@@ -902,13 +1093,13 @@ export function FilmStageRate({ rates = RATES, onClick, children, ...props }: Co
 
 /** Mutes or unmutes the attached sound: a toggle whose pressed state says whether it is on. Disabled while no FilmStageAudio is attached. */
 export function FilmStageMute({ children, onClick, disabled, ...props }: ControlButtonProps) {
-  const { muted, audio, actions, labels } = useFilmStage("FilmStageMute");
+  const { muted, sounds, actions, labels } = useFilmStage("FilmStageMute");
   return (
     <ControlButton
       data-slot="film-stage-mute"
       aria-label={labels.mute}
       aria-pressed={muted}
-      disabled={disabled || audio === null}
+      disabled={disabled || sounds === 0}
       onClick={(event) => {
         onClick?.(event);
         if (!event.defaultPrevented) actions.toggleMuted();

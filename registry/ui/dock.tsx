@@ -3,7 +3,7 @@
  * @name dock
  * @category ui
  * @description A layout of main content with a panel docked beside it that stays while the person works: the panel can be resized with a splitter, collapsed to a slim bar, and on narrow containers gives way to a bar at the bottom.
- * @when A working surface that belongs beside the content and is not modal: a plan next to a conversation, an inspector next to a canvas, details next to a list. For a panel that covers the page for a moment use sheet; for two fixed columns with no resizing use split. Write the parts in reading order: DockMain, DockResizer, DockPanel for a panel at the end; DockPanel, DockResizer, DockMain with side="start". Below 42rem of its own width the panel and splitter are hidden and DockBar shows at the bottom: open the panel's content in a bottom-sheet from `onOpenStacked`. Give the Dock a height (it fills its parent).
+ * @when A working surface that belongs beside the content and is not modal: a plan next to a conversation, an inspector next to a canvas, details next to a list. For a panel that covers the page for a moment use sheet; for two fixed columns with no resizing use split. Write the parts in reading order: DockMain, DockResizer, DockPanel for a panel at the end; DockPanel, DockResizer, DockMain with side="start". Below 42rem of its own width (another width with `stackBelow`) the panel and splitter are hidden and DockBar shows at the bottom: open the panel's content in a bottom-sheet from `onOpenStacked`. Where the content ends in a region that must stay lowest (a composer), put a second DockBar inside DockMain above that region with `show="stacked"`, and give the one after the panel `show="collapsed"`. Give the Dock a height (it fills its parent).
  * @example
  * <Dock defaultSize={32} minSize={24} maxSize={50} className="h-[32rem]">
  *   <DockMain>…the conversation…</DockMain>
@@ -17,6 +17,18 @@
  *
  * // Controlled, in pixels, at the start
  * <Dock side="start" unit="px" size={width} onSizeChange={setWidth} minSize={240} maxSize={480} collapsed={hidden} onCollapsedChange={setHidden}>…</Dock>
+ *
+ * // Stacks below 56rem; on a narrow dock the bar sits above the composer, not under it
+ * <Dock stackBelow={56} className="h-[32rem]">
+ *   <DockMain className="flex flex-col">
+ *     <div className="min-h-0 flex-1 overflow-y-auto">…the conversation…</div>
+ *     <DockBar show="stacked" onOpenStacked={() => setSheetOpen(true)}>Plan · 3 stops</DockBar>
+ *     <footer>…the composer…</footer>
+ *   </DockMain>
+ *   <DockResizer aria-label="Resize the plan" />
+ *   <DockPanel aria-label="Plan">…</DockPanel>
+ *   <DockBar show="collapsed">Plan · 3 stops</DockBar>
+ * </Dock>
  */
 import { createContext, use, useEffect, useId, useRef, type ComponentProps, type CSSProperties, type KeyboardEvent, type PointerEvent } from "react";
 import { cn } from "@/lib/cn";
@@ -24,8 +36,15 @@ import { inlineStep, isRtl } from "@/lib/direction";
 import { useControllableState } from "@/lib/use-controllable-state";
 import { useSize } from "@/lib/use-size";
 
-/** The container width, in rem, below which the panel no longer sits beside the content (Tailwind's @2xl). */
+/** The container width, in rem, below which the panel no longer sits beside the content unless `stackBelow` says otherwise (Tailwind's @2xl). */
 const STACK_BELOW_REM = 42;
+
+/**
+ * How the dock decides between side by side and stacked. "auto": the stylesheet does, with a container
+ * query at 42rem, so it is right before any script runs. "side" and "stacked": the dock measured itself
+ * against another `stackBelow`, which a container query cannot read from a property.
+ */
+type DockLayout = "auto" | "side" | "stacked";
 
 type DockSide = "start" | "end";
 type FocusTarget = "bar" | "panel" | "resizer";
@@ -77,6 +96,12 @@ export type DockProps = ComponentProps<"div"> & {
   collapsed?: boolean;
   defaultCollapsed?: boolean;
   onCollapsedChange?: (collapsed: boolean) => void;
+  /**
+   * The width of the dock itself, in rem, below which the panel gives way to the bar. Default 42. With the
+   * default the stylesheet decides (a container query); with another width the dock measures itself, so
+   * until it has (on the server, and for the first frame) it is laid out as for 42.
+   */
+  stackBelow?: number;
 };
 
 /**
@@ -98,6 +123,7 @@ export function Dock({
   collapsed,
   defaultCollapsed = false,
   onCollapsedChange,
+  stackBelow = STACK_BELOW_REM,
   ...props
 }: DockProps) {
   const percent = unit === "%";
@@ -116,8 +142,14 @@ export function Dock({
   useEffect(() => {
     const target = pendingFocus.current === "back" ? returnTo.current : pendingFocus.current;
     pendingFocus.current = null;
-    if (target) root.current?.querySelector<HTMLElement>(`[data-slot=dock-${target}]`)?.focus();
+    if (!target) return;
+    // There may be two bars (one for each layout): the one that is shown takes focus.
+    const parts = [...(root.current?.querySelectorAll<HTMLElement>(`[data-slot=dock-${target}]`) ?? [])];
+    (parts.find((part) => part.getClientRects().length > 0) ?? parts[0])?.focus();
   }, [isCollapsed]);
+
+  const stacked = width > 0 && width < stackBelow * 16;
+  const layout: DockLayout = stackBelow === STACK_BELOW_REM || width === 0 ? "auto" : stacked ? "stacked" : "side";
 
   const clamp = (value: number): number => Math.round(Math.min(max, Math.max(min, value)) * 100) / 100;
 
@@ -138,7 +170,7 @@ export function Dock({
           if (from) returnTo.current = from;
           setIsCollapsed(next);
         },
-        stacked: width > 0 && width < STACK_BELOW_REM * 16,
+        stacked,
         panelId,
       }}
     >
@@ -149,12 +181,13 @@ export function Dock({
         }}
         data-slot="dock"
         data-side={side}
+        data-layout={layout}
         data-collapsed={isCollapsed ? "" : undefined}
         className={cn("group/dock @container/dock h-full min-h-0 w-full min-w-0", className)}
         style={{ "--dock-size": `${clamp(current)}${unit}`, ...style } as CSSProperties}
         {...props}
       >
-        <div data-slot="dock-layout" className="flex h-full min-h-0 w-full flex-col @2xl/dock:flex-row">
+        <div data-slot="dock-layout" className="flex h-full min-h-0 w-full flex-col group-data-[layout=side]/dock:flex-row @2xl/dock:group-data-[layout=auto]/dock:flex-row">
           {children}
         </div>
       </div>
@@ -181,7 +214,7 @@ export function DockPanel({ className, ...props }: DockPanelProps) {
       tabIndex={-1}
       data-slot="dock-panel"
       className={cn(
-        "hidden min-h-0 min-w-0 shrink-0 grow-0 basis-(--dock-size) flex-col overflow-hidden outline-none group-data-[collapsed]/dock:hidden! @2xl/dock:flex",
+        "hidden min-h-0 min-w-0 shrink-0 grow-0 basis-(--dock-size) flex-col overflow-hidden outline-none group-data-[collapsed]/dock:hidden! group-data-[layout=side]/dock:flex @2xl/dock:group-data-[layout=auto]/dock:flex",
         className,
       )}
       {...props}
@@ -277,7 +310,7 @@ export function DockResizer({
         if (!event.defaultPrevented) dock.resetSize();
       }}
       className={cn(
-        "relative z-10 hidden w-px shrink-0 cursor-col-resize touch-none bg-border-strong select-none group-data-[collapsed]/dock:hidden! before:absolute before:inset-y-0 before:-inset-x-[1.5px] before:my-auto before:h-8 before:rounded-full before:bg-border-strong after:absolute after:inset-y-0 after:-inset-x-3 hover:before:bg-foreground focus-visible:before:bg-foreground pointer-coarse:after:-inset-x-5 @2xl/dock:block",
+        "relative z-10 hidden w-px shrink-0 cursor-col-resize touch-none bg-border-strong select-none group-data-[collapsed]/dock:hidden! before:absolute before:inset-y-0 before:-inset-x-[1.5px] before:my-auto before:h-8 before:rounded-full before:bg-border-strong after:absolute after:inset-y-0 after:-inset-x-3 hover:before:bg-foreground focus-visible:before:bg-foreground pointer-coarse:after:-inset-x-5 group-data-[layout=side]/dock:block @2xl/dock:group-data-[layout=auto]/dock:block",
         className,
       )}
       {...props}
@@ -319,19 +352,28 @@ export type DockBarProps = Omit<ComponentProps<"button">, "type"> & {
    * open the panel's content another way (a bottom-sheet). On a wide dock the bar restores the panel itself.
    */
   onOpenStacked?: () => void;
+  /**
+   * When this bar is there. "both" (default): across the bottom on a narrow dock, and as the slim strip
+   * where the panel was on a wide one. "stacked": only on a narrow dock, and then wherever it is written, so
+   * it can sit inside DockMain above a region that must stay lowest (a composer). "collapsed": only as the
+   * strip of a wide dock. Use the last two as a pair.
+   */
+  show?: "both" | "stacked" | "collapsed";
 };
 
 /**
  * The collapsed form of the panel: one button that says what is in the panel (its children: "Plan · 3
  * stops") and brings it back. On a wide dock it shows only while the panel is collapsed, as a slim strip
- * where the panel was; on a narrow one it is always there, across the bottom.
+ * where the panel was; on a narrow one it is always there, across the bottom, or with `show="stacked"`
+ * wherever it is written inside DockMain.
  */
-export function DockBar({ className, onClick, onOpenStacked, children, ...props }: DockBarProps) {
+export function DockBar({ className, onClick, onOpenStacked, show = "both", children, ...props }: DockBarProps) {
   const dock = useDock("DockBar");
   return (
     <button
       type="button"
       data-slot="dock-bar"
+      data-show={show}
       aria-expanded={dock.stacked ? undefined : false}
       aria-controls={dock.stacked ? undefined : dock.panelId}
       aria-haspopup={dock.stacked ? "dialog" : undefined}
@@ -342,8 +384,16 @@ export function DockBar({ className, onClick, onOpenStacked, children, ...props 
         else dock.setCollapsed(false, "back");
       }}
       className={cn(
-        "flex h-control-lg w-full shrink-0 items-center gap-2 border-t border-border bg-card px-4 text-start text-sm font-medium text-card-foreground transition-colors duration-instant ease-out hover:bg-accent motion-reduce:transition-none [&_svg]:size-4 [&_svg]:shrink-0",
-        "@2xl/dock:hidden @2xl/dock:h-full @2xl/dock:w-(--control-h-lg) @2xl/dock:justify-start @2xl/dock:border-t-0 @2xl/dock:px-0 @2xl/dock:py-4 @2xl/dock:[writing-mode:vertical-rl] @2xl/dock:group-data-[collapsed]/dock:flex @2xl/dock:group-data-[side=end]/dock:border-s @2xl/dock:group-data-[side=start]/dock:order-first @2xl/dock:group-data-[side=start]/dock:border-e",
+        "h-control-lg w-full shrink-0 items-center gap-2 border-t border-border bg-card px-4 text-start text-sm font-medium text-card-foreground transition-colors duration-instant ease-out hover:bg-accent motion-reduce:transition-none [&_svg]:size-4 [&_svg]:shrink-0",
+        // On a narrow dock: there, unless it is only the strip of a wide one.
+        show === "collapsed" ? "hidden" : "flex",
+        // On a wide dock it is gone, whichever way the width was decided…
+        "group-data-[layout=side]/dock:hidden @2xl/dock:group-data-[layout=auto]/dock:hidden",
+        // …and comes back as the strip where the panel was, while the panel is collapsed.
+        show !== "stacked" && [
+          "group-data-[layout=side]/dock:h-full group-data-[layout=side]/dock:w-(--control-h-lg) group-data-[layout=side]/dock:justify-start group-data-[layout=side]/dock:border-t-0 group-data-[layout=side]/dock:px-0 group-data-[layout=side]/dock:py-4 group-data-[layout=side]/dock:[writing-mode:vertical-rl] group-data-[layout=side]/dock:group-data-[collapsed]/dock:flex group-data-[layout=side]/dock:group-data-[side=end]/dock:border-s group-data-[layout=side]/dock:group-data-[side=start]/dock:order-first group-data-[layout=side]/dock:group-data-[side=start]/dock:border-e",
+          "@2xl/dock:group-data-[layout=auto]/dock:h-full @2xl/dock:group-data-[layout=auto]/dock:w-(--control-h-lg) @2xl/dock:group-data-[layout=auto]/dock:justify-start @2xl/dock:group-data-[layout=auto]/dock:border-t-0 @2xl/dock:group-data-[layout=auto]/dock:px-0 @2xl/dock:group-data-[layout=auto]/dock:py-4 @2xl/dock:group-data-[layout=auto]/dock:[writing-mode:vertical-rl] @2xl/dock:group-data-[layout=auto]/dock:group-data-[collapsed]/dock:flex @2xl/dock:group-data-[layout=auto]/dock:group-data-[side=end]/dock:border-s @2xl/dock:group-data-[layout=auto]/dock:group-data-[side=start]/dock:order-first @2xl/dock:group-data-[layout=auto]/dock:group-data-[side=start]/dock:border-e",
+        ],
         className,
       )}
       {...props}

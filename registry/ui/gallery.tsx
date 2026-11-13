@@ -3,7 +3,7 @@
  * @name gallery
  * @category ui
  * @description A set of picture tiles that open a full-screen viewer: a mosaic of one large and several small, an even grid, or a row that scrolls sideways.
- * @when Showing several pictures of one thing where each can be looked at closely: a place, a product, a piece of work. GalleryLightbox takes a list of pictures and does everything; Gallery, GalleryItem and GalleryImage are the parts, to put inside your own Lightbox or to use with no viewer at all. For pictures that are decoration, use plain images in a grid; for one picture use aspect.
+ * @when Showing several pictures of one thing where each can be looked at closely: a place, a product, a piece of work. GalleryLightbox takes a list of pictures and does everything; Gallery, GalleryItem and GalleryImage are the parts, to put inside your own Lightbox or to use with no viewer at all. Pictures are plain `<img>` elements unless the project gives its framework's image component: `as` on GalleryImage, `renderImage` on GalleryLightbox. For pictures that are decoration, use plain images in a grid; for one picture use aspect.
  * @example
  * <GalleryLightbox
  *   title="Photos of the studio"
@@ -25,9 +25,19 @@
  *   </Gallery>
  *   <LightboxContent>…</LightboxContent>
  * </Lightbox>
+ *
+ * // With the framework's image component (here next/image) in place of <img>
+ * <GalleryImage as={Image} fill sizes="(min-width: 48rem) 25vw, 50vw" src={photo.src} alt={photo.alt} />
+ * <GalleryLightbox
+ *   title="Photos of the studio"
+ *   items={photos}
+ *   renderImage={({ use, picture, props }) =>
+ *     use === "tile" ? <GalleryImage as={Image} fill sizes="25vw" {...props} /> : <Image {...props} width={use === "slide" ? picture.width : 96} height={use === "slide" ? picture.height : 72} />
+ *   }
+ * />
  */
 import { ImageOff } from "lucide-react";
-import { Children, createContext, use, useState, type ComponentProps, type ReactNode } from "react";
+import { Children, createContext, use, useState, type ComponentProps, type ElementType, type ReactNode, type SyntheticEvent } from "react";
 import {
   Lightbox,
   LightboxCaption,
@@ -134,18 +144,30 @@ export function GalleryItem({ className, children, openLabel = "Open picture:", 
   );
 }
 
-export type GalleryImageProps = ComponentProps<"img"> & {
+type GalleryImageOwnProps = {
   /** What the picture shows. Required: it is also the tile's name. */
   alt: string;
   /** The words shown in place of a picture that cannot be loaded. Default "Picture unavailable". */
   unavailableLabel?: string;
 };
 
+export type GalleryImageProps<T extends ElementType = "img"> = GalleryImageOwnProps & {
+  /**
+   * The component that draws the picture, in place of `<img>`: the framework's image component (`Image`
+   * from next/image, for one). It is given `src`, `alt`, `className` (which makes it fill the tile),
+   * `onError`, a `ref` to the picture element, and every other prop passed here (`fill`, `sizes`, `width`).
+   */
+  as?: T;
+} & Omit<ComponentProps<T>, keyof GalleryImageOwnProps | "as">;
+
 /**
  * The picture, cropped to fill its tile. A picture that fails to load is replaced by a labelled placeholder
- * that keeps the description, never the browser's broken-image icon.
+ * that keeps the description, never the browser's broken-image icon. It is an `<img>` (lazy, decoded off
+ * the main thread) unless `as` names another component, which then decides how it loads.
  */
-export function GalleryImage({ className, alt, unavailableLabel = "Picture unavailable", loading = "lazy", decoding = "async", onError, ...props }: GalleryImageProps) {
+export function GalleryImage<T extends ElementType = "img">(all: GalleryImageProps<T>) {
+  const { as, className, alt, unavailableLabel = "Picture unavailable", onError, ...props } = all as GalleryImageProps<"img"> & { as?: ElementType };
+  const Picture: ElementType = as ?? "img";
   const [failed, setFailed] = useState(false);
   if (failed) {
     return (
@@ -157,16 +179,16 @@ export function GalleryImage({ className, alt, unavailableLabel = "Picture unava
     );
   }
   return (
-    <img
+    <Picture
       data-slot="gallery-image"
       alt={alt}
-      loading={loading}
-      decoding={decoding}
+      // The plain element loads when it nears the screen; another component has its own way of loading.
+      {...(Picture === "img" ? { loading: "lazy", decoding: "async" } : {})}
       // A picture that failed before the page became interactive never fires onError: look at it once.
-      ref={(node) => {
+      ref={(node: HTMLImageElement | null) => {
         if (node?.complete && node.naturalWidth === 0 && node.currentSrc !== "") setFailed(true);
       }}
-      onError={(event) => {
+      onError={(event: SyntheticEvent<HTMLImageElement>) => {
         onError?.(event);
         setFailed(true);
       }}
@@ -186,8 +208,26 @@ export type GalleryPicture = {
   caption?: ReactNode;
 };
 
-export type GalleryLightboxProps = Omit<LightboxProps, "count" | "children"> & {
-  items: GalleryPicture[];
+/** What `renderImage` is given for one picture in one place. */
+export type GalleryRenderImage<P extends GalleryPicture = GalleryPicture> = {
+  /** Where the picture is drawn: a "tile" of the gallery, the large "slide" in the viewer, or a "thumbnail" in the viewer's strip. */
+  use: "tile" | "slide" | "thumbnail";
+  /** The item, with whatever else the project keeps on it (a width and height, a blurred placeholder). */
+  picture: P;
+  /** Its place in `items`, from 0. */
+  index: number;
+  /** What the picture must be given: spread them onto the element. `alt` is empty for a thumbnail, whose button carries the name. */
+  props: { src: string; alt: string; className?: string; draggable?: boolean };
+};
+
+export type GalleryLightboxProps<P extends GalleryPicture = GalleryPicture> = Omit<LightboxProps, "count" | "children"> & {
+  items: P[];
+  /**
+   * Draws each picture, in place of `<img>`: return the framework's image component with `props` spread on
+   * it. For a tile, return a GalleryImage with `as` to keep the placeholder of a picture that fails to load.
+   * A slide must keep its own proportions (give it the picture's width and height).
+   */
+  renderImage?: (image: GalleryRenderImage<P>) => ReactNode;
   /** The viewer's name for screen readers, and the gallery's: "Photos of the studio". */
   title: string;
   layout?: GalleryLayout;
@@ -213,6 +253,12 @@ export type GalleryLightboxProps = Omit<LightboxProps, "count" | "children"> & {
   className?: string;
 };
 
+/**
+ * The large picture in the viewer: whole, never cropped, never larger than the slide. Its size is its own
+ * (`h-auto w-auto`), so a component that writes `width` and `height` attributes keeps its proportions too.
+ */
+const SLIDE_PICTURE = "h-auto max-h-full w-auto max-w-full object-contain";
+
 function CurrentCaption({ items }: { items: GalleryPicture[] }) {
   const { index } = useLightbox("GalleryLightbox");
   const caption = items[index]?.caption;
@@ -223,7 +269,7 @@ function CurrentCaption({ items }: { items: GalleryPicture[] }) {
  * A gallery and its viewer from a list of pictures. Every option of Lightbox passes through (`open`,
  * `index`, `loop`, `sharedTransition`, `formatPosition` and the rest), so it can be controlled.
  */
-export function GalleryLightbox({ items, title, layout = "grid", thumbnails, labels = {}, className, ...lightbox }: GalleryLightboxProps) {
+export function GalleryLightbox<P extends GalleryPicture = GalleryPicture>({ items, title, layout = "grid", thumbnails, labels = {}, className, renderImage, ...lightbox }: GalleryLightboxProps<P>) {
   const strip = thumbnails ?? items.length > 1;
   return (
     <Lightbox count={items.length} {...lightbox}>
@@ -231,7 +277,11 @@ export function GalleryLightbox({ items, title, layout = "grid", thumbnails, lab
         {items.map((item, index) => (
           <LightboxTrigger key={`${index}-${item.src}`} index={index} asChild>
             <GalleryItem {...(labels.open ? { openLabel: labels.open } : {})}>
-              <GalleryImage src={item.thumbnail ?? item.src} alt={item.alt} {...(labels.unavailable ? { unavailableLabel: labels.unavailable } : {})} />
+              {renderImage ? (
+                renderImage({ use: "tile", picture: item, index, props: { src: item.thumbnail ?? item.src, alt: item.alt } })
+              ) : (
+                <GalleryImage src={item.thumbnail ?? item.src} alt={item.alt} {...(labels.unavailable ? { unavailableLabel: labels.unavailable } : {})} />
+              )}
             </GalleryItem>
           </LightboxTrigger>
         ))}
@@ -247,7 +297,12 @@ export function GalleryLightbox({ items, title, layout = "grid", thumbnails, lab
           <LightboxViewport aria-label={labels.pictures}>
             {items.map((item, index) => (
               <LightboxSlide key={`${index}-${item.src}`} index={index}>
-                <img src={item.src} alt={item.alt} draggable={false} className="max-h-full max-w-full object-contain" />
+                {renderImage ? (
+                  renderImage({ use: "slide", picture: item, index, props: { src: item.src, alt: item.alt, draggable: false, className: SLIDE_PICTURE } })
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element -- The library is not tied to one framework: the default is the plain element, and `renderImage` takes the framework's image component.
+                  <img src={item.src} alt={item.alt} draggable={false} className={SLIDE_PICTURE} />
+                )}
               </LightboxSlide>
             ))}
           </LightboxViewport>
@@ -261,7 +316,12 @@ export function GalleryLightbox({ items, title, layout = "grid", thumbnails, lab
               <LightboxThumbnails aria-label={labels.allPictures}>
                 {items.map((item, index) => (
                   <LightboxThumbnail key={`${index}-${item.src}`} index={index} aria-label={(labels.show ?? ((position, alt) => `Show picture ${position}: ${alt}`))(index + 1, item.alt)}>
-                    <img src={item.thumbnail ?? item.src} alt="" draggable={false} />
+                    {renderImage ? (
+                      renderImage({ use: "thumbnail", picture: item, index, props: { src: item.thumbnail ?? item.src, alt: "", draggable: false } })
+                    ) : (
+                      // eslint-disable-next-line @next/next/no-img-element -- As above: `renderImage` takes the framework's image component.
+                      <img src={item.thumbnail ?? item.src} alt="" draggable={false} />
+                    )}
                   </LightboxThumbnail>
                 ))}
               </LightboxThumbnails>
