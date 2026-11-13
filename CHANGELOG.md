@@ -2,6 +2,68 @@
 
 Prelaunch. There are no version numbers yet: entries are dated, newest first. Numbering starts at launch.
 
+## 2026-11-13
+
+More that the existing components can do. Every change is an added prop or part with the old behaviour
+as its default; no package was added to the library. To take them into a project that already has the
+items, add them again with `overwrite` (which replaces the project's own edits to those files).
+
+- **`media-row-list` and `dropzone`.** A row can be in a state of the project's own: `state` takes any
+  word, with `stateLabel` and `stateTone` (`neutral`, `success`, `warning`, `destructive`, each with its own
+  mark; `stateIcon` on `UploadItem` replaces the mark). Rows take a `status` line, `controls` of the
+  project's own, `hideCover`, and `altRequired`, `altInvalid` and `altError` for the description field (the
+  message is tied to the field and read out when it appears). The list takes `onPause` and `onResume`
+  (pause and resume buttons on uploading and paused rows), `altRequired`, `onDropped`, and
+  `variant="lines"` for hairline rows with no box. A row now has the surface radius at every roundness,
+  where it took the control radius and became a pill. `UploadItem` takes `as="div"`, so a media row no
+  longer holds a list inside a list item.
+- **`film-stage`.** Any number of `FilmStageAudio` at once, each with its own `start`, `duration` and
+  `volume`, all following the clock, the rate, a seek and the mute. `renderAt(time, { timeout })` now loads
+  pictures marked `loading="lazy"` at once (off screen or not displayed, they never arrived and it never
+  resolved), counts `srcset` pictures, waits for the decode after a late load, and rejects after `timeout`
+  milliseconds (default 10000) with an error naming the picture and its scene. `FilmStagePreviousScene`
+  and `FilmStageNextScene`, the keys P and N, `previousScene()` and `nextScene()` on the handle, each
+  reading out the scene arrived at; `onSceneChange` with the scene, its place and the one before;
+  `sceneIndex` from `useFilmClock`. Letter keys are found by their place on keyboards of other scripts.
+- **`wizard`.** Driven from outside: with `onNext`, `onBack` and `onSkip` the buttons tell the project and
+  the wizard does not move; the project sets `step`. `pending` makes the buttons and the rail wait and
+  marks the card busy. The step animation and the move of focus to the new heading now follow any change
+  of `step`, not only the wizard's own buttons. Uncontrolled use is unchanged.
+- **`sortable-list`.** `onDropped({ value, from, to, values })`, called once when a drag is let go, a
+  lifted row is dropped (Space, Enter, Tab or focus leaving) or a move button is pressed; not when a lifted
+  row is put back with Escape. `onValuesChange` still reports every step.
+- **`dock`.** `stackBelow` (rem, default 42) sets the width below which the panel gives way to the bar.
+  `DockBar` takes `show`: `"stacked"` for a bar written inside `DockMain` above a region that must stay
+  lowest (a composer), `"collapsed"` for the strip of a wide dock, `"both"` (default) as before.
+- **`model-viewer` and `add`.** A registry entry now lists `devDependencies`: the types of a package
+  that does not carry its own (`@types/three`, `@types/d3-scale`, `@types/d3-shape`). `add` installs them
+  with `-D`, `info` lists them, `doctor` reports them missing, and `npm run registry` fails when a
+  dependency without types has no entry in `TYPES`. Pinch zoom is now exercised in the checks.
+- **`lightbox` with `carousel`.** On close, a trigger inside a slide that is out of view (and so inert) is
+  scrolled into view and then focused; before, focus was lost. A slide may have several triggers: the one in
+  view and reachable is preferred, one that is not drawn is never chosen.
+- **`virtual-list`.** `scroll="window"` on `VirtualList` and `VirtualGrid`: the list is as long as its rows
+  and the page scrolls it; `scrollToIndex` scrolls the page and leaves room for a sticky header through the
+  list's `scroll-margin-top`. A changing `count` and rows reordered under `getKey` are now in the checks.
+- **`combobox` and `gallery`: clean under `eslint-config-next`.** The combobox trigger states
+  `aria-expanded`, `aria-controls` and `aria-haspopup` itself. `GalleryImage` takes `as` and
+  `GalleryLightbox` takes `renderImage`, for the framework's image component; the default stays `<img>`,
+  with the rule switched off on those lines and the reason stated (and the same on the poster of
+  `model-viewer`). `npm run lint` now enforces `@next/next/no-img-element` on the registry
+  (`@next/eslint-plugin-next` 16.4.6, MIT, a dev dependency of the lint tooling only), and the whole
+  registry was run through `eslint-config-next` 16.4.6 and reports nothing.
+- **Types and proportions.** `MediaRowList` inherited the `onPause` of a `div` (a media event), which would have
+  made the new prop's argument untypable. The large picture in `GalleryLightbox` keeps its proportions when
+  the image component writes `width` and `height` attributes. In `lightbox`, a picture taller than the
+  slide was cut off at the slide's edge (`max-h-full` had nothing definite to be a percentage of); a slide
+  is now a size container and holds a picture directly inside it to its own height and width.
+- **Not in it, with the releases checked on 2026-11-13.** glTF that carries Gaussian splats in an extension
+  (`KHR_gaussian_splatting`): three.js 0.187.0 has a loader plugin for it, but the object it makes needs
+  the WebGPU renderer, and the viewer draws with WebGL 2 so that Spark (`@sparkjsdev/spark` 2.4.0), which
+  reads splat files and not glTF, can draw in the same canvas. Left until one of the two changes.
+- **Showcase and checks.** New demonstrations on `/carousel`, `/flows`, `/panels`, `/stage`, `/lists`,
+  `/gallery`, each with its checks; `/models` checks a pinch with two fingers at phone width.
+
 ## 2026-11-12 (third entry)
 
 What three design studies in a project still found missing, added as general components. One package was

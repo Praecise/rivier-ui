@@ -41,6 +41,19 @@ controlled and uncontrolled use. `scripts/checks/choices.ts` is the model. Then 
 in light and dark, square and round, at phone and desktop widths: the smoke test cannot judge looks.
 Add a dated line to `CHANGELOG.md`. No version numbers before launch.
 
+A copied component must also pass the lint of the project it lands in. `npm run lint` runs the React rules
+and the one rule of `eslint-config-next` a component can trip without knowing the framework (no plain
+`<img>`: a registry file that keeps one says why on that line, and offers a prop that takes the framework's
+image component). The accessibility rules of that config come from `eslint-plugin-jsx-a11y`, which does not
+yet accept the ESLint this repository lints with, so they are checked by hand when a component's markup
+changes: copy `registry/` into a folder beside a Next.js project that has `eslint-config-next` installed, and
+run that project's ESLint over the copy with a config of `eslint-config-next/core-web-vitals` and
+`eslint-config-next/typescript`. It must report nothing.
+
+A package whose types live in a package of their own (`three` and `@types/three`) is listed in `TYPES` in
+`scripts/registry.ts`; `npm run registry` fails when one is missing. `add` then installs the types as a dev
+dependency, and `doctor` reports them when they are missing.
+
 ## The theme
 
 `registry/theme/rivier-ui.css` is shared by everything. A new token needs a use in more than one component.

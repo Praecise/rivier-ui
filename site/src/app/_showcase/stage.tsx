@@ -2,7 +2,9 @@
 // Showcase: film-stage, with the scrubber, scene strip, captions and hotspots it composes.
 //
 // The scenes are plain markup and SVG drawn from each scene's own time, and the narration is a quiet tone
-// made in the browser as a WAV file, so the page needs no network and no media file.
+// made in the browser as a WAV file, so the page needs no network and no media file. The one exception is
+// the last demonstration, which draws pictures that load late or never: a small file in public/stage and an
+// address that never finishes (app/stall).
 
 import { useRef, useState, useSyncExternalStore } from "react";
 import {
@@ -13,7 +15,10 @@ import {
   FilmStageControlsRow,
   FilmStageFrame,
   FilmStageMute,
+  FilmStageNextScene,
   FilmStagePlay,
+  FilmStagePreviousScene,
+  FilmStageProvider,
   FilmStageRate,
   FilmStageSceneStrip,
   FilmStageScrubber,
@@ -145,6 +150,119 @@ function Readout({ name }: { name: string }) {
   );
 }
 
+const ROUND: FilmScene[] = [
+  { id: "first", duration: 2, label: "First", picture: <img src={picture("1")} alt="" />, children: <div className="flex size-full items-center justify-center bg-card text-[clamp(1rem,6cqi,3rem)] font-medium">One</div> },
+  { id: "second", duration: 2, label: "Second", picture: <img src={picture("2")} alt="" />, children: <div className="flex size-full items-center justify-center bg-highlight-soft text-[clamp(1rem,6cqi,3rem)] font-medium">Two</div> },
+  { id: "third", duration: 2, picture: <img src={picture("3")} alt="" />, children: <div className="flex size-full items-center justify-center bg-muted text-[clamp(1rem,6cqi,3rem)] font-medium">Three</div> },
+];
+
+/** The scene on stage as a number, read outside the stage element. */
+function SceneNow() {
+  const { sceneIndex } = useFilmClock();
+  return <span data-testid="round-scene">{sceneIndex + 1}</span>;
+}
+
+/**
+ * One clock shared by a stage and by parts that sit outside it; four sounds at once (a bed, and a clip for
+ * each of three lines, each with its own start and length); a film that goes round; and the scene buttons.
+ */
+function Round({ src }: { src: string | undefined }) {
+  const [changes, setChanges] = useState<string[]>([]);
+  return (
+    <FilmStageProvider scenes={ROUND} loop seekStep={0.5} onSceneChange={(scene) => setChanges((all) => [...all, `${scene.previous}>${scene.id}#${scene.index}`])}>
+      <div className="grid gap-4 @2xl:grid-cols-[minmax(0,1fr)_16rem]">
+        <FilmStage aria-label="A short film that goes round" data-testid="round">
+          <FilmStageFrame />
+          <FilmStageAudio data-sound="bed" src={src} volume={0.3} />
+          <FilmStageAudio data-sound="one" src={src} start={0.5} duration={1} />
+          <FilmStageAudio data-sound="two" src={src} start={2.5} duration={1.5} />
+          <FilmStageAudio data-sound="three" src={src} start={4} duration={1} />
+          <FilmStageControls>
+            <FilmStageControlsRow>
+              <FilmStagePreviousScene />
+              <FilmStagePlay />
+              <FilmStageNextScene />
+              <FilmStageMute />
+              <FilmStageTime className="ms-auto" />
+            </FilmStageControlsRow>
+          </FilmStageControls>
+        </FilmStage>
+        <div data-testid="round-beside" className="flex min-w-0 flex-col gap-3">
+          <FilmStageSceneStrip />
+          <Readout name="round" />
+          <p className="text-sm text-muted-foreground">
+            Scene <SceneNow /> of 3. Changes: <span data-testid="round-changes">{changes.join(", ")}</span>
+          </p>
+        </div>
+      </div>
+    </FilmStageProvider>
+  );
+}
+
+const PICTURE_SCENES: FilmScene[] = [
+  {
+    id: "late",
+    duration: 4,
+    label: "Pictures that load late",
+    children: (
+      <div className="grid size-full grid-cols-2 gap-2 bg-card p-[4cqi]">
+        {/* Lazy, and many screens below the fold of the frame: it would not start to load by itself. */}
+        <div className="overflow-hidden">
+          <div className="h-[3000cqi]" />
+          <img data-testid="pictures-far" loading="lazy" src="/stage/dot.svg?far" alt="A dot, far down" width={160} height={90} />
+        </div>
+        {/* Lazy, and inside something that is not displayed: it would never load. */}
+        <div hidden>
+          <img data-testid="pictures-hidden" loading="lazy" src="/stage/dot.svg?hidden" alt="A dot, not displayed" width={160} height={90} />
+        </div>
+        <img data-testid="pictures-missing" src="data:image/png;base64,AAAA" alt="A picture whose file is broken" width={160} height={90} />
+      </div>
+    ),
+  },
+  {
+    id: "stalled",
+    duration: 4,
+    label: "A picture that never arrives",
+    children: (
+      <div className="flex size-full items-center justify-center bg-muted">
+        <img data-testid="pictures-stalled" src="/stall?picture" alt="Never arrives" width={160} height={90} />
+      </div>
+    ),
+  },
+];
+
+/** `renderAt` with pictures that are lazy, hidden, broken, or never arrive. */
+function Pictures() {
+  const handle = useRef<FilmStageHandle>(null);
+  const [result, setResult] = useState("nothing yet");
+  const draw = (moment: number, timeout?: number): void => {
+    setResult("drawing");
+    const started = performance.now();
+    void handle.current?.renderAt(moment, timeout === undefined ? undefined : { timeout }).then(
+      (at) => setResult(`drawn ${at}`),
+      (error: unknown) => setResult(`failed after ${Math.round((performance.now() - started) / 100) / 10}s: ${error instanceof Error ? error.message : String(error)}`),
+    );
+  };
+  return (
+    <div className="flex flex-col gap-3">
+      <FilmStage scenes={PICTURE_SCENES} deterministic handleRef={handle} aria-label="A film with pictures that load late" data-testid="pictures">
+        <FilmStageFrame />
+      </FilmStage>
+      <div className="flex flex-wrap items-center gap-2">
+        <Button variant="outline" size="sm" onClick={() => draw(1)}>
+          Draw the late pictures
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => draw(5, 700)}>
+          Draw the one that never arrives
+        </Button>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        Result: <span data-testid="pictures-result">{result}</span>
+      </p>
+    </div>
+  );
+}
+
 export function Stage() {
   const src = useSyncExternalStore(subscribe, toneUrl, noUrl);
   const [chosen, setChosen] = useState("nothing yet");
@@ -179,7 +297,7 @@ export function Stage() {
             <Readout name="film" />
           </FilmStage>
           <p className="text-sm text-muted-foreground">
-            Chosen: <span data-testid="film-chosen">{chosen}</span>. Uncontrolled, twenty seconds in four scenes, with a tone as narration. Keys: Space or K, Left and Right, Home, End, M.
+            Chosen: <span data-testid="film-chosen">{chosen}</span>. Uncontrolled, twenty seconds in four scenes, with a tone as narration. Keys: Space or K, Left and Right, Home, End, N and P, M.
           </p>
         </div>
       </Demo>
@@ -244,6 +362,14 @@ export function Stage() {
             Drawn: <span data-testid="drawn-at">{drawn}</span>. In this mode no timer runs on the page; an exporter calls <code>window.__filmStage.demo.renderAt(seconds)</code> for each frame.
           </p>
         </div>
+      </Demo>
+
+      <Demo title="One clock, parts outside, several sounds, a loop" className="@3xl:col-span-2">
+        <Round src={src} />
+      </Demo>
+
+      <Demo title="Drawn on request: pictures that load late or never">
+        <Pictures />
       </Demo>
     </div>
   );

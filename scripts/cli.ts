@@ -99,13 +99,14 @@ function packageManager(): string {
   return "npm";
 }
 
-function installPackages(names: string[]): void {
+/** Installs packages the project does not have yet. `dev`: as dev dependencies (types, needed only to type-check). */
+function installPackages(names: string[], dev = false): void {
   if (names.length === 0) return;
   const manager = packageManager();
   // Latest release of each, resolved by the package manager at the time of installing.
-  const install = `${manager} ${manager === "npm" ? "install" : "add"} ${names.map((name) => `${name}@latest`).join(" ")}`;
+  const install = `${manager} ${manager === "npm" ? "install" : "add"}${dev ? " -D" : ""} ${names.map((name) => `${name}@latest`).join(" ")}`;
   if (flag("dry") || !existsSync(join(projectDir, "node_modules"))) {
-    console.log(`  note    packages to install:  ${install}`);
+    console.log(`  note    ${dev ? "dev packages" : "packages"} to install:  ${install}`);
     return;
   }
   console.log(`  run     ${install}`);
@@ -118,6 +119,8 @@ function add(items: Item[], wanted: string[]): void {
   installTheme();
   for (const item of chosen) report(item.target, place(item.target, item.source));
   installPackages(missingPackages([...BASE_PACKAGES, ...THEME_PACKAGES, ...chosen.flatMap((item) => item.dependencies)]));
+  // The types of packages that do not carry their own: without them the project's type-check fails on the copied file.
+  installPackages(missingPackages(chosen.flatMap((item) => item.devDependencies)), true);
   console.log(`\n${chosen.length} item${chosen.length === 1 ? "" : "s"}. Import as "@/${chosen.at(-1)?.target.replace(/\.tsx?$/, "")}".`);
 }
 
@@ -148,6 +151,7 @@ function info(items: Item[], name: string): void {
       "",
       `Goes to:   ${item.target}`,
       `Needs:     ${[...item.registryDependencies, ...item.dependencies].join(", ") || "nothing else"}`,
+      ...(item.devDependencies.length > 0 ? [`Types:     ${item.devDependencies.join(", ")} (dev)`] : []),
       "",
       item.example,
     ].join("\n"),
@@ -175,6 +179,8 @@ function doctor(items: Item[]): number {
   }
   const missing = missingPackages([...BASE_PACKAGES, ...THEME_PACKAGES, ...installed.flatMap((item) => item.dependencies)]);
   say(missing.length === 0, missing.length ? `packages missing from package.json: ${missing.join(", ")}` : "packages present");
+  const missingTypes = missingPackages(installed.flatMap((item) => item.devDependencies));
+  say(missingTypes.length === 0, missingTypes.length ? `types missing from package.json (dev dependencies): ${missingTypes.join(", ")}` : "types present");
   return problems === 0 ? 0 : 1;
 }
 

@@ -132,8 +132,61 @@ export async function run(kit: Kit): Promise<void> {
   await kit.click(next);
   check((await text("[data-testid=wizard-done]")) === "yes" && (await stepNow()) === "review", "pressing it on the last step completes");
 
+  // ---------------------------------------------------------------- Wizard: driven from outside
+  const server = await kit.demo("Wizard: driven from outside");
+  const sroot = `${server} [data-slot=wizard]`;
+  const sheading = `${server} [data-slot=wizard-step-title]`;
+  const snext = `${server} [data-slot=wizard-next]`;
+  const sback = `${server} [data-slot=wizard-back]`;
+  const sstep = (): Promise<string> => text("[data-testid=server-step]");
+  const asked = (): Promise<string> => text("[data-testid=server-asked]");
+  /** Until the pretend server has answered. */
+  const answered = async (): Promise<void> => {
+    await page.waitForFunction(() => document.querySelector("[data-testid=server-pending]")?.textContent === "no", { timeout: 5000 }).catch(() => {});
+    await sleep(150);
+  };
+  check((await sstep()) === "who" && (await attr(`${server} [data-slot=wizard-step]`, "data-travel")) === null, "a wizard given its step starts there, without arriving from anywhere");
+  check((await attr(sback, "disabled")) === null, "with Back handled by the project, it is available on the first step too");
+  await kit.focus(snext);
+  await keys("Enter");
+  check((await asked()) === "next:who" && (await sstep()) === "who", "the main button tells the project and the wizard does not move by itself");
+  check((await attr(sroot, "aria-busy")) === "true" && (await attr(snext, "aria-disabled")) === "true" && (await attr(snext, "aria-busy")) === "true" && (await attr(sback, "disabled")) !== null, "while the answer is on its way the card says it is busy and the buttons wait");
+  check(await focusIs(snext), "the main button keeps focus while it waits");
+  await keys("Enter");
+  check((await asked()) === "next:who", "a press while waiting asks nothing more");
+  await answered();
+  check((await sstep()) === "extras" && (await attr(sroot, "aria-busy")) === null && (await attr(snext, "aria-disabled")) === null, "the reply sets the step, and the buttons are free again");
+  check(await focusIs(sheading), `the new step's heading takes focus, though the project set the step (${await kit.focused()})`);
+  check((await text(sheading)) === "Step 2 of 4: Anything to add?" && (await attr(`${server} [data-slot=wizard-step]`, "data-travel")) === "forward", "and the step arrives from the side it lies on");
+  const sanimation = await page.evaluate((s) => getComputedStyle(document.querySelector(s) as Element).animationName, `${server} [data-slot=wizard-step]`);
+  check(sanimation !== "none", `with its animation (${sanimation})`);
+  await kit.click(`${server} [data-slot=wizard-skip]`);
+  check((await asked()) === "next:who, skip:extras" && (await sstep()) === "extras", "Skip tells the project too");
+  await answered();
+  check((await sstep()) === "pay" && (await attr(`${server} [data-slot=wizard-rail] li:nth-child(2)`, "data-state")) === "skipped" && (await focusIs(sheading)), "the rail shows the states the project gives it, and focus follows again");
+  await kit.click(sback);
+  await answered();
+  check((await asked()).endsWith("back:pay") && (await sstep()) === "who", "Back goes where the reply says, not one step back");
+  check((await attr(`${server} [data-slot=wizard-step]`, "data-travel")) === "back" && (await focusIs(sheading)), "arriving from the other side, with focus on the heading");
+  await kit.clickText(`${server} button`, "The reply says: pay");
+  check((await sstep()) === "pay" && (await focusIs(sheading)) && (await attr(`${server} [data-slot=wizard-step]`, "data-travel")) === "forward", "a step set with no button of the wizard pressed is treated the same");
+  check((await text(`${server} [data-slot=steps-count]`)) === "Step 3 of 4" && (await attr(`${server} [data-slot=wizard-rail] li:nth-child(3)`, "aria-current")) === "step", "the count and the rail follow");
+  await kit.clickText(`${server} button`, "The reply says: start again");
+  check((await sstep()) === "who" && (await attr(`${server} [data-slot=wizard-step]`, "data-travel")) === "back", "and back again");
+  await kit.axe(server, "the wizard driven from outside");
+
+  // Uncontrolled: as before.
+  const plain = await kit.demo("Wizard: uncontrolled");
+  const pheading = `${plain} [data-slot=wizard-step-title]`;
+  check((await text(pheading)) === "Step 1 of 2: The first question" && (await attr(`${plain} [data-slot=wizard-back]`, "disabled")) !== null, "an uncontrolled wizard starts on its first step, with Back disabled");
+  await kit.click(`${plain} [data-slot=wizard-next]`);
+  check((await text(pheading)) === "Step 2 of 2: The second question" && (await focusIs(pheading)) && (await attr(`${plain} [data-slot=wizard-step]`, "data-travel")) === "forward", "it keeps the step itself, moves focus to the heading and arrives forward");
+  await kit.click(`${plain} [data-slot=wizard-back]`);
+  check((await text(pheading)) === "Step 1 of 2: The first question" && (await focusIs(pheading)) && (await attr(`${plain} [data-slot=wizard-step]`, "data-travel")) === "back", "and back");
+
   // ---------------------------------------------------------------- Sortable list
   const sortable = await kit.demo("Sortable list");
+  const dropped = (): Promise<string> => text("[data-testid=dropped]");
   const order = (): Promise<string> => text("[data-testid=order]");
   const handle = (label: string): string => `${sortable} [aria-label="Reorder ${label}"]`;
   const START = "market, lunch, museum, walk, concert";
@@ -166,16 +219,23 @@ export async function run(kit: Kit): Promise<void> {
   check((await order()) === START && (await attr(handle("Lunch"), "aria-pressed")) === "false", `Escape puts it back where it was lifted (${await order()})`);
   check((await lastAnnounced()) === "Lunch, put back at position 2 of 5.", `the cancel is read out (${await lastAnnounced()})`);
   check(await focusIs(handle("Lunch")), "focus stays on the handle after Escape");
+  check((await dropped()) === "", "a row lifted, moved and put back with Escape is not reported as let go");
 
   // Keyboard: lift with Enter, move, drop.
   await keys("Enter", "ArrowDown", "Enter");
   check((await order()) === "market, museum, lunch, walk, concert" && (await attr(handle("Lunch"), "aria-pressed")) === "false", "Enter lifts and drops too");
   check((await lastAnnounced()) === "Lunch, dropped at position 3 of 5.", `the drop is read out (${await lastAnnounced()})`);
+  check((await dropped()) === "lunch:1>2" && (await text("[data-testid=dropped-order]")) === "market/museum/lunch/walk/concert", `the drop is reported once, with the row, where it was, where it is and the new order (${await dropped()})`);
+  await keys("Enter", "ArrowDown", "ArrowDown", "ArrowUp", "ArrowUp", "Enter");
+  check((await dropped()) === "lunch:1>2, lunch:2>2" && (await order()) === "market, museum, lunch, walk, concert", "a row carried about and dropped where it was lifted is reported with the same place twice, once");
+  await keys("Enter", "End", "Home", "ArrowDown", "ArrowDown", "Enter");
+  check((await dropped()).endsWith("lunch:2>2, lunch:2>2") && (await text("[data-testid=dropped-count]")) === "3", `however many steps a move takes, it is reported when it ends and not before (${await text("[data-testid=dropped-count]")})`);
 
   // Tab drops first.
   await keys("Space", "ArrowUp", "Tab");
   check((await order()) === START && (await count(`${sortable} li[data-lifted]`)) === 0, "Tab drops the row where it is");
   check((await kit.focused()) === "Move Lunch up", `and then moves on (${await kit.focused()})`);
+  check((await dropped()).endsWith(", lunch:2>1") && (await text("[data-testid=dropped-count]")) === "4", `a drop made by Tab is reported once, not again as focus leaves (${await dropped()})`);
 
   // Buttons: the alternative to dragging.
   await keys("Enter");
@@ -184,6 +244,7 @@ export async function run(kit: Kit): Promise<void> {
   check((await lastAnnounced()) === "Lunch, position 1 of 5.", "a button move is read out");
   await keys("Enter");
   check((await order()) === "lunch, market, museum, walk, concert", "an unavailable button does nothing");
+  check((await dropped()).endsWith(", lunch:1>0") && (await text("[data-testid=dropped-count]")) === "5", "a press of a move button is one whole move and is reported; an unavailable one is not");
   check(await kit.click(`${sortable} [aria-label="Move Lunch down"]`), "Move down can be pressed");
   check((await order()) === START, "Move down moves the row one place");
   const buttonSize = await rect(`${sortable} [aria-label="Move Lunch down"]`);
@@ -220,6 +281,7 @@ export async function run(kit: Kit): Promise<void> {
   check((await order()) === "lunch, museum, market, walk, concert", `dragging the handle down two rows moves the row there (${await order()})`);
   check((await lastAnnounced()) === "Morning market, dropped at position 3 of 5.", `the drop is read out (${await lastAnnounced()})`);
   check((await count(`${sortable} li[data-dragging]`)) === 0, "the row is no longer marked as dragged");
+  check((await dropped()).endsWith(", lunch:0>1, market:0>2") && (await text("[data-testid=dropped-count]")) === "7" && (await text("[data-testid=dropped-order]")) === "lunch/museum/market/walk/concert", `a drag past two rows is reported once, when the row is let go (${await dropped()})`);
   await kit.axe(sortable, "the sortable list after reordering");
 
   // Dragging by the whole row (uncontrolled list): at once with a mouse, after a long press with a finger.
@@ -267,13 +329,14 @@ export async function run(kit: Kit): Promise<void> {
   const content = "[data-slot=combobox-content]";
   const options = (): Promise<string[]> => page.evaluate(() => [...document.querySelectorAll("[data-slot=combobox-content] [role=option]")].map((node) => node.textContent?.trim() ?? ""));
   check((await attr("#city", "role")) === "combobox" && (await attr("#city", "aria-expanded")) === "false", "the trigger is a combobox that says it is closed");
+  check((await attr("#city", "aria-haspopup")) === "dialog" && (await attr("#city", "aria-controls")) === null, "it says what it opens, and points at no panel while there is none");
   check((await text("#city")) === "Choose a city" && (await attr("#city", "data-placeholder")) !== null, "it shows the placeholder while nothing is chosen");
   await kit.focus("#city");
   await keys("Enter");
   await sleep(300);
   check((await attr("#city", "aria-expanded")) === "true", "Enter opens the list");
   const controls = await attr("#city", "aria-controls");
-  check(controls !== null && (await count(`[id="${controls}"]`)) === 1, "aria-controls points at the panel");
+  check(controls !== null && (await count(`[id="${controls}"]`)) === 1 && (await attr(`[id="${controls}"]`, "data-slot")) === "combobox-content", "aria-controls points at the panel");
   check(await focusIs(`${content} input[role=combobox]`), `focus is in the search field (${await kit.focused()})`);
   check((await count(`${content} [role=listbox]`)) === 1 && (await attr(`${content} [role=listbox]`, "aria-label")) === "Cities" && (await options()).length === 13, "the options are a named listbox");
   const panel = await rect(content);

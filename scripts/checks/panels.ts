@@ -245,6 +245,47 @@ export async function run(kit: Kit): Promise<void> {
   }
   await kit.axe(`${dock}, [data-testid=dock-start]`, "the docks");
 
+  // Its own stacking width, and the bar above a region that must stay lowest.
+  const above = "[data-testid=dock-above]";
+  await kit.demo("Dock: its own stacking width, the bar above a composer");
+  const apanel = `${above} [data-slot=dock-panel]`;
+  const stackedBar = `${above} [data-slot=dock-bar][data-show=stacked]`;
+  const stripBar = `${above} [data-slot=dock-bar][data-show=collapsed]`;
+  check((await attr(dock, "data-layout")) === "auto", "a dock left at the usual width is laid out by the stylesheet alone, as before");
+  const aboveWidth = (await rect(above)).width;
+  check((await attr(above, "data-layout")) === "stacked" && aboveWidth < 200 * 16, `given a width to stack below, a dock narrower than it is stacked, however wide it is (${Math.round(aboveWidth)}px, below 200rem)`);
+  check(!(await shown(apanel)) && !(await shown(`${above} [data-slot=dock-resizer]`)), "stacked, the panel and the splitter are not shown");
+  check((await shown(stackedBar)) && !(await shown(stripBar)), "of the two bars, the one for a narrow dock shows");
+  const barBox = await rect(stackedBar);
+  const composer = await rect("[data-testid=dock-composer]");
+  const inMain = await page.evaluate((s) => document.querySelector(s)?.closest("[data-slot=dock-main]") !== null, stackedBar);
+  check(inMain && near(barBox.y + barBox.height, composer.y, 1) && composer.y + composer.height <= (await rect(above)).y + (await rect(above)).height + 1, `it sits inside the content, above the composer, which stays lowest (bar ends at ${Math.round(barBox.y + barBox.height)}, composer starts at ${Math.round(composer.y)})`);
+  check(near(barBox.width, aboveWidth, 2) && barBox.height >= 40 && (await attr(stackedBar, "aria-haspopup")) === "dialog", "it spans the dock, is a touch target, and says it opens a dialog");
+  check(await kit.click(stackedBar), "it can be pressed");
+  check((await text("[data-testid=dock-opened]")) === "1", "and tells the project to open the panel's content another way");
+  const tabOrder = await page.evaluate((s) => [...document.querySelectorAll<HTMLElement>(`${s} button`)].filter((button) => button.getClientRects().length > 0).map((button) => button.textContent?.trim()), above);
+  check(tabOrder.join(" | ") === "Plan · 3 stops | Write a message", `in reading order the bar comes before the composer (${tabOrder.join(" | ")})`);
+  await kit.screenshot("dock-above");
+
+  await kit.clickText("button", "Stack below 16rem instead");
+  await sleep(300);
+  check((await text("[data-testid=dock-below]")) === "16" && (await attr(above, "data-layout")) === "side", `with a smaller width to stack below, the same dock is side by side (${Math.round(aboveWidth)}px, above 16rem)`);
+  check((await shown(apanel)) && near((await rect(apanel)).width, aboveWidth * 0.4, 3) && (await shown(`${above} [data-slot=dock-resizer]`)), `the panel takes its share beside the content${kit.phone ? ", on a phone too" : ""} (${Math.round((await rect(apanel)).width)}px)`);
+  check(!(await shown(stackedBar)) && !(await shown(stripBar)), "and neither bar shows while the panel does");
+  check(await kit.click(`${above} [aria-label="Hide the plan beside the composer"]`), "the panel can be collapsed");
+  await sleep(200);
+  check(!(await shown(apanel)) && (await shown(stripBar)) && !(await shown(stackedBar)), "collapsed, the bar for a wide dock shows, and the other still does not");
+  check(await focusIs(stripBar), `focus goes to the bar that is shown, though it is the second in the page (${await kit.focused()})`);
+  const strip = await rect(stripBar);
+  check(strip.width < 60 && near(strip.height, (await rect(above)).height, 2), "as a slim strip where the panel was");
+  await keys("Enter");
+  await sleep(200);
+  check((await shown(apanel)) && (await focusIs(apanel)), "Enter on it restores the panel and focus moves into it");
+  await kit.axe(above, "the dock with its own stacking width");
+  await kit.clickText("button", "Stack below 200rem instead");
+  await sleep(300);
+  check((await attr(above, "data-layout")) === "stacked" && (await shown(stackedBar)), "and it stacks again when the width to stack below is raised");
+
   // Map frame.
   const map = await kit.demo("Map frame");
   const stage = `${map} [data-slot=map-frame-stage]`;

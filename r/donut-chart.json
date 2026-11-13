@@ -10,6 +10,9 @@
   "dependencies": [
     "d3-shape"
   ],
+  "devDependencies": [
+    "@types/d3-shape"
+  ],
   "registryDependencies": [
     "@rivier-ui/theme",
     "@rivier-ui/chart",

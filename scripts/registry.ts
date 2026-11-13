@@ -1,7 +1,8 @@
 // Rivier UI: reads the registry's source files. Shared by the build script and the CLI.
 //
 // An item is one file in registry/<category>/. Its header comment gives its name, description, when to use it
-// and an example; its imports give its dependencies. Nothing is listed by hand.
+// and an example; its imports give its dependencies. Nothing is listed by hand, except which packages keep
+// their types in a package of their own (TYPES below), which the build checks against what is installed.
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -25,6 +26,8 @@ export type Item = {
   target: string;
   /** npm packages it imports. */
   dependencies: string[];
+  /** Packages a project needs only to type-check the item: the types of a dependency that does not carry its own. */
+  devDependencies: string[];
   /** Other items it imports. */
   registryDependencies: string[];
   /** Whether it is a client component. */
@@ -34,6 +37,28 @@ export type Item = {
 
 /** Packages every project already has, or that are not installed by name. */
 const IMPLICIT = new Set(["react", "react-dom", "next"]);
+
+/**
+ * Packages that do not carry their own types, with the package that does. An item that imports one needs
+ * the other as a dev dependency, or the project's type-check fails on the copied file. `npm run registry`
+ * fails when a dependency without types of its own is missing from this list.
+ */
+export const TYPES: Readonly<Record<string, string>> = {
+  three: "@types/three",
+  "d3-scale": "@types/d3-scale",
+  "d3-shape": "@types/d3-shape",
+};
+
+/** Whether an installed package carries type declarations. undefined when it is not installed here, so it cannot be told. */
+export function carriesTypes(name: string): boolean | undefined {
+  const dir = join(libraryDir, "node_modules", ...name.split("/"));
+  const manifest = join(dir, "package.json");
+  if (!existsSync(manifest)) return undefined;
+  const text = readFileSync(manifest, "utf8");
+  const pkg = JSON.parse(text) as { types?: string; typings?: string };
+  // A "types" entry at the top or under "exports", or a declaration file beside the entry point.
+  return Boolean(pkg.types ?? pkg.typings) || /"types"\s*:/.test(text) || existsSync(join(dir, "index.d.ts"));
+}
 
 const packageOf = (specifier: string): string =>
   specifier.startsWith("@") ? specifier.split("/").slice(0, 2).join("/") : (specifier.split("/")[0] ?? specifier);
@@ -92,6 +117,7 @@ function parse(file: string): Item {
     file,
     target: targetOf(file),
     dependencies: [...dependencies].sort(),
+    devDependencies: [...dependencies].flatMap((name) => TYPES[name] ?? []).sort(),
     registryDependencies: [...registryDependencies].sort(),
     client: /^\s*"use client";?/.test(source),
     source,

@@ -20,6 +20,9 @@
  * <SortableList defaultValues={["a", "b", "c"]} aria-label="Priorities">
  *   {(order) => order.map((id) => <SortableItem key={id} value={id} label={id}>…</SortableItem>)}
  * </SortableList>
+ *
+ * // Save once, when a row has been let go, not at every step it passes
+ * <SortableList values={stops} onValuesChange={setStops} onDropped={({ from, to, values }) => (from === to ? undefined : save(values))} aria-label="Stops, in order">…</SortableList>
  */
 import { ChevronDown, ChevronUp, GripVertical } from "lucide-react";
 import { MotionConfig, Reorder, useDragControls, type DragControls } from "motion/react";
@@ -65,9 +68,27 @@ export const SORTABLE_MESSAGES: SortableMessages = {
   moveDown: (label) => `Move ${label} down`,
 };
 
+/** One finished move: what `onDropped` is given. */
+export type SortableDrop = {
+  /** The id of the row that was moved. */
+  value: string;
+  /** Where it was when it was picked up, counted from 0. */
+  from: number;
+  /** Where it was let go, counted from 0. The same as `from` when it was put down where it started. */
+  to: number;
+  /** The ids in the order the list now has. */
+  values: string[];
+};
+
 type ListContextValue = {
   values: string[];
   setValues: (values: string[]) => void;
+  /** A row was picked up (a drag began, or it was lifted with the keyboard): remembers where from. */
+  begin: (value: string) => void;
+  /** The row was let go: reports the move, once. `values` is the order when it is newer than the one rendered (a press of a move button). */
+  finish: (value: string, values?: string[]) => void;
+  /** The row went back where it was (Escape): nothing is reported. */
+  abandon: () => void;
   messages: SortableMessages;
   disabled: boolean;
   instructionsId: string;
@@ -88,6 +109,8 @@ type ItemContextValue = {
   controls: DragControls;
   /** Moves the row to an index (clamped) and says where it is now. False when it was already there. */
   moveTo: (index: number) => boolean;
+  /** The same as one whole move, reported to `onDropped`: what a move button does. */
+  moveOnce: (index: number) => boolean;
 };
 
 const ItemContext = createContext<ItemContextValue | null>(null);
@@ -109,7 +132,14 @@ export type SortableListProps = Omit<ComponentProps<"ol">, "children" | "values"
   values?: string[];
   /** The starting order when uncontrolled. */
   defaultValues?: string[];
+  /** Called with the new order at every step: each row a dragged row passes, each arrow key, each press of a move button. */
   onValuesChange?: (values: string[]) => void;
+  /**
+   * Called once when a move ends: a dragged row is let go, a row lifted with the keyboard is dropped (Space,
+   * Enter, Tab or focus leaving), or a move button is pressed. Not called when a lifted row is put back with
+   * Escape. `from` and `to` are equal when the row was put down where it started. The place to save the order.
+   */
+  onDropped?: (drop: SortableDrop) => void;
   /** Stops all reordering. */
   disabled?: boolean;
   /** The words that are read out and the names of the controls, where the English defaults are not wanted. */
@@ -123,14 +153,36 @@ export type SortableListProps = Omit<ComponentProps<"ol">, "children" | "values"
  * `aria-labelledby`. Rows slide to their new places with a transform; under reduced motion they are simply
  * in their new places.
  */
-export function SortableList({ className, values, defaultValues, onValuesChange, disabled = false, messages, children, ...props }: SortableListProps) {
+export function SortableList({ className, values, defaultValues, onValuesChange, onDropped, disabled = false, messages, children, ...props }: SortableListProps) {
   const [order, setOrder] = useControllableState({ value: values, defaultValue: defaultValues ?? [], onChange: onValuesChange });
   const [lifted, setLifted] = useState<ListContextValue["lifted"]>(null);
   const instructionsId = useId();
   const merged = { ...SORTABLE_MESSAGES, ...messages };
+  /** The row in the air and where it was picked up: one move is reported once, however it ends. */
+  const moving = useRef<{ value: string; from: number } | null>(null);
+  /** The newest order and listener, for a drag that ends between renders. */
+  const latest = useRef({ order, onDropped });
+  useEffect(() => {
+    latest.current = { order, onDropped };
+  });
+
+  const begin = (value: string): void => {
+    moving.current = { value, from: latest.current.order.indexOf(value) };
+  };
+  const finish = (value: string, next?: string[]): void => {
+    const move = moving.current;
+    moving.current = null;
+    if (!move || move.value !== value) return;
+    const now = next ?? latest.current.order;
+    const to = now.indexOf(value);
+    if (move.from !== -1 && to !== -1) latest.current.onDropped?.({ value, from: move.from, to, values: [...now] });
+  };
+  const abandon = (): void => {
+    moving.current = null;
+  };
 
   return (
-    <ListContext value={{ values: order, setValues: setOrder, messages: merged, disabled, instructionsId, lifted, setLifted }}>
+    <ListContext value={{ values: order, setValues: setOrder, begin, finish, abandon, messages: merged, disabled, instructionsId, lifted, setLifted }}>
       <MotionConfig reducedMotion="user" transition={{ duration: DURATION.base, ease: EASE }}>
         <Reorder.Group as="ol" axis="y" values={order} onReorder={setOrder} data-slot="sortable-list" className={cn("flex w-full min-w-0 flex-col gap-2", className)} {...props}>
           {typeof children === "function" ? children(order) : children}
@@ -184,6 +236,19 @@ export function SortableItem({ className, value, label, disabled = false, dragBy
     announce(list.messages.moved(label, target + 1, total));
     return true;
   };
+  /** A press of a move button: picked up, moved and let go in one. */
+  const moveOnce = (to: number): boolean => {
+    const target = Math.min(total - 1, Math.max(0, to));
+    list.begin(value);
+    if (!moveTo(target)) {
+      list.abandon();
+      return false;
+    }
+    const next = list.values.filter((item) => item !== value);
+    next.splice(target, 0, value);
+    list.finish(value, next);
+    return true;
+  };
 
   const endPress = (): void => {
     if (press.current) window.clearTimeout(press.current.timer);
@@ -233,7 +298,7 @@ export function SortableItem({ className, value, label, disabled = false, dragBy
   };
 
   return (
-    <ItemContext value={{ value, label, index, total, disabled: blocked, lifted, controls, moveTo }}>
+    <ItemContext value={{ value, label, index, total, disabled: blocked, lifted, controls, moveTo, moveOnce }}>
       <Reorder.Item
         as="li"
         ref={row}
@@ -243,11 +308,15 @@ export function SortableItem({ className, value, label, disabled = false, dragBy
         drag={blocked ? false : "y"}
         dragListener={false}
         dragControls={controls}
-        onDragStart={() => setDragging(true)}
+        onDragStart={() => {
+          setDragging(true);
+          list.begin(value);
+        }}
         onDragEnd={() => {
           setDragging(false);
           endPress();
           announce(list.messages.dropped(label, list.values.indexOf(value) + 1, list.values.length));
+          list.finish(value);
         }}
         onPointerDown={handlePointerDown}
         onPointerMove={(event: ReactPointerEvent<HTMLLIElement>) => {
@@ -290,6 +359,7 @@ export function SortableHandle({ className, children, onKeyDown, onPointerDown, 
   const drop = (): void => {
     list.setLifted(null);
     announce(messages.dropped(label, index + 1, total));
+    list.finish(item.value);
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>): void => {
@@ -302,6 +372,7 @@ export function SortableHandle({ className, children, onKeyDown, onPointerDown, 
       if (lifted) drop();
       else {
         list.setLifted({ value: item.value, from: list.values });
+        list.begin(item.value);
         announce(messages.lifted(label, index + 1, total));
       }
       return;
@@ -320,6 +391,7 @@ export function SortableHandle({ className, children, onKeyDown, onPointerDown, 
       const restored = list.values.map((value) => (from.includes(value) ? (known.shift() ?? value) : value));
       list.setValues(restored);
       list.setLifted(null);
+      list.abandon();
       announce(messages.cancelled(label, restored.indexOf(item.value) + 1, total));
     } else if (key === "Tab") {
       drop();
@@ -341,7 +413,10 @@ export function SortableHandle({ className, children, onKeyDown, onPointerDown, 
       }}
       onBlur={(event) => {
         onBlur?.(event);
-        if (lifted) list.setLifted(null);
+        if (!lifted) return;
+        // Focus left while the row was lifted (a press elsewhere): it stays where it is, and that is a drop.
+        list.setLifted(null);
+        list.finish(item.value);
       }}
       className={cn(
         "inline-flex size-8 shrink-0 cursor-grab touch-none items-center justify-center rounded-control text-muted-foreground transition-[background-color,color] duration-instant ease-out select-none hover:bg-accent hover:text-foreground active:cursor-grabbing disabled:pointer-events-none disabled:opacity-40 aria-pressed:bg-primary aria-pressed:text-primary-foreground motion-reduce:transition-none pointer-coarse:size-10 [&_svg]:size-4",
@@ -370,10 +445,10 @@ export function SortableMoveButtons({ className, ...props }: SortableMoveButtons
   const atBottom = item.disabled || item.index >= item.total - 1;
   return (
     <div data-slot="sortable-move-buttons" className={cn("ms-auto flex shrink-0 items-center", className)} {...props}>
-      <button type="button" data-slot="sortable-move-up" aria-label={messages.moveUp(item.label)} aria-disabled={atTop || undefined} onClick={() => (atTop ? undefined : item.moveTo(item.index - 1))} className={button}>
+      <button type="button" data-slot="sortable-move-up" aria-label={messages.moveUp(item.label)} aria-disabled={atTop || undefined} onClick={() => (atTop ? undefined : item.moveOnce(item.index - 1))} className={button}>
         <ChevronUp aria-hidden="true" strokeWidth={1.5} />
       </button>
-      <button type="button" data-slot="sortable-move-down" aria-label={messages.moveDown(item.label)} aria-disabled={atBottom || undefined} onClick={() => (atBottom ? undefined : item.moveTo(item.index + 1))} className={button}>
+      <button type="button" data-slot="sortable-move-down" aria-label={messages.moveDown(item.label)} aria-disabled={atBottom || undefined} onClick={() => (atBottom ? undefined : item.moveOnce(item.index + 1))} className={button}>
         <ChevronDown aria-hidden="true" strokeWidth={1.5} />
       </button>
     </div>

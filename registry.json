@@ -1049,8 +1049,8 @@
       ],
       "meta": {
         "category": "ui",
-        "when": "A working surface that belongs beside the content and is not modal: a plan next to a conversation, an inspector next to a canvas, details next to a list. For a panel that covers the page for a moment use sheet; for two fixed columns with no resizing use split. Write the parts in reading order: DockMain, DockResizer, DockPanel for a panel at the end; DockPanel, DockResizer, DockMain with side=\"start\". Below 42rem of its own width the panel and splitter are hidden and DockBar shows at the bottom: open the panel's content in a bottom-sheet from `onOpenStacked`. Give the Dock a height (it fills its parent).",
-        "example": "<Dock defaultSize={32} minSize={24} maxSize={50} className=\"h-[32rem]\">\n  <DockMain>…the conversation…</DockMain>\n  <DockResizer aria-label=\"Resize the plan\" />\n  <DockPanel aria-label=\"Plan\">\n    <DockCollapse aria-label=\"Hide the plan\"><PanelRightClose /></DockCollapse>\n    …the plan…\n  </DockPanel>\n  <DockBar onOpenStacked={() => setSheetOpen(true)}>Plan · 3 stops</DockBar>\n</Dock>\n\n// Controlled, in pixels, at the start\n<Dock side=\"start\" unit=\"px\" size={width} onSizeChange={setWidth} minSize={240} maxSize={480} collapsed={hidden} onCollapsedChange={setHidden}>…</Dock>",
+        "when": "A working surface that belongs beside the content and is not modal: a plan next to a conversation, an inspector next to a canvas, details next to a list. For a panel that covers the page for a moment use sheet; for two fixed columns with no resizing use split. Write the parts in reading order: DockMain, DockResizer, DockPanel for a panel at the end; DockPanel, DockResizer, DockMain with side=\"start\". Below 42rem of its own width (another width with `stackBelow`) the panel and splitter are hidden and DockBar shows at the bottom: open the panel's content in a bottom-sheet from `onOpenStacked`. Where the content ends in a region that must stay lowest (a composer), put a second DockBar inside DockMain above that region with `show=\"stacked\"`, and give the one after the panel `show=\"collapsed\"`. Give the Dock a height (it fills its parent).",
+        "example": "<Dock defaultSize={32} minSize={24} maxSize={50} className=\"h-[32rem]\">\n  <DockMain>…the conversation…</DockMain>\n  <DockResizer aria-label=\"Resize the plan\" />\n  <DockPanel aria-label=\"Plan\">\n    <DockCollapse aria-label=\"Hide the plan\"><PanelRightClose /></DockCollapse>\n    …the plan…\n  </DockPanel>\n  <DockBar onOpenStacked={() => setSheetOpen(true)}>Plan · 3 stops</DockBar>\n</Dock>\n\n// Controlled, in pixels, at the start\n<Dock side=\"start\" unit=\"px\" size={width} onSizeChange={setWidth} minSize={240} maxSize={480} collapsed={hidden} onCollapsedChange={setHidden}>…</Dock>\n\n// Stacks below 56rem; on a narrow dock the bar sits above the composer, not under it\n<Dock stackBelow={56} className=\"h-[32rem]\">\n  <DockMain className=\"flex flex-col\">\n    <div className=\"min-h-0 flex-1 overflow-y-auto\">…the conversation…</div>\n    <DockBar show=\"stacked\" onOpenStacked={() => setSheetOpen(true)}>Plan · 3 stops</DockBar>\n    <footer>…the composer…</footer>\n  </DockMain>\n  <DockResizer aria-label=\"Resize the plan\" />\n  <DockPanel aria-label=\"Plan\">…</DockPanel>\n  <DockBar show=\"collapsed\">Plan · 3 stops</DockBar>\n</Dock>",
         "client": true
       }
     },
@@ -1112,7 +1112,7 @@
       "meta": {
         "category": "ui",
         "when": "Adding pictures, documents or other files where progress matters: a listing's photos, attachments, an import. It contains no upload engine: the project uploads (plain, or resumable such as tus) and tells each row its state and progress. For one small file in a form, an input with type=\"file\" is enough. Name the dropzone with `aria-label` or `aria-labelledby`, and word rejected files yourself from the reason given to `onReject`.",
-        "example": "<Dropzone accept=\"image/*\" maxSize={10_000_000} onFiles={start} onReject={explain} aria-label=\"Add pictures\">\n  <DropzoneHint>Drop pictures here, or</DropzoneHint>\n  <DropzoneButton>Choose pictures</DropzoneButton>\n</Dropzone>\n<UploadList aria-label=\"Pictures being added\">\n  {uploads.map((upload) => (\n    <UploadItem key={upload.id} name={upload.file.name} size={upload.file.size} state={upload.state}>\n      <UploadProgress value={upload.percent} />\n      <UploadActions>\n        {upload.state === \"uploading\" ? <UploadPause onClick={() => pause(upload.id)} /> : null}\n        {upload.state === \"paused\" ? <UploadResume onClick={() => resume(upload.id)} /> : null}\n        {upload.state === \"failed\" ? <UploadRetry onClick={() => retry(upload.id)} /> : null}\n        <UploadRemove onClick={() => remove(upload.id)} />\n      </UploadActions>\n    </UploadItem>\n  ))}\n</UploadList>",
+        "example": "<Dropzone accept=\"image/*\" maxSize={10_000_000} onFiles={start} onReject={explain} aria-label=\"Add pictures\">\n  <DropzoneHint>Drop pictures here, or</DropzoneHint>\n  <DropzoneButton>Choose pictures</DropzoneButton>\n</Dropzone>\n<UploadList aria-label=\"Pictures being added\">\n  {uploads.map((upload) => (\n    <UploadItem key={upload.id} name={upload.file.name} size={upload.file.size} state={upload.state}>\n      <UploadProgress value={upload.percent} />\n      <UploadActions>\n        {upload.state === \"uploading\" ? <UploadPause onClick={() => pause(upload.id)} /> : null}\n        {upload.state === \"paused\" ? <UploadResume onClick={() => resume(upload.id)} /> : null}\n        {upload.state === \"failed\" ? <UploadRetry onClick={() => retry(upload.id)} /> : null}\n        <UploadRemove onClick={() => remove(upload.id)} />\n      </UploadActions>\n    </UploadItem>\n  ))}\n</UploadList>\n\n// A state of the project's own, with its word and tone; and a row that is not a list item\n<UploadItem as=\"div\" name=\"walk.mp4\" state=\"checking\" stateLabel=\"Being checked\" stateTone=\"warning\" />",
         "client": true
       }
     },
@@ -1233,8 +1233,8 @@
       ],
       "meta": {
         "category": "ui",
-        "when": "Showing several pictures of one thing where each can be looked at closely: a place, a product, a piece of work. GalleryLightbox takes a list of pictures and does everything; Gallery, GalleryItem and GalleryImage are the parts, to put inside your own Lightbox or to use with no viewer at all. For pictures that are decoration, use plain images in a grid; for one picture use aspect.",
-        "example": "<GalleryLightbox\n  title=\"Photos of the studio\"\n  layout=\"mosaic\"\n  items={[\n    { src: \"/studio-1.jpg\", alt: \"The studio from the street\" },\n    { src: \"/studio-2.jpg\", alt: \"The workbench\", caption: \"The workbench, built in 1962\" },\n  ]}\n/>\n\n// The parts, in your own lightbox\n<Lightbox count={photos.length}>\n  <Gallery layout=\"grid\" aria-label=\"Photos\">\n    {photos.map((photo, index) => (\n      <LightboxTrigger key={photo.src} index={index} asChild>\n        <GalleryItem><GalleryImage src={photo.src} alt={photo.alt} /></GalleryItem>\n      </LightboxTrigger>\n    ))}\n  </Gallery>\n  <LightboxContent>…</LightboxContent>\n</Lightbox>",
+        "when": "Showing several pictures of one thing where each can be looked at closely: a place, a product, a piece of work. GalleryLightbox takes a list of pictures and does everything; Gallery, GalleryItem and GalleryImage are the parts, to put inside your own Lightbox or to use with no viewer at all. Pictures are plain `<img>` elements unless the project gives its framework's image component: `as` on GalleryImage, `renderImage` on GalleryLightbox. For pictures that are decoration, use plain images in a grid; for one picture use aspect.",
+        "example": "<GalleryLightbox\n  title=\"Photos of the studio\"\n  layout=\"mosaic\"\n  items={[\n    { src: \"/studio-1.jpg\", alt: \"The studio from the street\" },\n    { src: \"/studio-2.jpg\", alt: \"The workbench\", caption: \"The workbench, built in 1962\" },\n  ]}\n/>\n\n// The parts, in your own lightbox\n<Lightbox count={photos.length}>\n  <Gallery layout=\"grid\" aria-label=\"Photos\">\n    {photos.map((photo, index) => (\n      <LightboxTrigger key={photo.src} index={index} asChild>\n        <GalleryItem><GalleryImage src={photo.src} alt={photo.alt} /></GalleryItem>\n      </LightboxTrigger>\n    ))}\n  </Gallery>\n  <LightboxContent>…</LightboxContent>\n</Lightbox>\n\n// With the framework's image component (here next/image) in place of <img>\n<GalleryImage as={Image} fill sizes=\"(min-width: 48rem) 25vw, 50vw\" src={photo.src} alt={photo.alt} />\n<GalleryLightbox\n  title=\"Photos of the studio\"\n  items={photos}\n  renderImage={({ use, picture, props }) =>\n    use === \"tile\" ? <GalleryImage as={Image} fill sizes=\"25vw\" {...props} /> : <Image {...props} width={use === \"slide\" ? picture.width : 96} height={use === \"slide\" ? picture.height : 72} />\n  }\n/>",
         "client": true
       }
     },
@@ -1452,11 +1452,13 @@
       "name": "media-row-list",
       "type": "registry:ui",
       "title": "Media Row List",
-      "description": "The pictures or clips a person has added, as rows they can put in order, describe and choose a cover from: each row shows its upload progress or its error with a retry, a field for its text alternative, a \"cover\" choice and a remove button.",
+      "description": "The pictures or clips a person has added, as rows they can put in order, describe and choose a cover from: each row shows its state in words (an upload's, or one the project names), its progress or its error with pause, resume and retry, a field for its text alternative that can be required, a \"cover\" choice, a remove button, and room for a status line and controls of the project's own.",
       "categories": [
         "ui"
       ],
-      "dependencies": [],
+      "dependencies": [
+        "lucide-react"
+      ],
       "registryDependencies": [
         "@rivier-ui/theme",
         "@rivier-ui/announce",
@@ -1476,7 +1478,7 @@
       "meta": {
         "category": "ui",
         "when": "After a dropzone, when the order of the files matters and each needs a description: the photos of a listing, the slides of a story, the pages of a document. It is ready-made from sortable-list (drag by the handle, lift and move with the keyboard, or the move buttons; every move is read out) and the upload rows of dropzone, and contains no upload engine: the project uploads and passes each row its state. For files whose order does not matter use the dropzone's own UploadList; to reorder things that are not files use sortable-list.",
-        "example": "const [rows, setRows] = useState<MediaRow[]>([\n  { id: \"a\", name: \"kitchen.jpg\", size: 1_200_000, state: \"done\", alt: \"The kitchen, from the door\" },\n  { id: \"b\", name: \"garden.jpg\", size: 2_400_000, state: \"uploading\", progress: 40 },\n  { id: \"c\", name: \"stairs.jpg\", state: \"failed\", error: \"The connection dropped.\" },\n]);\nconst [cover, setCover] = useState<string | null>(\"a\");\n<MediaRowList\n  aria-label=\"Pictures, in order\"\n  items={rows}\n  onItemsChange={setRows}\n  cover={cover}\n  onCoverChange={setCover}\n  onAltChange={(id, alt) => setRows((all) => all.map((row) => (row.id === id ? { ...row, alt } : row)))}\n  onRemove={(id) => setRows((all) => all.filter((row) => row.id !== id))}\n  onRetry={(id) => upload(id)}\n/>",
+        "example": "const [rows, setRows] = useState<MediaRow[]>([\n  { id: \"a\", name: \"kitchen.jpg\", size: 1_200_000, state: \"done\", alt: \"The kitchen, from the door\" },\n  { id: \"b\", name: \"garden.jpg\", size: 2_400_000, state: \"uploading\", progress: 40 },\n  { id: \"c\", name: \"stairs.jpg\", state: \"failed\", error: \"The connection dropped.\" },\n]);\nconst [cover, setCover] = useState<string | null>(\"a\");\n<MediaRowList\n  aria-label=\"Pictures, in order\"\n  items={rows}\n  onItemsChange={setRows}\n  cover={cover}\n  onCoverChange={setCover}\n  onAltChange={(id, alt) => setRows((all) => all.map((row) => (row.id === id ? { ...row, alt } : row)))}\n  onRemove={(id) => setRows((all) => all.filter((row) => row.id !== id))}\n  onRetry={(id) => upload(id)}\n/>\n\n// A state of the project's own, a status line, a control of its own, no cover choice, and a description that is required\nconst row: MediaRow = {\n  id: \"d\", name: \"walk.mp4\", state: \"checking\", stateLabel: \"Being checked\", stateTone: \"warning\",\n  status: \"Usually takes a minute.\", controls: <Button size=\"sm\" variant=\"ghost\">Trim</Button>,\n  hideCover: true, altRequired: true, altError: \"Say what the clip shows.\",\n};\n<MediaRowList aria-label=\"Clips\" items={[row]} variant=\"lines\" onAltChange={describe} onPause={pause} onResume={resume} onDropped={({ values }) => save(values)} />",
         "client": true
       }
     },
@@ -2111,7 +2113,7 @@
       "meta": {
         "category": "ui",
         "when": "The order itself is the data: the stops of a plan, priorities, pictures in a gallery, columns to show. Always give the rows SortableMoveButtons or a SortableHandle (both is best): dragging alone leaves out people who cannot drag (WCAG 2.5.7). It is one vertical list; it does not move rows between lists or sort a grid. For a list sorted by a rule (newest first) use a select for the rule instead; for choosing rather than ordering use chip or checkboxes.",
-        "example": "const [stops, setStops] = useState([\"market\", \"lunch\", \"museum\"]);\n<SortableList values={stops} onValuesChange={setStops} aria-label=\"Stops, in order\">\n  {stops.map((id) => (\n    <SortableItem key={id} value={id} label={NAMES[id]}>\n      <SortableHandle />\n      <span className=\"min-w-0 flex-1 truncate\">{NAMES[id]}</span>\n      <SortableMoveButtons />\n    </SortableItem>\n  ))}\n</SortableList>\n\n// Uncontrolled: the list keeps the order and gives it to its children\n<SortableList defaultValues={[\"a\", \"b\", \"c\"]} aria-label=\"Priorities\">\n  {(order) => order.map((id) => <SortableItem key={id} value={id} label={id}>…</SortableItem>)}\n</SortableList>",
+        "example": "const [stops, setStops] = useState([\"market\", \"lunch\", \"museum\"]);\n<SortableList values={stops} onValuesChange={setStops} aria-label=\"Stops, in order\">\n  {stops.map((id) => (\n    <SortableItem key={id} value={id} label={NAMES[id]}>\n      <SortableHandle />\n      <span className=\"min-w-0 flex-1 truncate\">{NAMES[id]}</span>\n      <SortableMoveButtons />\n    </SortableItem>\n  ))}\n</SortableList>\n\n// Uncontrolled: the list keeps the order and gives it to its children\n<SortableList defaultValues={[\"a\", \"b\", \"c\"]} aria-label=\"Priorities\">\n  {(order) => order.map((id) => <SortableItem key={id} value={id} label={id}>…</SortableItem>)}\n</SortableList>\n\n// Save once, when a row has been let go, not at every step it passes\n<SortableList values={stops} onValuesChange={setStops} onDropped={({ from, to, values }) => (from === to ? undefined : save(values))} aria-label=\"Stops, in order\">…</SortableList>",
         "client": true
       }
     },
@@ -2703,7 +2705,7 @@
       "name": "virtual-list",
       "type": "registry:ui",
       "title": "Virtual List",
-      "description": "A long list or grid that renders only the rows in view: thousands of items of any height in a box that scrolls, each still announced with its position in the whole list, with a way to go to an item and to come back to where the person was.",
+      "description": "A long list or grid that renders only the rows in view: thousands of items of any height in a box that scrolls, or down a page that scrolls with the window, each still announced with its position in the whole list, with a way to go to an item and to come back to where the person was.",
       "categories": [
         "ui"
       ],
@@ -2721,8 +2723,8 @@
       ],
       "meta": {
         "category": "ui",
-        "when": "More items than the page should hold at once (a few hundred or more): a feed, a log, search results, a picture library. Rows may have any height: each is measured once it is drawn and the rest are estimated, and the view does not jump when a row above it turns out taller. Give the box a height and a name (`aria-label`). For a short list render the rows plainly; for a conversation that grows at the bottom use thread; for pages of results use pagination. Written here on ResizeObserver instead of adding a virtualisation package: a headless one would bring the offsets but not the roles, the positions for screen readers, the kept focus or the restoration, which are most of this file. It scrolls inside its own box only, not with the window.",
-        "example": "// Rows of any height\n<VirtualList count={messages.length} estimateSize={72} getKey={(index) => messages[index].id} aria-label=\"Messages\" className=\"h-96 rounded-surface border\">\n  {(index) => <article className=\"border-b p-3\">{messages[index].text}</article>}\n</VirtualList>\n\n// A grid, as many columns as fit; the place is remembered for this tab\n<VirtualGrid count={pictures.length} columns={{ minWidth: 160 }} gap={8} estimateSize={160} restoreKey=\"library\" aria-label=\"Pictures\" className=\"h-[32rem]\">\n  {(index) => <img src={pictures[index].src} alt={pictures[index].alt} className=\"aspect-square w-full rounded-control object-cover\" />}\n</VirtualGrid>\n\n// Going to an item\nconst list = useRef<VirtualListHandle>(null);\n<VirtualList handleRef={list} count={10000} aria-label=\"Lines\">{(index) => <p className=\"p-2\">Line {index + 1}</p>}</VirtualList>\n<Button onClick={() => list.current?.scrollToIndex(4999, { align: \"center\" })}>Go to line 5,000</Button>",
+        "when": "More items than the page should hold at once (a few hundred or more): a feed, a log, search results, a picture library. Rows may have any height: each is measured once it is drawn and the rest are estimated, and the view does not jump when a row above it turns out taller. Give the box a height and a name (`aria-label`); or, where the list is the page (a feed, results under a header), `scroll=\"window\"` and no height: it then grows to its full length and the window scrolls it. For a short list render the rows plainly; for a conversation that grows at the bottom use thread; for pages of results use pagination. Written here on ResizeObserver instead of adding a virtualisation package: a headless one would bring the offsets but not the roles, the positions for screen readers, the kept focus or the restoration, which are most of this file.",
+        "example": "// Rows of any height\n<VirtualList count={messages.length} estimateSize={72} getKey={(index) => messages[index].id} aria-label=\"Messages\" className=\"h-96 rounded-surface border\">\n  {(index) => <article className=\"border-b p-3\">{messages[index].text}</article>}\n</VirtualList>\n\n// A grid, as many columns as fit; the place is remembered for this tab\n<VirtualGrid count={pictures.length} columns={{ minWidth: 160 }} gap={8} estimateSize={160} restoreKey=\"library\" aria-label=\"Pictures\" className=\"h-[32rem]\">\n  {(index) => <img src={pictures[index].src} alt={pictures[index].alt} className=\"aspect-square w-full rounded-control object-cover\" />}\n</VirtualGrid>\n\n// The page scrolls, not a box: no height, and rows above and below the window are not rendered\n<VirtualList scroll=\"window\" count={results.length} estimateSize={96} getKey={(index) => results[index].id} aria-label=\"Results\">\n  {(index) => <ResultCard result={results[index]} />}\n</VirtualList>\n\n// Going to an item\nconst list = useRef<VirtualListHandle>(null);\n<VirtualList handleRef={list} count={10000} aria-label=\"Lines\">{(index) => <p className=\"p-2\">Line {index + 1}</p>}</VirtualList>\n<Button onClick={() => list.current?.scrollToIndex(4999, { align: \"center\" })}>Go to line 5,000</Button>",
         "client": true
       }
     },
@@ -2752,8 +2754,8 @@
       ],
       "meta": {
         "category": "ui",
-        "when": "A task that is easier one question at a time and has a known order: a booking, a set-up, an application. It keeps where one is (controlled or not), moves focus to each new step's heading, and blocks the main button with a stated reason while a step is not answered. For a short form show all the fields at once (field); for the rail alone use steps; for unordered sections use tabs or accordion. What each step contains is yours: the wizard holds no answers.",
-        "example": "const [people, setPeople] = useState(0);\n<Wizard\n  steps={[\n    { id: \"dates\", label: \"Dates\" },\n    { id: \"people\", label: \"People\", canContinue: people > 0, blockedReason: \"Say how many people are coming.\" },\n    { id: \"extras\", label: \"Extras\", optional: true },\n    { id: \"review\", label: \"Review\" },\n  ]}\n  defaultStep=\"dates\"\n  onComplete={book}\n>\n  <WizardHeader>Book a table</WizardHeader>\n  <WizardRail />\n  <WizardStep id=\"dates\" title=\"Which day?\">…</WizardStep>\n  <WizardStep id=\"people\" title=\"How many people?\">…</WizardStep>\n  <WizardStep id=\"extras\" title=\"Anything to add?\">…</WizardStep>\n  <WizardStep id=\"review\" title=\"Check and confirm\">…</WizardStep>\n  <WizardFooter>\n    <WizardBack>Back</WizardBack>\n    <WizardSkip>Skip</WizardSkip>\n    <WizardNext>{step === \"review\" ? \"Confirm\" : \"Continue\"}</WizardNext>\n  </WizardFooter>\n</Wizard>",
+        "when": "A task that is easier one question at a time and has a known order: a booking, a set-up, an application. It keeps where one is (controlled or not), moves focus to each new step's heading, and blocks the main button with a stated reason while a step is not answered. Where a server decides what comes next, control it: give `step`, and `onNext`, `onBack` and `onSkip` in place of the wizard's own moves, with `pending` while the answer is on its way; the step still slides in and its heading still takes focus when `step` changes. For a short form show all the fields at once (field); for the rail alone use steps; for unordered sections use tabs or accordion. What each step contains is yours: the wizard holds no answers.",
+        "example": "const [people, setPeople] = useState(0);\n<Wizard\n  steps={[\n    { id: \"dates\", label: \"Dates\" },\n    { id: \"people\", label: \"People\", canContinue: people > 0, blockedReason: \"Say how many people are coming.\" },\n    { id: \"extras\", label: \"Extras\", optional: true },\n    { id: \"review\", label: \"Review\" },\n  ]}\n  defaultStep=\"dates\"\n  onComplete={book}\n>\n  <WizardHeader>Book a table</WizardHeader>\n  <WizardRail />\n  <WizardStep id=\"dates\" title=\"Which day?\">…</WizardStep>\n  <WizardStep id=\"people\" title=\"How many people?\">…</WizardStep>\n  <WizardStep id=\"extras\" title=\"Anything to add?\">…</WizardStep>\n  <WizardStep id=\"review\" title=\"Check and confirm\">…</WizardStep>\n  <WizardFooter>\n    <WizardBack>Back</WizardBack>\n    <WizardSkip>Skip</WizardSkip>\n    <WizardNext>{step === \"review\" ? \"Confirm\" : \"Continue\"}</WizardNext>\n  </WizardFooter>\n</Wizard>\n\n// Driven from outside: the server says which step is next, and the rail's states are the project's\n<Wizard\n  steps={flow.steps.map((item) => ({ id: item.id, label: item.label, optional: item.optional, state: item.skipped ? \"skipped\" : undefined }))}\n  step={flow.current}\n  pending={saving}\n  onNext={(current) => submit(current.id)}\n  onBack={(current) => goBackFrom(current.id)}\n  onSkip={(current) => skip(current.id)}\n>…</Wizard>",
         "client": true
       }
     },
@@ -3049,8 +3051,8 @@
       ],
       "meta": {
         "category": "motion",
-        "when": "Content the project draws itself from a time: an animated explainer, a story in scenes, a slideshow with narration, a film assembled from markup, SVG or canvas. Each scene gets its own local time and draws from it, so any frame can be drawn again exactly. The stage is the clock other things follow: scrubber, scene-strip, captions and hotspots work inside it as they do inside video-player, and narration audio is kept in step. For a video or sound file use video-player or audio-player; for motion tied to scrolling use scroll-scene; for a set of pictures a person pages through use carousel.",
-        "example": "const scenes = [\n  { id: \"title\", duration: 4, label: \"Title\", children: <h2 className=\"p-8 text-3xl\">How a pot is thrown</h2> },\n  { id: \"wheel\", duration: 6, label: \"On the wheel\", transition: \"crossfade\" as const, render: ({ progress }) => <Wheel turn={progress} /> },\n];\n<FilmStage scenes={scenes} aria-label=\"How a pot is thrown\">\n  <FilmStageFrame aspect={16 / 9}>\n    <Captions cues={cues} lang=\"en\" />\n  </FilmStageFrame>\n  <FilmStageAudio src=\"/narration.mp3\" />\n  <FilmStageControls>\n    <FilmStageScrubber />\n    <FilmStageControlsRow>\n      <FilmStagePlay />\n      <FilmStageMute />\n      <FilmStageTime />\n      <FilmStageRate className=\"ms-auto\" />\n    </FilmStageControlsRow>\n  </FilmStageControls>\n  <FilmStageSceneStrip />\n</FilmStage>\n\n// Export: a headless browser draws each frame, with no timer running on the page\n<FilmStage scenes={scenes} deterministic exportName=\"main\" aria-label=\"How a pot is thrown\">…</FilmStage>\n// in the page, from the exporter: await window.__filmStage.main.renderAt(frame / 30), then take the picture",
+        "when": "Content the project draws itself from a time: an animated explainer, a story in scenes, a slideshow with narration, a film assembled from markup, SVG or canvas. Each scene gets its own local time and draws from it, so any frame can be drawn again exactly. The stage is the clock other things follow: scrubber, scene-strip, captions and hotspots work inside it as they do inside video-player, and any number of sounds (a clip for each narrated line, a bed under them) are kept in step, each from its own start for its own length. For a video or sound file use video-player or audio-player; for motion tied to scrolling use scroll-scene; for a set of pictures a person pages through use carousel.",
+        "example": "const scenes = [\n  { id: \"title\", duration: 4, label: \"Title\", children: <h2 className=\"p-8 text-3xl\">How a pot is thrown</h2> },\n  { id: \"wheel\", duration: 6, label: \"On the wheel\", transition: \"crossfade\" as const, render: ({ progress }) => <Wheel turn={progress} /> },\n];\n<FilmStage scenes={scenes} aria-label=\"How a pot is thrown\">\n  <FilmStageFrame aspect={16 / 9}>\n    <Captions cues={cues} lang=\"en\" />\n  </FilmStageFrame>\n  <FilmStageAudio src=\"/narration.mp3\" />\n  <FilmStageControls>\n    <FilmStageScrubber />\n    <FilmStageControlsRow>\n      <FilmStagePreviousScene />\n      <FilmStagePlay />\n      <FilmStageNextScene />\n      <FilmStageMute />\n      <FilmStageTime />\n      <FilmStageRate className=\"ms-auto\" />\n    </FilmStageControlsRow>\n  </FilmStageControls>\n  <FilmStageSceneStrip />\n</FilmStage>\n\n// One clip for each narrated line and a bed under them; each follows the clock, the speed, a seek and the mute\n<FilmStage scenes={scenes} loop onSceneChange={(scene) => track(scene.id)} aria-label=\"How a pot is thrown\">\n  <FilmStageFrame />\n  <FilmStageAudio src=\"/bed.mp3\" volume={0.3} />\n  {lines.map((line) => <FilmStageAudio key={line.id} src={line.src} start={line.start} duration={line.length} />)}\n</FilmStage>\n\n// Export: a headless browser draws each frame, with no timer running on the page\n<FilmStage scenes={scenes} deterministic exportName=\"main\" aria-label=\"How a pot is thrown\">…</FilmStage>\n// in the page, from the exporter: await window.__filmStage.main.renderAt(frame / 30), then take the picture",
         "client": true
       }
     },
@@ -3479,6 +3481,9 @@
         "@react-three/fiber",
         "three"
       ],
+      "devDependencies": [
+        "@types/three"
+      ],
       "registryDependencies": [
         "@rivier-ui/theme",
         "@rivier-ui/theme-color"
@@ -3508,6 +3513,9 @@
       "dependencies": [
         "@react-three/fiber",
         "three"
+      ],
+      "devDependencies": [
+        "@types/three"
       ],
       "registryDependencies": [
         "@rivier-ui/theme",
@@ -3539,6 +3547,9 @@
         "@react-three/fiber",
         "three"
       ],
+      "devDependencies": [
+        "@types/three"
+      ],
       "registryDependencies": [
         "@rivier-ui/theme"
       ],
@@ -3568,6 +3579,9 @@
         "@sparkjsdev/spark",
         "lucide-react",
         "three"
+      ],
+      "devDependencies": [
+        "@types/three"
       ],
       "registryDependencies": [
         "@rivier-ui/theme",
@@ -3602,6 +3616,9 @@
         "@react-three/fiber",
         "three"
       ],
+      "devDependencies": [
+        "@types/three"
+      ],
       "registryDependencies": [
         "@rivier-ui/theme",
         "@rivier-ui/theme-color"
@@ -3631,6 +3648,9 @@
       "dependencies": [
         "@react-three/fiber",
         "three"
+      ],
+      "devDependencies": [
+        "@types/three"
       ],
       "registryDependencies": [
         "@rivier-ui/theme",
@@ -3717,6 +3737,9 @@
       "dependencies": [
         "d3-scale"
       ],
+      "devDependencies": [
+        "@types/d3-scale"
+      ],
       "registryDependencies": [
         "@rivier-ui/theme",
         "@rivier-ui/chart",
@@ -3746,6 +3769,9 @@
       ],
       "dependencies": [
         "d3-shape"
+      ],
+      "devDependencies": [
+        "@types/d3-shape"
       ],
       "registryDependencies": [
         "@rivier-ui/theme",
@@ -3777,6 +3803,9 @@
       "dependencies": [
         "d3-shape"
       ],
+      "devDependencies": [
+        "@types/d3-shape"
+      ],
       "registryDependencies": [
         "@rivier-ui/theme",
         "@rivier-ui/chart",
@@ -3806,6 +3835,9 @@
       ],
       "dependencies": [
         "d3-scale"
+      ],
+      "devDependencies": [
+        "@types/d3-scale"
       ],
       "registryDependencies": [
         "@rivier-ui/theme",
@@ -3837,6 +3869,10 @@
       "dependencies": [
         "d3-scale",
         "d3-shape"
+      ],
+      "devDependencies": [
+        "@types/d3-scale",
+        "@types/d3-shape"
       ],
       "registryDependencies": [
         "@rivier-ui/theme",
@@ -3896,6 +3932,10 @@
       "dependencies": [
         "d3-scale",
         "d3-shape"
+      ],
+      "devDependencies": [
+        "@types/d3-scale",
+        "@types/d3-shape"
       ],
       "registryDependencies": [
         "@rivier-ui/theme",

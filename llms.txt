@@ -685,7 +685,7 @@ const dir = useDirection();
 
 A layout of main content with a panel docked beside it that stays while the person works: the panel can be resized with a splitter, collapsed to a slim bar, and on narrow containers gives way to a bar at the bottom.
 
-Use it: A working surface that belongs beside the content and is not modal: a plan next to a conversation, an inspector next to a canvas, details next to a list. For a panel that covers the page for a moment use sheet; for two fixed columns with no resizing use split. Write the parts in reading order: DockMain, DockResizer, DockPanel for a panel at the end; DockPanel, DockResizer, DockMain with side="start". Below 42rem of its own width the panel and splitter are hidden and DockBar shows at the bottom: open the panel's content in a bottom-sheet from `onOpenStacked`. Give the Dock a height (it fills its parent).
+Use it: A working surface that belongs beside the content and is not modal: a plan next to a conversation, an inspector next to a canvas, details next to a list. For a panel that covers the page for a moment use sheet; for two fixed columns with no resizing use split. Write the parts in reading order: DockMain, DockResizer, DockPanel for a panel at the end; DockPanel, DockResizer, DockMain with side="start". Below 42rem of its own width (another width with `stackBelow`) the panel and splitter are hidden and DockBar shows at the bottom: open the panel's content in a bottom-sheet from `onOpenStacked`. Where the content ends in a region that must stay lowest (a composer), put a second DockBar inside DockMain above that region with `show="stacked"`, and give the one after the panel `show="collapsed"`. Give the Dock a height (it fills its parent).
 
 ```tsx
 <Dock defaultSize={32} minSize={24} maxSize={50} className="h-[32rem]">
@@ -700,6 +700,18 @@ Use it: A working surface that belongs beside the content and is not modal: a pl
 
 // Controlled, in pixels, at the start
 <Dock side="start" unit="px" size={width} onSizeChange={setWidth} minSize={240} maxSize={480} collapsed={hidden} onCollapsedChange={setHidden}>…</Dock>
+
+// Stacks below 56rem; on a narrow dock the bar sits above the composer, not under it
+<Dock stackBelow={56} className="h-[32rem]">
+  <DockMain className="flex flex-col">
+    <div className="min-h-0 flex-1 overflow-y-auto">…the conversation…</div>
+    <DockBar show="stacked" onOpenStacked={() => setSheetOpen(true)}>Plan · 3 stops</DockBar>
+    <footer>…the composer…</footer>
+  </DockMain>
+  <DockResizer aria-label="Resize the plan" />
+  <DockPanel aria-label="Plan">…</DockPanel>
+  <DockBar show="collapsed">Plan · 3 stops</DockBar>
+</Dock>
 ```
 
 ### dropdown-menu
@@ -754,6 +766,9 @@ Use it: Adding pictures, documents or other files where progress matters: a list
     </UploadItem>
   ))}
 </UploadList>
+
+// A state of the project's own, with its word and tone; and a row that is not a list item
+<UploadItem as="div" name="walk.mp4" state="checking" stateLabel="Being checked" stateTone="warning" />
 ```
 
 ### empty-state
@@ -830,7 +845,7 @@ Use it: Every control in a form. Put the control inside FieldControl; render Fie
 
 A set of picture tiles that open a full-screen viewer: a mosaic of one large and several small, an even grid, or a row that scrolls sideways.
 
-Use it: Showing several pictures of one thing where each can be looked at closely: a place, a product, a piece of work. GalleryLightbox takes a list of pictures and does everything; Gallery, GalleryItem and GalleryImage are the parts, to put inside your own Lightbox or to use with no viewer at all. For pictures that are decoration, use plain images in a grid; for one picture use aspect.
+Use it: Showing several pictures of one thing where each can be looked at closely: a place, a product, a piece of work. GalleryLightbox takes a list of pictures and does everything; Gallery, GalleryItem and GalleryImage are the parts, to put inside your own Lightbox or to use with no viewer at all. Pictures are plain `<img>` elements unless the project gives its framework's image component: `as` on GalleryImage, `renderImage` on GalleryLightbox. For pictures that are decoration, use plain images in a grid; for one picture use aspect.
 
 ```tsx
 <GalleryLightbox
@@ -853,6 +868,16 @@ Use it: Showing several pictures of one thing where each can be looked at closel
   </Gallery>
   <LightboxContent>…</LightboxContent>
 </Lightbox>
+
+// With the framework's image component (here next/image) in place of <img>
+<GalleryImage as={Image} fill sizes="(min-width: 48rem) 25vw, 50vw" src={photo.src} alt={photo.alt} />
+<GalleryLightbox
+  title="Photos of the studio"
+  items={photos}
+  renderImage={({ use, picture, props }) =>
+    use === "tile" ? <GalleryImage as={Image} fill sizes="25vw" {...props} /> : <Image {...props} width={use === "slide" ? picture.width : 96} height={use === "slide" ? picture.height : 72} />
+  }
+/>
 ```
 
 ### hotspots
@@ -989,7 +1014,7 @@ Use it: Looking closely at pictures that are shown small on the page: a listing'
 
 ### media-row-list
 
-The pictures or clips a person has added, as rows they can put in order, describe and choose a cover from: each row shows its upload progress or its error with a retry, a field for its text alternative, a "cover" choice and a remove button.
+The pictures or clips a person has added, as rows they can put in order, describe and choose a cover from: each row shows its state in words (an upload's, or one the project names), its progress or its error with pause, resume and retry, a field for its text alternative that can be required, a "cover" choice, a remove button, and room for a status line and controls of the project's own.
 
 Use it: After a dropzone, when the order of the files matters and each needs a description: the photos of a listing, the slides of a story, the pages of a document. It is ready-made from sortable-list (drag by the handle, lift and move with the keyboard, or the move buttons; every move is read out) and the upload rows of dropzone, and contains no upload engine: the project uploads and passes each row its state. For files whose order does not matter use the dropzone's own UploadList; to reorder things that are not files use sortable-list.
 
@@ -1010,6 +1035,14 @@ const [cover, setCover] = useState<string | null>("a");
   onRemove={(id) => setRows((all) => all.filter((row) => row.id !== id))}
   onRetry={(id) => upload(id)}
 />
+
+// A state of the project's own, a status line, a control of its own, no cover choice, and a description that is required
+const row: MediaRow = {
+  id: "d", name: "walk.mp4", state: "checking", stateLabel: "Being checked", stateTone: "warning",
+  status: "Usually takes a minute.", controls: <Button size="sm" variant="ghost">Trim</Button>,
+  hideCover: true, altRequired: true, altError: "Say what the clip shows.",
+};
+<MediaRowList aria-label="Clips" items={[row]} variant="lines" onAltChange={describe} onPause={pause} onResume={resume} onDropped={({ values }) => save(values)} />
 ```
 
 ### message
@@ -1416,6 +1449,9 @@ const [stops, setStops] = useState(["market", "lunch", "museum"]);
 <SortableList defaultValues={["a", "b", "c"]} aria-label="Priorities">
   {(order) => order.map((id) => <SortableItem key={id} value={id} label={id}>…</SortableItem>)}
 </SortableList>
+
+// Save once, when a row has been let go, not at every step it passes
+<SortableList values={stops} onValuesChange={setStops} onDropped={({ from, to, values }) => (from === to ? undefined : save(values))} aria-label="Stops, in order">…</SortableList>
 ```
 
 ### spinner
@@ -1804,9 +1840,9 @@ Use it: Any video a person controls: a clip on a page, a lesson, a recording. Th
 
 ### virtual-list
 
-A long list or grid that renders only the rows in view: thousands of items of any height in a box that scrolls, each still announced with its position in the whole list, with a way to go to an item and to come back to where the person was.
+A long list or grid that renders only the rows in view: thousands of items of any height in a box that scrolls, or down a page that scrolls with the window, each still announced with its position in the whole list, with a way to go to an item and to come back to where the person was.
 
-Use it: More items than the page should hold at once (a few hundred or more): a feed, a log, search results, a picture library. Rows may have any height: each is measured once it is drawn and the rest are estimated, and the view does not jump when a row above it turns out taller. Give the box a height and a name (`aria-label`). For a short list render the rows plainly; for a conversation that grows at the bottom use thread; for pages of results use pagination. Written here on ResizeObserver instead of adding a virtualisation package: a headless one would bring the offsets but not the roles, the positions for screen readers, the kept focus or the restoration, which are most of this file. It scrolls inside its own box only, not with the window.
+Use it: More items than the page should hold at once (a few hundred or more): a feed, a log, search results, a picture library. Rows may have any height: each is measured once it is drawn and the rest are estimated, and the view does not jump when a row above it turns out taller. Give the box a height and a name (`aria-label`); or, where the list is the page (a feed, results under a header), `scroll="window"` and no height: it then grows to its full length and the window scrolls it. For a short list render the rows plainly; for a conversation that grows at the bottom use thread; for pages of results use pagination. Written here on ResizeObserver instead of adding a virtualisation package: a headless one would bring the offsets but not the roles, the positions for screen readers, the kept focus or the restoration, which are most of this file.
 
 ```tsx
 // Rows of any height
@@ -1819,6 +1855,11 @@ Use it: More items than the page should hold at once (a few hundred or more): a 
   {(index) => <img src={pictures[index].src} alt={pictures[index].alt} className="aspect-square w-full rounded-control object-cover" />}
 </VirtualGrid>
 
+// The page scrolls, not a box: no height, and rows above and below the window are not rendered
+<VirtualList scroll="window" count={results.length} estimateSize={96} getKey={(index) => results[index].id} aria-label="Results">
+  {(index) => <ResultCard result={results[index]} />}
+</VirtualList>
+
 // Going to an item
 const list = useRef<VirtualListHandle>(null);
 <VirtualList handleRef={list} count={10000} aria-label="Lines">{(index) => <p className="p-2">Line {index + 1}</p>}</VirtualList>
@@ -1829,7 +1870,7 @@ const list = useRef<VirtualListHandle>(null);
 
 The shell of a guided task done one step at a time inside a card: a title with "Step 2 of 5", a rail of the steps, the current step, and Back, Skip and a main button named after what the step does.
 
-Use it: A task that is easier one question at a time and has a known order: a booking, a set-up, an application. It keeps where one is (controlled or not), moves focus to each new step's heading, and blocks the main button with a stated reason while a step is not answered. For a short form show all the fields at once (field); for the rail alone use steps; for unordered sections use tabs or accordion. What each step contains is yours: the wizard holds no answers.
+Use it: A task that is easier one question at a time and has a known order: a booking, a set-up, an application. It keeps where one is (controlled or not), moves focus to each new step's heading, and blocks the main button with a stated reason while a step is not answered. Where a server decides what comes next, control it: give `step`, and `onNext`, `onBack` and `onSkip` in place of the wizard's own moves, with `pending` while the answer is on its way; the step still slides in and its heading still takes focus when `step` changes. For a short form show all the fields at once (field); for the rail alone use steps; for unordered sections use tabs or accordion. What each step contains is yours: the wizard holds no answers.
 
 ```tsx
 const [people, setPeople] = useState(0);
@@ -1855,6 +1896,16 @@ const [people, setPeople] = useState(0);
     <WizardNext>{step === "review" ? "Confirm" : "Continue"}</WizardNext>
   </WizardFooter>
 </Wizard>
+
+// Driven from outside: the server says which step is next, and the rail's states are the project's
+<Wizard
+  steps={flow.steps.map((item) => ({ id: item.id, label: item.label, optional: item.optional, state: item.skipped ? "skipped" : undefined }))}
+  step={flow.current}
+  pending={saving}
+  onNext={(current) => submit(current.id)}
+  onBack={(current) => goBackFrom(current.id)}
+  onSkip={(current) => skip(current.id)}
+>…</Wizard>
 ```
 
 ## Layout
@@ -2046,7 +2097,7 @@ Use it: Spacing a run of siblings evenly: form fields, a button row, a header wi
 
 A stage for a sequence of timed scenes with a transport: it owns the clock and the chrome (play, time bar, speed, sound), mounts the scene for the current moment, cuts or crossfades between scenes, and can draw any moment on request for export.
 
-Use it: Content the project draws itself from a time: an animated explainer, a story in scenes, a slideshow with narration, a film assembled from markup, SVG or canvas. Each scene gets its own local time and draws from it, so any frame can be drawn again exactly. The stage is the clock other things follow: scrubber, scene-strip, captions and hotspots work inside it as they do inside video-player, and narration audio is kept in step. For a video or sound file use video-player or audio-player; for motion tied to scrolling use scroll-scene; for a set of pictures a person pages through use carousel.
+Use it: Content the project draws itself from a time: an animated explainer, a story in scenes, a slideshow with narration, a film assembled from markup, SVG or canvas. Each scene gets its own local time and draws from it, so any frame can be drawn again exactly. The stage is the clock other things follow: scrubber, scene-strip, captions and hotspots work inside it as they do inside video-player, and any number of sounds (a clip for each narrated line, a bed under them) are kept in step, each from its own start for its own length. For a video or sound file use video-player or audio-player; for motion tied to scrolling use scroll-scene; for a set of pictures a person pages through use carousel.
 
 ```tsx
 const scenes = [
@@ -2061,13 +2112,22 @@ const scenes = [
   <FilmStageControls>
     <FilmStageScrubber />
     <FilmStageControlsRow>
+      <FilmStagePreviousScene />
       <FilmStagePlay />
+      <FilmStageNextScene />
       <FilmStageMute />
       <FilmStageTime />
       <FilmStageRate className="ms-auto" />
     </FilmStageControlsRow>
   </FilmStageControls>
   <FilmStageSceneStrip />
+</FilmStage>
+
+// One clip for each narrated line and a bed under them; each follows the clock, the speed, a seek and the mute
+<FilmStage scenes={scenes} loop onSceneChange={(scene) => track(scene.id)} aria-label="How a pot is thrown">
+  <FilmStageFrame />
+  <FilmStageAudio src="/bed.mp3" volume={0.3} />
+  {lines.map((line) => <FilmStageAudio key={line.id} src={line.src} start={line.start} duration={line.length} />)}
 </FilmStage>
 
 // Export: a headless browser draws each frame, with no timer running on the page

@@ -22,8 +22,11 @@
  *     </UploadItem>
  *   ))}
  * </UploadList>
+ *
+ * // A state of the project's own, with its word and tone; and a row that is not a list item
+ * <UploadItem as="div" name="walk.mp4" state="checking" stateLabel="Being checked" stateTone="warning" />
  */
-import { CircleAlert, CircleCheck, Clock, File as FileIcon, Pause, Play, RotateCw, Upload, X } from "lucide-react";
+import { CircleAlert, CircleCheck, CircleDashed, Clock, File as FileIcon, Pause, Play, RotateCw, TriangleAlert, Upload, X } from "lucide-react";
 import {
   createContext,
   use,
@@ -222,18 +225,29 @@ export function formatFileSize(bytes: number, locale?: string): string {
 
 export type UploadState = "queued" | "uploading" | "paused" | "done" | "failed";
 
+/** How a state reads: plain, good news, something to look at, or a failure. Each has its own mark as well as its colour. */
+export type UploadTone = "neutral" | "success" | "warning" | "destructive";
+
+type Mark = ComponentType<{ className?: string; strokeWidth?: number; "aria-hidden"?: "true" }>;
+
 const STATE_WORDS: Record<UploadState, string> = { queued: "Waiting", uploading: "Uploading", paused: "Paused", done: "Uploaded", failed: "Failed" };
-const STATE_ICONS: Record<UploadState, ComponentType<{ className?: string; strokeWidth?: number; "aria-hidden"?: "true" }>> = {
+const STATE_ICONS: Record<UploadState, Mark> = {
   queued: Clock,
   uploading: Upload,
   paused: Pause,
   done: CircleCheck,
   failed: CircleAlert,
 };
+const STATE_TONES: Record<UploadState, UploadTone> = { queued: "neutral", uploading: "neutral", paused: "neutral", done: "success", failed: "destructive" };
+/** The mark of a state the project names itself, by its tone. */
+const TONE_ICONS: Record<UploadTone, Mark> = { neutral: CircleDashed, success: CircleCheck, warning: TriangleAlert, destructive: CircleAlert };
+const TONE_CLASSES: Record<UploadTone, string> = { neutral: "", success: "text-success", warning: "text-warning", destructive: "text-destructive" };
 
-const UploadItemContext = createContext<{ name: string; state: UploadState; locale: string | undefined } | null>(null);
+const isUploadState = (state: string): state is UploadState => state in STATE_WORDS;
 
-function useUploadItem(part: string): { name: string; state: UploadState; locale: string | undefined } {
+const UploadItemContext = createContext<{ name: string; state: string; locale: string | undefined } | null>(null);
+
+function useUploadItem(part: string): { name: string; state: string; locale: string | undefined } {
   const context = use(UploadItemContext);
   if (!context) throw new Error(`<${part}> must be used inside <UploadItem>.`);
   return context;
@@ -245,20 +259,29 @@ export function UploadList({ className, ...props }: ComponentProps<"ul">) {
 }
 
 export type UploadItemProps = Omit<ComponentProps<"li">, "children"> & {
+  /** The element the row is. "li" (default) inside an UploadList; "div" where the row is not an item of a list of its own (inside another list's row, or alone). */
+  as?: "li" | "div";
   /** The file's name. */
   name: string;
   /** Its size in bytes. */
   size?: number;
-  state: UploadState;
+  /** One of the five upload states, or a state of the project's own ("checking", "published"): give that one a `stateLabel`. */
+  state: UploadState | (string & {});
   /** The word for each state, to translate or reword. Defaults: Waiting, Uploading, Paused, Uploaded, Failed. */
   stateLabels?: Partial<Record<UploadState, string>>;
+  /** The word for this row's state, whatever it is: it replaces the one from `stateLabels`. Needed for a state of the project's own. */
+  stateLabel?: string;
+  /** How this row's state reads. Default: by the state ("done" is success, "failed" is destructive, anything else neutral). */
+  stateTone?: UploadTone;
+  /** The mark beside the word, in place of the one the state or the tone gives (an icon, `aria-hidden`). */
+  stateIcon?: ReactNode;
   /** More about the state, after its word: why it failed, what is left. */
   detail?: ReactNode;
   /** A small picture of the file. Without one, a file mark is shown. */
   thumbnail?: ReactNode;
   /** For the size and the percentage. Default: the browser's. */
   locale?: string;
-  /** Say "name: Uploaded" or "name: Failed" to screen readers when the row reaches that state. Default true. */
+  /** Say "name: Uploaded" or "name: Failed" to screen readers when the row reaches that state (or a state of the project's own whose tone is success or destructive). Default true. */
   announceChanges?: boolean;
   /** UploadProgress and UploadActions. */
   children?: ReactNode;
@@ -267,25 +290,33 @@ export type UploadItemProps = Omit<ComponentProps<"li">, "children"> & {
 /**
  * One file: a picture or mark, its name, its state in words with a mark (never colour alone), its size,
  * then its progress and its buttons. Reaching "done" or "failed" is announced once; progress on the way is
- * not, because a screen reader would read every step.
+ * not, because a screen reader would read every step. The state may be one of the project's own, with the
+ * word and the tone it gives.
  */
-export function UploadItem({ name, size, state, stateLabels, detail, thumbnail, locale, announceChanges = true, className, children, ...props }: UploadItemProps) {
-  const word = stateLabels?.[state] ?? STATE_WORDS[state];
-  const Mark = STATE_ICONS[state];
+export function UploadItem({ as = "li", name, size, state, stateLabels, stateLabel, stateTone, stateIcon, detail, thumbnail, locale, announceChanges = true, className, children, ...props }: UploadItemProps) {
+  // One set of props for either element: a list item and a div take the same attributes here.
+  const Row = as as "div";
+  const known = isUploadState(state);
+  const word = stateLabel ?? (known ? (stateLabels?.[state] ?? STATE_WORDS[state]) : state);
+  const tone = stateTone ?? (known ? STATE_TONES[state] : "neutral");
+  // A known state keeps its own mark unless the project gives it another tone.
+  const Mark = known && stateTone === undefined ? STATE_ICONS[state] : TONE_ICONS[tone];
+  const final = known ? state === "done" || state === "failed" : tone === "success" || tone === "destructive";
   const previous = useRef(state);
   useEffect(() => {
     if (previous.current === state) return;
     previous.current = state;
-    if (announceChanges && (state === "done" || state === "failed")) announce(`${name}: ${word}`);
-  }, [state, name, word, announceChanges]);
+    if (announceChanges && final) announce(`${name}: ${word}`);
+  }, [state, name, word, announceChanges, final]);
 
   return (
     <UploadItemContext value={{ name, state, locale }}>
-      <li
+      <Row
         data-slot="upload-item"
         data-state={state}
-        className={cn("grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 rounded-control border bg-card p-3 text-sm data-[state=failed]:border-destructive", className)}
-        {...props}
+        data-tone={tone}
+        className={cn("grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 rounded-control border bg-card p-3 text-sm data-[tone=destructive]:border-destructive", className)}
+        {...(props as ComponentProps<"div">)}
       >
         <span
           data-slot="upload-thumbnail"
@@ -300,8 +331,8 @@ export function UploadItem({ name, size, state, stateLabels, detail, thumbnail, 
             <bdi>{name}</bdi>
           </p>
           <p className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
-            <span data-slot="upload-state" className={cn("inline-flex items-center gap-1", state === "failed" && "text-destructive", state === "done" && "text-success")}>
-              <Mark aria-hidden="true" strokeWidth={1.5} className="size-3.5" />
+            <span data-slot="upload-state" className={cn("inline-flex items-center gap-1 [&_svg]:size-3.5 [&_svg]:shrink-0", TONE_CLASSES[tone])}>
+              {stateIcon ?? <Mark aria-hidden="true" strokeWidth={1.5} />}
               {word}
             </span>
             {detail ? <span data-slot="upload-detail">{detail}</span> : null}
@@ -309,7 +340,7 @@ export function UploadItem({ name, size, state, stateLabels, detail, thumbnail, 
           </p>
         </div>
         {children}
-      </li>
+      </Row>
     </UploadItemContext>
   );
 }

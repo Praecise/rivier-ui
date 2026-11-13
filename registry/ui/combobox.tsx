@@ -24,7 +24,7 @@
  * </Combobox>
  */
 import { Check, ChevronsUpDown } from "lucide-react";
-import { createContext, use, type ComponentProps, type ReactNode } from "react";
+import { createContext, use, useId, type ComponentProps, type ReactNode } from "react";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/cn";
@@ -37,6 +37,8 @@ type ComboboxContextValue = {
   open: boolean;
   disabled: boolean;
   selectedLabel: string;
+  /** The id of the floating panel, which the trigger says it controls. */
+  contentId: string;
 };
 
 const ComboboxContext = createContext<ComboboxContextValue | null>(null);
@@ -71,6 +73,7 @@ export type ComboboxProps = {
 export function Combobox({ value, defaultValue = "", onValueChange, open, defaultOpen = false, onOpenChange, name, disabled = false, clearable = false, selectedLabel = "selected", children }: ComboboxProps) {
   const [current, setCurrent] = useControllableState({ value, defaultValue, onChange: onValueChange });
   const [isOpen, setIsOpen] = useControllableState({ value: open, defaultValue: defaultOpen, onChange: onOpenChange });
+  const contentId = useId();
 
   const choose = (next: string): void => {
     setCurrent(next === current ? (clearable ? "" : current) : next);
@@ -78,7 +81,7 @@ export function Combobox({ value, defaultValue = "", onValueChange, open, defaul
   };
 
   return (
-    <ComboboxContext value={{ value: current, choose, open: isOpen, disabled, selectedLabel }}>
+    <ComboboxContext value={{ value: current, choose, open: isOpen, disabled, selectedLabel, contentId }}>
       <Popover open={isOpen} onOpenChange={(next) => setIsOpen(disabled ? false : next)}>
         {children}
       </Popover>
@@ -100,6 +103,10 @@ export function ComboboxTrigger({ className, children, type = "button", disabled
       <button
         type={type}
         role="combobox"
+        // Stated here, not left to the popover to add: a combobox must say whether it is open and what it controls.
+        aria-expanded={context.open}
+        aria-controls={context.open ? context.contentId : undefined}
+        aria-haspopup="dialog"
         data-slot="combobox-trigger"
         data-placeholder={context.value === "" ? "" : undefined}
         disabled={disabled ?? context.disabled}
@@ -145,9 +152,9 @@ export type ComboboxContentProps = ComponentProps<typeof PopoverContent> & {
  * a name with `aria-label` ("Cities"). The chosen item is the one marked when it opens.
  */
 export function ComboboxContent({ className, children, align = "start", commandProps, "aria-label": ariaLabel = "Options", ...props }: ComboboxContentProps) {
-  const { value } = useCombobox("ComboboxContent");
+  const { value, contentId } = useCombobox("ComboboxContent");
   return (
-    <PopoverContent data-slot="combobox-content" align={align} aria-label={ariaLabel} className={cn("w-(--radix-popover-trigger-width) min-w-56 overflow-hidden p-0", className)} {...props}>
+    <PopoverContent id={contentId} data-slot="combobox-content" align={align} aria-label={ariaLabel} className={cn("w-(--radix-popover-trigger-width) min-w-56 overflow-hidden p-0", className)} {...props}>
       <Command label={ariaLabel} defaultValue={value || undefined} {...commandProps}>
         {children}
       </Command>

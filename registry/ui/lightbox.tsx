@@ -175,8 +175,22 @@ export function Lightbox({
   // The zoom belongs to one slide: it is dropped as soon as another slide is shown.
   const [zoomState, setZoomState] = useState<Zoom & { index: number }>({ ...NO_ZOOM, index: -1 });
   const [viaTransition, setViaTransition] = useState(false);
-  const triggers = useRef(new Map<number, HTMLElement>());
+  /** Every trigger of each slide: one picture may have two (a tile in a grid and another in a row that scrolls). */
+  const triggers = useRef(new Map<number, Set<HTMLElement>>());
   const opener = useRef(0);
+  /** A wait for a trigger to become reachable, so that a newer one can replace it. */
+  const focusWait = useRef(0);
+  /** The triggers of a slide that are drawn, the ones a person can reach first. */
+  const triggersOf = (at: number): HTMLElement[] => {
+    const all = triggers.current.get(at);
+    if (!all) return [];
+    // A trigger that has left the page is forgotten here: a ref is not told which element went.
+    for (const element of all) if (!element.isConnected) all.delete(element);
+    const drawn = [...all].filter((element) => element.getClientRects().length > 0);
+    // In view and reachable first, then reachable, then the rest.
+    const rank = (element: HTMLElement): number => (reachable(element) ? (inView(element) ? 0 : 1) : 2);
+    return drawn.sort((a, b) => rank(a) - rank(b));
+  };
   const viewportRef = useRef<HTMLDivElement>(null);
   const surfaceRef = useRef<HTMLDivElement>(null);
   const transitionName = `rui-lightbox-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
@@ -196,7 +210,7 @@ export function Lightbox({
       return;
     }
     // The thumbnail carries the shared name in the view without the dialog; the slide carries it in the view with it.
-    const trigger = triggers.current.get(at);
+    const trigger = triggersOf(at)[0];
     const thumbnail = trigger?.isConnected ? (trigger.querySelector<HTMLElement>("img, [data-lightbox-shared]") ?? trigger) : null;
     if (next && thumbnail) thumbnail.style.viewTransitionName = transitionName;
     const transition = document.startViewTransition(() => {
@@ -251,13 +265,33 @@ export function Lightbox({
     viewportRef,
     surfaceRef,
     registerTrigger: (at, element) => {
-      if (element) triggers.current.set(at, element);
-      else triggers.current.delete(at);
+      if (!element) return;
+      // An element is the trigger of one slide: a tile whose index changed leaves its old one.
+      for (const [index, all] of triggers.current) if (index !== at) all.delete(element);
+      const all = triggers.current.get(at) ?? new Set<HTMLElement>();
+      all.add(element);
+      triggers.current.set(at, all);
     },
     focusTrigger: () => {
-      const visible = (element: HTMLElement | undefined): element is HTMLElement => element !== undefined && element.isConnected && element.getClientRects().length > 0;
-      const target = [triggers.current.get(shown), triggers.current.get(opener.current)].find(visible);
-      target?.focus();
+      window.cancelAnimationFrame(focusWait.current);
+      // The trigger of the slide shown, else the one that opened; of two for one slide, the one in view.
+      const target = [...triggersOf(shown), ...triggersOf(opener.current)][0];
+      if (!target) return;
+      if (reachable(target)) {
+        target.focus();
+        return;
+      }
+      // It is inside something inert because it is out of view (a slide of a carousel): bring it into
+      // view, and focus it once whatever made it inert has let go.
+      target.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" });
+      let frames = 0;
+      const attempt = (): void => {
+        frames += 1;
+        if (!target.isConnected) return;
+        if (reachable(target) || frames >= FOCUS_WAIT_FRAMES) target.focus();
+        else focusWait.current = window.requestAnimationFrame(attempt);
+      };
+      focusWait.current = window.requestAnimationFrame(attempt);
     },
     openAt: (at) => {
       opener.current = at;
@@ -280,6 +314,23 @@ export function Lightbox({
   );
 }
 
+/**
+ * A picture directly inside a slide is never larger than the slide. `max-h-full` on the picture cannot do
+ * that by itself: the wrapper around it is as tall as its content, and a percentage of that is no limit, so
+ * a picture taller than the slide was cut off. The slide's own size, in container units, is a limit.
+ */
+const SLIDE_PICTURE = "[&>img]:max-h-[100cqh] [&>img]:max-w-[100cqw]";
+
+/** Whether focus can go to an element now: nothing around it is inert. */
+const reachable = (element: HTMLElement): boolean => element.closest("[inert]") === null;
+/** Whether any of an element is inside the window. */
+const inView = (element: HTMLElement): boolean => {
+  const box = element.getBoundingClientRect();
+  return box.bottom > 0 && box.right > 0 && box.top < window.innerHeight && box.left < window.innerWidth;
+};
+/** How long a trigger that was scrolled into view is waited for before focus is tried anyway: about a second. */
+const FOCUS_WAIT_FRAMES = 60;
+
 export type LightboxTriggerProps = ComponentProps<"button"> & {
   /** The slide this opens at, from 0. */
   index?: number;
@@ -289,8 +340,10 @@ export type LightboxTriggerProps = ComponentProps<"button"> & {
 
 /**
  * A thumbnail (or any button) that opens the lightbox at a slide. The lightbox remembers it: focus comes
- * back here on close, or to the trigger of the slide shown at that moment. The picture inside it (the first
- * <img>, or an element marked `data-lightbox-shared`) is what the slide grows out of.
+ * back here on close, or to the trigger of the slide shown at that moment. A trigger that is out of view
+ * inside something inert (a slide of a carousel) is scrolled into view first and then focused; where one
+ * slide has two triggers, the one in view is used. The picture inside it (the first <img>, or an element
+ * marked `data-lightbox-shared`) is what the slide grows out of.
  */
 export function LightboxTrigger({ index = 0, asChild = false, onClick, ref, ...props }: LightboxTriggerProps) {
   const { registerTrigger, openAt } = useLightbox("LightboxTrigger");
@@ -517,10 +570,11 @@ export function LightboxSlide({ index, className, children, roleDescription = "s
       aria-roledescription={roleDescription}
       aria-label={ariaLabel ?? context.formatPosition(index + 1, context.count)}
       inert={!active}
-      className={cn("relative flex size-full shrink-0 snap-center snap-always items-center justify-center overflow-hidden p-2", className)}
+      // A size container: the picture inside is held to the slide's own height and width (see SLIDE_PICTURE).
+      className={cn("relative flex size-full shrink-0 snap-center snap-always items-center justify-center overflow-hidden p-2 [container-type:size]", className)}
       {...props}
     >
-      {active ? <ZoomSurface>{children}</ZoomSurface> : <div className="flex max-h-full max-w-full items-center justify-center">{children}</div>}
+      {active ? <ZoomSurface>{children}</ZoomSurface> : <div className={cn("flex max-h-full max-w-full items-center justify-center", SLIDE_PICTURE)}>{children}</div>}
     </div>
   );
 }
@@ -625,7 +679,7 @@ function ZoomSurface({ children }: { children: ReactNode }) {
         if (event.timeStamp - lastTouch.current < 700) return;
         zoomTo(zoom.scale > 1 ? 1 : ZOOM_DOUBLE, { origin: { x: event.clientX, y: event.clientY } });
       }}
-      className="flex max-h-full max-w-full touch-pan-x items-center justify-center transition-transform duration-base ease-out select-none data-[gesture]:transition-none data-[zoomed]:cursor-grab data-[zoomed]:touch-none data-[zoomed]:data-[gesture]:cursor-grabbing motion-reduce:transition-none [&_img]:pointer-events-none"
+      className={cn(SLIDE_PICTURE, "flex max-h-full max-w-full touch-pan-x items-center justify-center transition-transform duration-base ease-out select-none data-[gesture]:transition-none data-[zoomed]:cursor-grab data-[zoomed]:touch-none data-[zoomed]:data-[gesture]:cursor-grabbing motion-reduce:transition-none [&_img]:pointer-events-none")}
     >
       {children}
     </div>

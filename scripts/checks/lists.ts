@@ -1,4 +1,4 @@
-// Checks: virtual-list (VirtualList and VirtualGrid) (site/src/app/lists).
+// Checks: virtual-list (VirtualList and VirtualGrid; in a box, and scrolling with the page) (site/src/app/lists).
 
 import type { Kit } from "../smoke-kit.ts";
 
@@ -221,6 +221,220 @@ export async function run(kit: Kit): Promise<void> {
   const small = `${gridDemo} [aria-label="Seven cells in three columns"]`;
   const smallRows = await page.evaluate((s) => [...((document.querySelector(s) as HTMLElement).firstElementChild?.children ?? [])].map((row) => row.children.length), small);
   check((await attr(small, "data-columns")) === "3" && smallRows.join(",") === "3,3,1", `a fixed number of columns, with a short last line (${smallRows.join(",")})`);
+
+  // ---- A count that changes, and rows that move: heights are kept by key.
+  const changing = await kit.demo("Virtual list: rows that come, go and move");
+  const notes = `${changing} [data-slot=virtual-list]`;
+  const ESTIMATE = 72;
+  /** The notes in the page, in order, and how far their heights are from the estimate, taken together. */
+  const drawnNotes = (): Promise<{ ids: string[]; extra: number; heights: Record<string, number> }> =>
+    page.evaluate(
+      (s, estimate) => {
+        const rows = [...document.querySelectorAll<HTMLElement>(`${s} [data-row]`)].map((row) => ({ id: row.querySelector<HTMLElement>("[data-note]")?.dataset["note"] ?? "", height: row.getBoundingClientRect().height }));
+        return { ids: rows.map((row) => row.id), extra: rows.reduce((sum, row) => sum + row.height - estimate, 0), heights: Object.fromEntries(rows.map((row) => [row.id, row.height])) };
+      },
+      notes,
+      ESTIMATE,
+    );
+  /** The position (aria-posinset) a note says it has; 0 when it is not in the page. */
+  const placeOf = (id: string): Promise<number> => page.evaluate((s, note) => Number(document.querySelector(`${s} [data-note="${note}"]`)?.closest("[role=listitem]")?.getAttribute("aria-posinset") ?? 0), notes, id);
+  const noteCount = (): Promise<string> => text("[data-testid=notes-count]");
+  /**
+   * Every note that has been in the page since this was first called, with the height it had: a row that
+   * was drawn has been measured, also one that was drawn for a moment and let go. Returns how far those
+   * heights are from the estimate, taken together.
+   */
+  const everDrawn = (): Promise<number> =>
+    page.evaluate(
+      (s, estimate) => {
+        const host = window as unknown as { __notes?: Map<string, number> };
+        const sizer = (document.querySelector(s) as HTMLElement).firstElementChild as HTMLElement;
+        const look = (): void => {
+          for (const row of sizer.children) {
+            const id = row.querySelector<HTMLElement>("[data-note]")?.dataset["note"];
+            if (id) host.__notes?.set(id, row.getBoundingClientRect().height);
+          }
+        };
+        if (!host.__notes) {
+          host.__notes = new Map();
+          new MutationObserver(look).observe(sizer, { childList: true, subtree: true });
+        }
+        look();
+        return [...host.__notes.values()].reduce((sum, height) => sum + height - estimate, 0);
+      },
+      notes,
+      ESTIMATE,
+    );
+  await sleep(300);
+  await everDrawn();
+  now = await shape(notes);
+  const start = await drawnNotes();
+  check(now.positions[0] === 1 && now.sizes.length === 1 && now.sizes[0] === 300 && start.ids[0] === "n1", `a list of rows known by a key starts at its first (${start.ids[0]}, 1 of ${now.sizes[0]})`);
+  check(Math.abs(now.scrollHeight - (300 * ESTIMATE + start.extra)) <= 3 && Math.abs(start.extra) > 20, `its length is the estimate for rows not yet seen plus what the drawn rows measure (${now.scrollHeight}px, ${Math.round(start.extra)}px from the estimate)`);
+
+  // Reordering: the rows drawn before keep their measured heights although they are now somewhere else.
+  check(await kit.clickText(`${changing} button`, "Reverse the order"), "the order can be reversed");
+  await sleep(400);
+  const turned = await drawnNotes();
+  const after1 = await shape(notes);
+  check(turned.ids[0] === "n300" && after1.positions[0] === 1 && after1.sizes[0] === 300, `after a reorder the row now first says it is 1 of 300 (${turned.ids[0]})`);
+  const known = await everDrawn();
+  check(!turned.ids.includes("n1") && Math.abs(after1.scrollHeight - (300 * ESTIMATE + known)) <= 3, `rows that moved keep the heights measured for them: the length is the estimate plus what every row drawn so far measures, before the reorder or after (${after1.scrollHeight}px, expected ${Math.round(300 * ESTIMATE + known)}px)`);
+  check(after1.seam <= 1 && after1.covers, "with no gap or overlap");
+  await scrollTo(notes, 1_000_000);
+  await sleep(300);
+  const ended = await drawnNotes();
+  const after2 = await shape(notes);
+  check(ended.ids.at(-1) === "n1" && after2.positions.at(-1) === 300 && atEnd(after2) && after2.tail <= 1, `the row that was first is now last, at the end of the content (${ended.ids.at(-1)}, ${after2.tail.toFixed(2)}px)`);
+  check(Math.abs((ended.heights["n1"] ?? 0) - (start.heights["n1"] ?? -1)) <= 0.5, `and is as tall there as it was (${ended.heights["n1"]}px)`);
+  await kit.clickText(`${changing} button`, "Reverse the order");
+  await sleep(400);
+  check((await drawnNotes()).ids.at(-1) === "n300" && (await placeOf("n300")) === 300, "reversed again, the rows are back in their first order");
+
+  // The count grows: the rows being read stay where they are.
+  await scrollTo(notes, 6000);
+  await sleep(300);
+  now = await shape(notes);
+  const held = now.positions[5] ?? 0;
+  const heldId = (await drawnNotes()).ids[5] ?? "";
+  const heldAt = await offsetOf(notes, held);
+  check(await kit.clickText(`${changing} button`, "Add 100 at the end"), "rows can be added at the end");
+  await sleep(400);
+  const grown = await shape(notes);
+  check((await noteCount()) === "400" && grown.sizes.length === 1 && grown.sizes[0] === 400, `when the count grows every row says the new total (${grown.sizes.join("/")})`);
+  check(grown.scrollTop === now.scrollTop && Math.abs((await offsetOf(notes, held)).top - heldAt.top) <= 1 && (await placeOf(heldId)) === held, "and the rows in view have not moved");
+  check(Math.abs(grown.scrollHeight - now.scrollHeight - 100 * ESTIMATE) <= 1, `the content is longer by the estimate for the new rows (${grown.scrollHeight - now.scrollHeight}px)`);
+
+  // A row added before the others: every row after it is one further on, and keeps its own height.
+  check(await kit.clickText(`${changing} button`, "Add one at the start"), "a row can be added at the start");
+  await sleep(400);
+  const shifted = await shape(notes);
+  check((await text("[data-testid=notes-first]")) === "n401" && shifted.sizes[0] === 401, "the list has a new first row");
+  check((await placeOf(heldId)) === held + 1,`a row that was ${held} of 400 is now ${held + 1} of 401`);
+  const sofar = await everDrawn();
+  check(shifted.seam <= 1 && shifted.covers && Math.abs(shifted.scrollHeight - (401 * ESTIMATE + sofar)) <= 4, `measured heights went with their rows: nothing overlaps, and the length is still the estimate plus what the rows drawn so far measure (${shifted.scrollHeight}px, expected ${Math.round(401 * ESTIMATE + sofar)}px)`);
+  await kit.axe(changing, "the list whose rows change");
+
+  // The count shrinks below where the view was.
+  await scrollTo(notes, 1_000_000);
+  check(await kit.clickText(`${changing} button`, "Keep only three"), "the list can be cut short");
+  await sleep(500);
+  const cut = await shape(notes);
+  check((await noteCount()) === "3" && cut.rendered === 3 && cut.positions.join() === "1,2,3" && cut.sizes.join() === "3", `cut to three rows while scrolled to the end, the three are drawn: no blank (${cut.positions.join()} of ${cut.sizes.join()})`);
+  check(cut.scrollTop <= Math.max(0, cut.scrollHeight - cut.clientHeight) + 1 && cut.covers && cut.seam <= 1 && cut.tail <= 1, `and the view is inside the shorter content (${Math.round(cut.scrollTop)}px of ${cut.scrollHeight}px)`);
+  check(await kit.clickText(`${changing} button`, "Remove them all"), "the list can be emptied");
+  await sleep(300);
+  check((await noteCount()) === "0" && (await count(`${notes} [role=listitem]`)) === 0 && (await page.evaluate((s) => (document.querySelector(s)?.firstElementChild as HTMLElement).offsetHeight, notes)) === 0, "an empty list draws nothing and has no length");
+
+  // ---- A list that scrolls with the page.
+  const paged = await kit.demo("Virtual list: the page scrolls");
+  const results = `${paged} [data-slot=virtual-list]`;
+  type PageShape = { rendered: number; positions: number[]; sizes: number[]; seam: number; covers: boolean; length: number; inner: boolean; scrollY: number; view: number; atBottom: boolean };
+  const pageShape = (): Promise<PageShape> =>
+    page.evaluate((s) => {
+      const element = document.querySelector(s) as HTMLElement;
+      const sizer = element.firstElementChild as HTMLElement;
+      const items = [...element.querySelectorAll<HTMLElement>("[role=listitem]")];
+      const rows = [...sizer.children].map((row) => ({ index: Number((row as HTMLElement).dataset["row"]), rect: row.getBoundingClientRect() }));
+      let seam = 0;
+      for (let at = 1; at < rows.length; at += 1) {
+        const before = rows[at - 1];
+        const after = rows[at];
+        if (!before || !after || after.index !== before.index + 1) continue;
+        seam = Math.max(seam, Math.abs(after.rect.top - before.rect.bottom));
+      }
+      const view = document.documentElement.clientHeight;
+      const box = sizer.getBoundingClientRect();
+      const from = Math.max(0, box.top);
+      const to = Math.min(view, box.bottom);
+      // Of the rows that follow one another (a row kept for its focus may stand apart), the first and the last.
+      const run = rows.filter((row, at) => at === 0 || row.index === (rows[at - 1]?.index ?? -2) + 1 || row.index === (rows[at + 1]?.index ?? -2) - 1);
+      const firstRow = run[0];
+      const lastRow = run.at(-1);
+      return {
+        rendered: items.length,
+        positions: items.map((item) => Number(item.getAttribute("aria-posinset"))),
+        sizes: [...new Set(items.map((item) => Number(item.getAttribute("aria-setsize"))))],
+        seam,
+        covers: to <= from || Boolean(firstRow && lastRow && firstRow.rect.top <= from + 1 && lastRow.rect.bottom >= to - 1),
+        length: element.offsetHeight,
+        inner: element.scrollHeight > element.clientHeight + 1 || getComputedStyle(element).overflowY !== "visible",
+        scrollY: window.scrollY,
+        view,
+        atBottom: window.scrollY + view >= document.documentElement.scrollHeight - 2,
+      };
+    }, results);
+  /** Where a result's row is in the window (not numbers when it is not in the page). */
+  const resultAt = (position: number): Promise<{ top: number; bottom: number }> =>
+    page.evaluate(
+      (s, p) => {
+        const row = document.querySelector(`${s} [role=listitem][aria-posinset="${p}"]`)?.closest("[data-row]");
+        const rect = row?.getBoundingClientRect();
+        return rect ? { top: rect.top, bottom: rect.bottom } : { top: Number.NaN, bottom: Number.NaN };
+      },
+      results,
+      position,
+    );
+  const scrollPage = async (by: number): Promise<void> => {
+    await page.evaluate((amount) => window.scrollBy({ top: amount, behavior: "instant" }), by);
+    await sleep(300);
+  };
+  check((await attr(results, "role")) === "list" && (await attr(results, "aria-label")) === "Two thousand results" && (await attr(results, "data-scroll")) === "window", "a list that scrolls with the page is still a named list");
+  check((await attr(results, "tabindex")) === null, "it is not a Tab stop: the page already scrolls from the keyboard");
+  let whole = await pageShape();
+  check(!whole.inner && whole.length > 2000 * 60, `it has no box of its own: it is as long as its rows (${whole.length}px)`);
+  check(whole.rendered > 3 && whole.rendered < 40 && whole.positions[0] === 1 && whole.sizes.join() === "2000", `yet only a window of the two thousand is in the page (${whole.rendered}), the first saying 1 of 2,000`);
+  await scrollPage(5000);
+  whole = await pageShape();
+  check((whole.positions[0] ?? 0) > 20 && whole.rendered < 40 && whole.covers && whole.seam <= 1, `scrolling the page brings other rows, which fill the window with no gap (${whole.positions[0]} to ${whole.positions.at(-1)})`);
+  check(Number(await text("[data-testid=results-start]")) > 20 && Number(await text("[data-testid=results-end]")) > Number(await text("[data-testid=results-start]")), `the range in view is reported (${await text("[data-testid=results-start]")} to ${await text("[data-testid=results-end]")})`);
+
+  // Going to a row scrolls the page, and stops under the sticky header.
+  const headroom = await page.evaluate((s) => Number.parseFloat(getComputedStyle(document.querySelector(s) as Element).scrollMarginTop), results);
+  const header = await page.evaluate(() => [...document.querySelectorAll("body div")].find((node) => getComputedStyle(node).position === "sticky")?.getBoundingClientRect().bottom ?? -1);
+  check(headroom > 0 && header > 0 && header <= headroom, `the list leaves room for the page's sticky header (${headroom}px for a header of ${Math.round(header)}px)`);
+  check(await kit.click("[data-testid=results-go]"), "there is a control that goes to a result");
+  await sleep(600);
+  let spot = await resultAt(1000);
+  check(Math.abs(spot.top - headroom) <= 2, `scrollToIndex scrolls the page until result 1,000 is just under the header (${spot.top.toFixed(1)}px)`);
+  await sleep(500);
+  spot = await resultAt(1000);
+  whole = await pageShape();
+  check(Math.abs(spot.top - headroom) <= 2 && whole.covers && whole.seam <= 1, "and it stays there once the rows around it are measured");
+  await scrollPage(-260);
+  const moved = await resultAt(1000);
+  check(Math.abs(moved.top - spot.top - 260) <= 2 && (await pageShape()).covers, `scrolling up over rows of unknown height moves the page by exactly what was scrolled (${(moved.top - spot.top).toFixed(1)}px of 260)`);
+  check(await kit.click("[data-testid=results-centre]"), "a result can be centred");
+  await sleep(800);
+  spot = await resultAt(500);
+  whole = await pageShape();
+  check(Math.abs((spot.top + spot.bottom) / 2 - (headroom + (whole.view - headroom) / 2)) <= 3, `align "center" puts it in the middle of what the header leaves (${((spot.top + spot.bottom) / 2).toFixed(1)} in ${whole.view})`);
+  check(await kit.click("[data-testid=results-last]"), "the last result can be gone to");
+  await sleep(800);
+  spot = await resultAt(2000);
+  whole = await pageShape();
+  check(whole.positions.at(-1) === 2000 && Math.abs(spot.bottom - whole.view) <= 2, `align "end" puts the last result at the bottom of the window (${spot.bottom.toFixed(1)} of ${whole.view})`);
+  check(await kit.click("[data-testid=results-back]"), "a control inside a row can go to the first");
+  await sleep(800);
+  spot = await resultAt(1);
+  whole = await pageShape();
+  check(whole.positions[0] === 1 && Math.abs(spot.top - headroom) <= 2, `the first result comes back under the header (${spot.top.toFixed(1)}px)`);
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await sleep(200);
+
+  // The keys are the page's.
+  await keys("End");
+  await sleep(700);
+  whole = await pageShape();
+  check(whole.atBottom && whole.positions.at(-1) === 2000 && whole.covers, `End goes to the end of the page, where the last results are drawn (${whole.positions.at(-1)})`);
+  await keys("Home");
+  await sleep(700);
+  whole = await pageShape();
+  check(whole.scrollY === 0, `and Home to its top (${Math.round(whole.scrollY)}px)`);
+  await kit.demo("Virtual list: the page scrolls");
+  whole = await pageShape();
+  check(whole.positions[0] === 1 && whole.rendered < 40, "where the list starts again at its first rows");
+  await kit.axe(paged, "the list that scrolls with the page");
 
   // ---- Restoration: the place survives a reload.
   const restore = await kit.demo("Scroll restoration");

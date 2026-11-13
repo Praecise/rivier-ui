@@ -174,6 +174,35 @@ export async function run(kit: Kit): Promise<void> {
     await page.keyboard.up("Control");
     await sleep(300);
     check((await viewOf(viewer)).zoom > zoom && (await scrollY()) === held, `Ctrl with the wheel zooms and the page stays (${await said(viewer)})`);
+  } else {
+    // Pinch: two fingers moving apart zoom in, moving together zoom out, and neither turns the model nor moves the page.
+    const again = await rect(surface);
+    const centre = { x: again.left + again.width / 2, y: again.top + again.height * 0.4 };
+    const held = await scrollY();
+    const turnedTo = (await viewOf(viewer)).azimuth;
+    const one = await page.touchscreen.touchStart(centre.x - 30, centre.y);
+    const two = await page.touchscreen.touchStart(centre.x + 30, centre.y);
+    for (let step = 1; step <= 6; step += 1) {
+      await one.move(centre.x - 30 - step * 5, centre.y);
+      await two.move(centre.x + 30 + step * 5, centre.y);
+    }
+    await sleep(200);
+    const spread = await viewOf(viewer);
+    check(near(spread.zoom, 2, 0.1), `two fingers moving apart to twice the distance zoom in to twice the size (${await said(viewer)})`);
+    for (let step = 5; step >= -3; step -= 1) {
+      await one.move(centre.x - 30 - step * 5, centre.y);
+      await two.move(centre.x + 30 + step * 5, centre.y);
+    }
+    await sleep(200);
+    const closed = await viewOf(viewer);
+    check(near(closed.zoom, 0.5, 0.05), `moving together to half the distance zoom out to half (${await said(viewer)})`);
+    await one.end();
+    await two.end();
+    await sleep(250);
+    const after = await viewOf(viewer);
+    check(near(after.azimuth, turnedTo, 0.5) && after.zoom === closed.zoom && (await scrollY()) === held, `a pinch does not turn the model or move the page, and lifting the fingers leaves the zoom where it was (${await said(viewer)})`);
+    await drag(centre, { x: centre.x + 50, y: centre.y });
+    check(near((await viewOf(viewer)).azimuth, turnedTo + 20, 3) && (await viewOf(viewer)).zoom === closed.zoom, `one finger turns it again afterwards (${await said(viewer)})`);
   }
   await kit.click("[data-testid=reset-handle]");
   check(await is(viewer, 0, 15, 1), "the project can reset the view from outside");
