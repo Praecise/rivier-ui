@@ -1,0 +1,32 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "code-block",
+  "type": "registry:ui",
+  "title": "Code Block",
+  "description": "Code to read and copy: a title or file name, the language, optional line numbers and highlighted lines, a switch between wrapping and scrolling long lines, and a copy button that says when it has copied.",
+  "categories": [
+    "ui"
+  ],
+  "dependencies": [
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/announce",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/code-block.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/code-block.tsx",
+      "content": "\"use client\";\n/**\n * @name code-block\n * @category ui\n * @description Code to read and copy: a title or file name, the language, optional line numbers and highlighted lines, a switch between wrapping and scrolling long lines, and a copy button that says when it has copied.\n * @when Showing code, commands or configuration in documentation and answers. Colouring by syntax comes from the project (pass `renderLine` with a highlighter's output); the block works without it. For code to edit, bring an editor (CodeMirror, Monaco); for a short word of code in a sentence use `<code>`.\n * @example\n * <CodeBlock title=\"Install\" language=\"sh\" code={\"npm install\\nnpm run dev\"} />\n * <CodeBlock language=\"ts\" code={source} lineNumbers highlight={[3, 4]} />\n */\nimport { Check, Copy, WrapText } from \"lucide-react\";\nimport { useState, type ComponentProps, type ReactNode } from \"react\";\nimport { announce } from \"@/lib/announce\";\nimport { cn } from \"@/lib/cn\";\n\nexport type CodeBlockLabels = { copy: string; copied: string; wrap: string; failed: string };\nconst LABELS: CodeBlockLabels = { copy: \"Copy the code\", copied: \"Copied\", wrap: \"Wrap long lines\", failed: \"Could not copy\" };\n\nexport type CodeBlockProps = Omit<ComponentProps<\"figure\">, \"title\"> & {\n  /** The code as plain text. */\n  code: string;\n  /** Its language, shown as a word (\"ts\", \"sh\") and set as the class `language-…` for highlighters. */\n  language?: string;\n  /** A file name or a few words above the code. */\n  title?: string;\n  lineNumbers?: boolean;\n  /** Line numbers (from 1) to mark, as for the lines a step talks about. */\n  highlight?: readonly number[];\n  /** Draws one line: return a highlighter's spans. Default: the plain text. */\n  renderLine?: (line: string, index: number) => ReactNode;\n  /** Start with long lines wrapped instead of scrolling. */\n  defaultWrap?: boolean;\n  labels?: Partial<CodeBlockLabels>;\n};\n\nexport function CodeBlock({ code, language, title, lineNumbers = false, highlight = [], renderLine, defaultWrap = false, labels: given, className, ...props }: CodeBlockProps) {\n  const labels = { ...LABELS, ...given };\n  const [copied, setCopied] = useState(false);\n  const [wrap, setWrap] = useState(defaultWrap);\n  const lines = code.replace(/\\n$/, \"\").split(\"\\n\");\n  const copy = async (): Promise<void> => {\n    try {\n      await navigator.clipboard.writeText(code);\n      setCopied(true);\n      announce(labels.copied);\n      window.setTimeout(() => setCopied(false), 2000);\n    } catch {\n      announce(labels.failed, \"assertive\");\n    }\n  };\n  return (\n    <figure data-slot=\"code-block\" className={cn(\"m-0 flex min-w-0 flex-col overflow-hidden rounded-surface border bg-muted\", className)} {...props}>\n      <div className=\"flex items-center gap-2 border-b bg-card px-3 py-1.5\">\n        {title ? <figcaption className=\"min-w-0 truncate font-mono text-xs\">{title}</figcaption> : null}\n        {language ? <span className=\"rounded-control bg-muted px-1.5 font-mono text-xs text-muted-foreground\">{language}</span> : null}\n        <span className=\"ms-auto flex gap-1\">\n          <button type=\"button\" aria-pressed={wrap} aria-label={labels.wrap} onClick={() => setWrap(!wrap)} className=\"flex size-8 items-center justify-center rounded-control text-muted-foreground hover:bg-accent hover:text-foreground aria-pressed:bg-highlight-soft pointer-coarse:size-10\">\n            <WrapText aria-hidden=\"true\" className=\"size-4\" />\n          </button>\n          <button type=\"button\" aria-label={copied ? labels.copied : labels.copy} onClick={() => void copy()} className=\"flex size-8 items-center justify-center rounded-control text-muted-foreground hover:bg-accent hover:text-foreground pointer-coarse:size-10\">\n            {copied ? <Check aria-hidden=\"true\" className=\"size-4 text-success\" /> : <Copy aria-hidden=\"true\" className=\"size-4\" />}\n          </button>\n        </span>\n      </div>\n      {/* Focusable so the keyboard can scroll it sideways; LTR whatever the page, as code reads. */}\n      <pre tabIndex={0} dir=\"ltr\" className={cn(\"m-0 overflow-x-auto py-3 font-mono text-sm leading-relaxed\", wrap && \"whitespace-pre-wrap break-words\")}>\n        <code className={language ? `language-${language}` : undefined}>\n          {lines.map((line, index) => {\n            const marked = highlight.includes(index + 1);\n            return (\n              <span key={index} data-line={index + 1} data-highlighted={marked ? \"\" : undefined} className={cn(\"flex px-3\", marked && \"bg-highlight-soft\")}>\n                {lineNumbers ? (\n                  <span aria-hidden=\"true\" className=\"me-4 inline-block w-8 shrink-0 text-end text-muted-foreground tabular-nums select-none\">\n                    {index + 1}\n                  </span>\n                ) : null}\n                <span className=\"min-w-0 flex-1\">{renderLine ? renderLine(line, index) : line || \" \"}</span>\n                {\"\\n\"}\n              </span>\n            );\n          })}\n        </code>\n      </pre>\n    </figure>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "Showing code, commands or configuration in documentation and answers. Colouring by syntax comes from the project (pass `renderLine` with a highlighter's output); the block works without it. For code to edit, bring an editor (CodeMirror, Monaco); for a short word of code in a sentence use `<code>`.",
+    "example": "<CodeBlock title=\"Install\" language=\"sh\" code={\"npm install\\nnpm run dev\"} />\n<CodeBlock language=\"ts\" code={source} lineNumbers highlight={[3, 4]} />",
+    "client": true
+  }
+}

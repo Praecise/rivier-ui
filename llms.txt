@@ -490,6 +490,17 @@ Use it: Filters in effect above a list (Chip with ChipRemove), suggested replies
 </ChipGroup>
 ```
 
+### code-block
+
+Code to read and copy: a title or file name, the language, optional line numbers and highlighted lines, a switch between wrapping and scrolling long lines, and a copy button that says when it has copied.
+
+Use it: Showing code, commands or configuration in documentation and answers. Colouring by syntax comes from the project (pass `renderLine` with a highlighter's output); the block works without it. For code to edit, bring an editor (CodeMirror, Monaco); for a short word of code in a sentence use `<code>`.
+
+```tsx
+<CodeBlock title="Install" language="sh" code={"npm install\nnpm run dev"} />
+<CodeBlock language="ts" code={source} lineNumbers highlight={[3, 4]} />
+```
+
 ### collapsible
 
 One section of content that opens and closes under a button that says whether it is open: the disclosure pattern.
@@ -1072,6 +1083,26 @@ Use it: A preview that sighted pointer users can do without: the link itself mus
 </HoverCard>
 ```
 
+### image-annotator
+
+A picture on which areas are marked and named: drawn by dragging, or added with a button and placed with the keys (arrows move, Alt and the arrows resize, Delete removes), each named in a list beside the picture; areas come out as fractions of the picture, every change said aloud.
+
+Use it: Labelling what is in a picture: damage on a photo, rooms on a plan, objects for training a model, notes on a design. For cutting a picture use image-cropper; for named points that play at moments of a video use hotspots.
+
+```tsx
+<ImageAnnotator src="/plan.png" alt="Ground floor plan" defaultAreas={[{ id: "a", x: 0.1, y: 0.2, width: 0.3, height: 0.25, label: "Kitchen" }]} onAreasChange={save} />
+```
+
+### image-cropper
+
+A picture with a frame over it that chooses the part to keep: dragged or resized by its corners, or moved with the arrow keys and resized with Alt and the arrows, optionally held to a shape (square, 16:9); the choice comes out as fractions and as pixels of the original.
+
+Use it: Cropping an avatar, a cover picture, a product photo before upload. The cutting itself is the project's (a canvas, the server); this gives the rectangle. For marking areas on a picture use image-annotator; for comparing two pictures use compare-slider.
+
+```tsx
+<ImageCropper src="/photo.jpg" alt="The harbour at dawn" aspect={1} onCropChange={(crop) => setCrop(crop.pixels)} />
+```
+
 ### input-group
 
 An input with a leading or trailing icon, text or button inside one shared border.
@@ -1195,6 +1226,16 @@ Use it: Looking closely at pictures that are shown small on the page: a listing'
     </LightboxStage>
   </LightboxContent>
 </Lightbox>
+```
+
+### markdown-editor
+
+A field for writing Markdown with a toolbar that wraps the chosen words (bold, italic, code, link) or starts a line (heading, list, quote), the same as Ctrl/⌘ with B, I and K, and a tab that shows the project's own preview.
+
+Use it: Comments, notes and descriptions where people write a little formatting. The preview is the project's (its Markdown renderer and its sanitiser); without one, leave `renderPreview` out and there is no preview tab. For rich text without markup bring an editor (Tiptap, Lexical); for plain text use textarea.
+
+```tsx
+<MarkdownEditor aria-label="Comment" defaultValue="**Hello**" renderPreview={(text) => <MyMarkdown source={text} />} name="comment" />
 ```
 
 ### media-row-list
