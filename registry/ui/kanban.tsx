@@ -175,7 +175,7 @@ export function Kanban({ columns, cards: cardsProp, defaultCards = [], onCardsCh
   };
 
   return (
-    <div data-slot="kanban" role="group" className={cn("flex w-full min-w-0 snap-x gap-3 overflow-x-auto pb-2", className)} {...props}>
+    <div data-slot="kanban" role="group" className={cn("flex w-full min-w-0 gap-3 overflow-x-auto pb-2", className)} {...props}>
       <p className="sr-only">{labels.instructions}</p>
       {columns.map((column) => {
         const list = cards.filter((c) => c.column === column.id);
@@ -184,7 +184,7 @@ export function Kanban({ columns, cards: cardsProp, defaultCards = [], onCardsCh
             key={column.id}
             data-slot="kanban-column"
             aria-label={column.title}
-            className={cn("flex w-64 shrink-0 snap-start flex-col gap-2 rounded-surface border bg-muted p-2 @md:w-72", over === column.id && "outline-2 outline-ring")}
+            className={cn("flex w-64 shrink-0 flex-col gap-2 rounded-surface border bg-muted p-2 @md:w-72", over === column.id && "outline-2 outline-ring")}
             onDragOver={(event) => {
               event.preventDefault();
               setOver(column.id);

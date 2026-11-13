@@ -94,6 +94,8 @@ export function TreeView({
     const hasChildren = Boolean(current.item.children?.length);
     const open = expanded.includes(current.item.id);
     const step = inlineStep(event.key, event.currentTarget);
+    // Any key that is not a letter ends a run of typed letters.
+    if (event.key.length !== 1) typed.current = { text: "", at: 0 };
     if (event.key === "ArrowDown") focus(rows[index + 1]?.item.id);
     else if (event.key === "ArrowUp") focus(rows[index - 1]?.item.id);
     else if (step === 1) {

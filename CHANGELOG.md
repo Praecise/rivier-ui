@@ -123,6 +123,12 @@ tile server. Shown at `/maps` and checked by `scripts/checks/maps.ts`. CONVENTIO
   Ctrl/⌘+B, a sheet on narrow screens), **`visually-hidden`**, **`skip-link`**, and **`use-hotkeys`** (lib:
   shortcuts and sequences by the key's place on any layout, never while typing, and `formatHotkey`). Shown
   at `/surfaces`.
+- **`tree-view`** (the WAI-ARIA tree: arrows, Home, End, type-ahead, `*`), **`kanban`** (drag, or lift with
+  Space and carry with the arrows, or each card's "Move to" menu; every move said), **`flow-diagram`** (steps
+  dragged or moved by arrows, linked by C then Enter or by a handle, Delete, zoom and pan, the links also as a
+  list), **`tour`** (a card beside each element in turn, ringed, focus in the card, Escape ends), and
+  **`notification-list`** (read and unread in words, all or unread, mark one or all, times from a given
+  moment). Shown at `/boards`.
 - Showcase: the header's row of page links scrolls sideways when there are more pages than fit.
 
 ## 2026-11-13
