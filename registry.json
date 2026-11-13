@@ -1621,6 +1621,39 @@
       }
     },
     {
+      "name": "kanban",
+      "type": "registry:ui",
+      "title": "Kanban",
+      "description": "Cards in columns (to do, doing, done) that move between and within columns three ways: dragged with a mouse, lifted with Space and carried with the arrow keys, or sent by each card's \"Move to\" menu; every move is said aloud.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn",
+        "@rivier-ui/direction",
+        "@rivier-ui/dropdown-menu",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/kanban.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/kanban.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Work that passes through stages: tasks, applications, orders. For one ordered list use sortable-list; for a schedule over time use gantt-chart; for records to sort and filter use data-grid.",
+        "example": "<Kanban\n  aria-label=\"Tasks\"\n  columns={[{ id: \"todo\", title: \"To do\" }, { id: \"doing\", title: \"Doing\" }, { id: \"done\", title: \"Done\" }]}\n  defaultCards={[{ id: \"1\", column: \"todo\", title: \"Write the brief\" }, { id: \"2\", column: \"doing\", title: \"Draw the map\" }]}\n/>",
+        "client": true
+      }
+    },
+    {
       "name": "kbd",
       "type": "registry:ui",
       "title": "Kbd",
@@ -3225,6 +3258,37 @@
         "category": "ui",
         "when": "Naming an icon-only button or adding a short hint. It does not open on touch, so never put anything needed there: the control keeps its own `aria-label`. For content people interact with use popover. Put one TooltipProvider around the app (root layout); every Tooltip must be inside one.",
         "example": "<TooltipProvider>\n  <Tooltip>\n    <TooltipTrigger asChild>\n      <Button variant=\"ghost\" size=\"icon\" aria-label=\"Copy link\"><Link2 /></Button>\n    </TooltipTrigger>\n    <TooltipContent>Copy link</TooltipContent>\n  </Tooltip>\n</TooltipProvider>",
+        "client": true
+      }
+    },
+    {
+      "name": "tree-view",
+      "type": "registry:ui",
+      "title": "Tree View",
+      "description": "A hierarchy of items that open and close (folders and files, sections and pages), moved through to the WAI-ARIA tree pattern: Up and Down through what is visible, Right to open or go in, Left to close or go up, Home, End, typing a letter to jump, * to open every sibling, and Enter to choose.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/direction",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/tree-view.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/tree-view.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Navigating or choosing within nested items: a file tree, a table of contents, categories. For flat lists use a list or virtual-list; for a few levels of site links use navigation-menu; for nested data to compare use data-grid grouping.",
+        "example": "<TreeView\n  aria-label=\"Files\"\n  items={[\n    { id: \"src\", label: \"src\", children: [{ id: \"app\", label: \"app.tsx\" }, { id: \"lib\", label: \"lib\", children: [{ id: \"cn\", label: \"cn.ts\" }] }] },\n    { id: \"readme\", label: \"README.md\" },\n  ]}\n  defaultExpanded={[\"src\"]}\n  onSelectedChange={(id) => open(id)}\n/>",
         "client": true
       }
     },

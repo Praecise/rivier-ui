@@ -1090,6 +1090,20 @@ Use it: Short free text: a name, an email, a number. Wrap it in field for a labe
 <Input aria-invalid="true" aria-label="Email" defaultValue="not-an-email" />
 ```
 
+### kanban
+
+Cards in columns (to do, doing, done) that move between and within columns three ways: dragged with a mouse, lifted with Space and carried with the arrow keys, or sent by each card's "Move to" menu; every move is said aloud.
+
+Use it: Work that passes through stages: tasks, applications, orders. For one ordered list use sortable-list; for a schedule over time use gantt-chart; for records to sort and filter use data-grid.
+
+```tsx
+<Kanban
+  aria-label="Tasks"
+  columns={[{ id: "todo", title: "To do" }, { id: "doing", title: "Doing" }, { id: "done", title: "Done" }]}
+  defaultCards={[{ id: "1", column: "todo", title: "Write the brief" }, { id: "2", column: "doing", title: "Draw the map" }]}
+/>
+```
+
 ### kbd
 
 A key cap for showing a keyboard key or a shortcut.
@@ -2107,6 +2121,24 @@ Use it: Naming an icon-only button or adding a short hint. It does not open on t
     <TooltipContent>Copy link</TooltipContent>
   </Tooltip>
 </TooltipProvider>
+```
+
+### tree-view
+
+A hierarchy of items that open and close (folders and files, sections and pages), moved through to the WAI-ARIA tree pattern: Up and Down through what is visible, Right to open or go in, Left to close or go up, Home, End, typing a letter to jump, * to open every sibling, and Enter to choose.
+
+Use it: Navigating or choosing within nested items: a file tree, a table of contents, categories. For flat lists use a list or virtual-list; for a few levels of site links use navigation-menu; for nested data to compare use data-grid grouping.
+
+```tsx
+<TreeView
+  aria-label="Files"
+  items={[
+    { id: "src", label: "src", children: [{ id: "app", label: "app.tsx" }, { id: "lib", label: "lib", children: [{ id: "cn", label: "cn.ts" }] }] },
+    { id: "readme", label: "README.md" },
+  ]}
+  defaultExpanded={["src"]}
+  onSelectedChange={(id) => open(id)}
+/>
 ```
 
 ### undo-line
