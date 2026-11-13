@@ -3754,7 +3754,7 @@
       ],
       "meta": {
         "category": "viz",
-        "when": "Comparing amounts across categories. Use `orientation=\"horizontal\"` for long names or a ranking, `stacked` when the series add up to a total. For change over many points in time use line-chart; for a single number use a stat, not one bar.",
+        "when": "Comparing amounts across categories. Use `orientation=\"horizontal\"` for long names or a ranking, `stacked` when the series add up to a total, `normalize` to compare each category's split as shares of 100 %. For change over many points in time use line-chart; for a single number use a stat, not one bar.",
         "example": "<BarChart\n  label=\"Orders by channel per quarter\"\n  data={[\n    { quarter: \"Q1\", web: 320, app: 210 },\n    { quarter: \"Q2\", web: 410, app: 290 },\n    { quarter: \"Q3\", web: 380, app: 350 },\n  ]}\n  x=\"quarter\"\n  series={[\n    { key: \"web\", label: \"Web\" },\n    { key: \"app\", label: \"App\" },\n  ]}\n  showValues\n/>",
         "client": true
       }
@@ -3826,6 +3826,40 @@
         "category": "viz",
         "when": "Building a chart of your own that should match the others. For the common forms use line-chart, area-chart, bar-chart, donut-chart, sparkline, heatmap or radial-progress directly.",
         "example": "<ChartContainer aspect={2} table={{ caption: \"Signups\", columns: [\"Day\", \"Signups\"], rows: [[\"Mon\", 4], [\"Tue\", 9]] }}>\n  {({ width, height }) => (\n    <ChartSvg label=\"Signups by day\" width={width} height={height}>\n      <rect x={0} y={height - 40} width={width / 3} height={40} className={chartSeries(0).fill} />\n      <rect x={width / 2} y={height - 90} width={width / 3} height={90} className={chartSeries(0).fill} />\n    </ChartSvg>\n  )}\n</ChartContainer>\n<ChartLegend items={[{ label: \"Signups\", index: 0 }]} mark=\"rect\" />",
+        "client": true
+      }
+    },
+    {
+      "name": "circle-pack",
+      "type": "registry:component",
+      "title": "Circle Pack",
+      "description": "A hierarchy as circles inside circles: each group an outline holding its parts, each part a circle whose area is its size, with zooming into a group by click or Enter and back out by the trail or Backspace.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-hierarchy"
+      ],
+      "devDependencies": [
+        "@types/d3-hierarchy"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/circle-pack.tsx",
+          "type": "registry:component",
+          "target": "components/viz/circle-pack.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing groups and their members when the grouping matters more than precise sizes: topics and their articles, teams and their projects. To compare sizes closely use treemap or bar-chart; for levels as rings use sunburst.",
+        "example": "<CirclePack\n  label=\"Articles by topic\"\n  data={{\n    name: \"All articles\",\n    children: [\n      { name: \"Science\", children: [{ name: \"Space\", value: 40 }, { name: \"Biology\", value: 25 }] },\n      { name: \"Arts\", children: [{ name: \"Film\", value: 30 }, { name: \"Music\", value: 18 }] },\n    ],\n  }}\n/>",
         "client": true
       }
     },
@@ -4129,6 +4163,76 @@
         "category": "viz",
         "when": "The shape of a trend beside a number that carries the value. Size it with classes (`h-8 w-24` by default). When the reader needs to read values off it, use line-chart or bar-chart.",
         "example": "<Sparkline data={[4, 6, 5, 9, 12, 10, 14]} label=\"Signups, last 7 days\" />\n<Sparkline data={[3, 8, 2, 7, 5]} type=\"bar\" className=\"h-6 w-16\" />",
+        "client": true
+      }
+    },
+    {
+      "name": "sunburst",
+      "type": "registry:component",
+      "title": "Sunburst",
+      "description": "A hierarchy as rings around a centre: each ring a level, each arc a part sized by its share of its parent, with zooming into any arc by click or Enter and back out by the centre, the trail or Backspace.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-hierarchy",
+        "d3-shape"
+      ],
+      "devDependencies": [
+        "@types/d3-hierarchy",
+        "@types/d3-shape"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/sunburst.tsx",
+          "type": "registry:component",
+          "target": "components/viz/sunburst.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing how a total divides level by level when the depth matters as much as the sizes: a path through categories, a file system, a budget in three levels. For sizes that must be compared closely use treemap (areas in rectangles are easier to judge than arcs); for one level use donut-chart.",
+        "example": "<Sunburst\n  label=\"Visits by source\"\n  data={{\n    name: \"All visits\",\n    children: [\n      { name: \"Search\", children: [{ name: \"Organic\", value: 420 }, { name: \"Paid\", value: 160 }] },\n      { name: \"Social\", children: [{ name: \"Video\", value: 120 }, { name: \"Posts\", value: 80 }] },\n      { name: \"Direct\", value: 300 },\n    ],\n  }}\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "treemap",
+      "type": "registry:component",
+      "title": "Treemap",
+      "description": "A whole split into nested rectangles whose areas are the parts' sizes: groups in their own colours, the parts inside them labelled where they fit, with zooming into a group by click or Enter and back out by the trail or Backspace.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-hierarchy"
+      ],
+      "devDependencies": [
+        "@types/d3-hierarchy"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/treemap.tsx",
+          "type": "registry:component",
+          "target": "components/viz/treemap.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing how a large total divides across a hierarchy (a budget by department and team, storage by folder) when there are too many parts for a donut. For a few parts use donut-chart; to see the levels as rings use sunburst; to compare exact sizes use bar-chart.",
+        "example": "<Treemap\n  label=\"Spending by area\"\n  data={{\n    name: \"All spending\",\n    children: [\n      { name: \"Housing\", children: [{ name: \"Rent\", value: 1200 }, { name: \"Power\", value: 140 }] },\n      { name: \"Food\", children: [{ name: \"Groceries\", value: 420 }, { name: \"Cafés\", value: 90 }] },\n      { name: \"Travel\", value: 260 },\n    ],\n  }}\n/>",
         "client": true
       }
     }

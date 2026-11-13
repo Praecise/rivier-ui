@@ -2533,7 +2533,7 @@ Use it: One series over time whose volume matters, or a few series that add up t
 
 A bar chart, vertical or horizontal, grouped or stacked, always measured from zero, with a tooltip on hover and arrow-key reading.
 
-Use it: Comparing amounts across categories. Use `orientation="horizontal"` for long names or a ranking, `stacked` when the series add up to a total. For change over many points in time use line-chart; for a single number use a stat, not one bar.
+Use it: Comparing amounts across categories. Use `orientation="horizontal"` for long names or a ranking, `stacked` when the series add up to a total, `normalize` to compare each category's split as shares of 100 %. For change over many points in time use line-chart; for a single number use a stat, not one bar.
 
 ```tsx
 <BarChart
@@ -2587,6 +2587,25 @@ Use it: Building a chart of your own that should match the others. For the commo
   )}
 </ChartContainer>
 <ChartLegend items={[{ label: "Signups", index: 0 }]} mark="rect" />
+```
+
+### circle-pack
+
+A hierarchy as circles inside circles: each group an outline holding its parts, each part a circle whose area is its size, with zooming into a group by click or Enter and back out by the trail or Backspace.
+
+Use it: Showing groups and their members when the grouping matters more than precise sizes: topics and their articles, teams and their projects. To compare sizes closely use treemap or bar-chart; for levels as rings use sunburst.
+
+```tsx
+<CirclePack
+  label="Articles by topic"
+  data={{
+    name: "All articles",
+    children: [
+      { name: "Science", children: [{ name: "Space", value: 40 }, { name: "Biology", value: 25 }] },
+      { name: "Arts", children: [{ name: "Film", value: 30 }, { name: "Music", value: 18 }] },
+    ],
+  }}
+/>
 ```
 
 ### donut-chart
@@ -2760,4 +2779,44 @@ Use it: The shape of a trend beside a number that carries the value. Size it wit
 ```tsx
 <Sparkline data={[4, 6, 5, 9, 12, 10, 14]} label="Signups, last 7 days" />
 <Sparkline data={[3, 8, 2, 7, 5]} type="bar" className="h-6 w-16" />
+```
+
+### sunburst
+
+A hierarchy as rings around a centre: each ring a level, each arc a part sized by its share of its parent, with zooming into any arc by click or Enter and back out by the centre, the trail or Backspace.
+
+Use it: Showing how a total divides level by level when the depth matters as much as the sizes: a path through categories, a file system, a budget in three levels. For sizes that must be compared closely use treemap (areas in rectangles are easier to judge than arcs); for one level use donut-chart.
+
+```tsx
+<Sunburst
+  label="Visits by source"
+  data={{
+    name: "All visits",
+    children: [
+      { name: "Search", children: [{ name: "Organic", value: 420 }, { name: "Paid", value: 160 }] },
+      { name: "Social", children: [{ name: "Video", value: 120 }, { name: "Posts", value: 80 }] },
+      { name: "Direct", value: 300 },
+    ],
+  }}
+/>
+```
+
+### treemap
+
+A whole split into nested rectangles whose areas are the parts' sizes: groups in their own colours, the parts inside them labelled where they fit, with zooming into a group by click or Enter and back out by the trail or Backspace.
+
+Use it: Showing how a large total divides across a hierarchy (a budget by department and team, storage by folder) when there are too many parts for a donut. For a few parts use donut-chart; to see the levels as rings use sunburst; to compare exact sizes use bar-chart.
+
+```tsx
+<Treemap
+  label="Spending by area"
+  data={{
+    name: "All spending",
+    children: [
+      { name: "Housing", children: [{ name: "Rent", value: 1200 }, { name: "Power", value: 140 }] },
+      { name: "Food", children: [{ name: "Groceries", value: 420 }, { name: "Cafés", value: 90 }] },
+      { name: "Travel", value: 260 },
+    ],
+  }}
+/>
 ```

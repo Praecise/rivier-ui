@@ -514,3 +514,82 @@ export function fitText(text: string, width: number, fontSize = 12): string {
   const fits = Math.max(2, Math.floor(width / (fontSize * 0.58)));
   return text.length > fits ? `${text.slice(0, fits - 1)}…` : text;
 }
+
+/* Trees: the data of treemap, sunburst and circle-pack, and the trail that zooms back out. */
+
+/** One node of a tree. A leaf has a `value`; a branch has `children` and is the sum of them. */
+export type ChartTreeNode = {
+  name: string;
+  value?: number;
+  children?: readonly ChartTreeNode[];
+};
+
+/** The node at a path of names below the root, or the deepest one found on the way. */
+export function chartTreeFind(tree: ChartTreeNode, path: readonly string[]): { node: ChartTreeNode; path: string[] } {
+  let node = tree;
+  const found: string[] = [];
+  for (const name of path) {
+    const next = node.children?.find((child) => child.name === name);
+    if (!next) break;
+    node = next;
+    found.push(name);
+  }
+  return { node, path: found };
+}
+
+/** The sum of the leaves below a node. */
+export function chartTreeTotal(node: ChartTreeNode): number {
+  if (!node.children || node.children.length === 0) return Math.max(0, node.value ?? 0);
+  return node.children.reduce((sum, child) => sum + chartTreeTotal(child), 0);
+}
+
+/** The tree as rows for the table alternative: the path of each leaf, its value and its share of the whole. */
+export function chartTreeRows(tree: ChartTreeNode, format: (value: number) => string, share: (value: number) => string): string[][] {
+  const total = chartTreeTotal(tree) || 1;
+  const rows: string[][] = [];
+  const walk = (node: ChartTreeNode, trail: string[]): void => {
+    if (!node.children || node.children.length === 0) {
+      const value = Math.max(0, node.value ?? 0);
+      rows.push([[...trail, node.name].join(" / "), format(value), share(value / total)]);
+      return;
+    }
+    for (const child of node.children) walk(child, [...trail, node.name]);
+  };
+  for (const child of tree.children ?? []) walk(child, []);
+  return rows;
+}
+
+export type ChartTrailProps = Omit<ComponentProps<"nav">, "children"> & {
+  /** The root's name and the names below it, down to the node in view. */
+  trail: readonly string[];
+  /** Called with the depth to go back to: 0 is the root. */
+  onNavigate: (depth: number) => void;
+};
+
+/** The path to the part of a tree in view, each step a button that zooms back out to it. Give it an `aria-label`. */
+export function ChartTrail({ trail, onNavigate, className, ...props }: ChartTrailProps) {
+  return (
+    <nav data-slot="chart-trail" className={cn("min-w-0 text-sm", className)} {...props}>
+      <ol className="flex flex-wrap items-center gap-1">
+        {trail.map((name, depth) => (
+          <li key={depth} className="flex min-w-0 items-center gap-1">
+            {depth > 0 ? (
+              <span aria-hidden="true" className="text-muted-foreground">
+                /
+              </span>
+            ) : null}
+            {depth === trail.length - 1 ? (
+              <span aria-current="location" className="truncate px-1 font-medium">
+                {name}
+              </span>
+            ) : (
+              <button type="button" onClick={() => onNavigate(depth)} className="min-h-10 truncate rounded-control px-1 text-muted-foreground underline underline-offset-4 hover:text-foreground sm:min-h-0">
+                {name}
+              </button>
+            )}
+          </li>
+        ))}
+      </ol>
+    </nav>
+  );
+}
