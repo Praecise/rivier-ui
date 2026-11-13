@@ -1626,7 +1626,7 @@
       "name": "image-annotator",
       "type": "registry:ui",
       "title": "Image Annotator",
-      "description": "A picture on which areas are marked and named: drawn by dragging, or added with a button and placed with the keys (arrows move, Alt and the arrows resize, Delete removes), each named in a list beside the picture; areas come out as fractions of the picture, every change said aloud.",
+      "description": "A picture on which areas are marked and named: drawn by dragging, or added with a button and placed with the keys (arrows move, plus and minus resize, Delete removes), each named in a list beside the picture; areas come out as fractions of the picture, every change said aloud.",
       "categories": [
         "ui"
       ],
@@ -1658,7 +1658,7 @@
       "name": "image-cropper",
       "type": "registry:ui",
       "title": "Image Cropper",
-      "description": "A picture with a frame over it that chooses the part to keep: dragged or resized by its corners, or moved with the arrow keys and resized with Alt and the arrows, optionally held to a shape (square, 16:9); the choice comes out as fractions and as pixels of the original.",
+      "description": "A picture with a frame over it that chooses the part to keep: dragged or resized by its corners, or moved with the arrow keys and resized with plus and minus, optionally held to a shape (square, 16:9); the choice comes out as fractions and as pixels of the original.",
       "categories": [
         "ui"
       ],

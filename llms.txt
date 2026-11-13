@@ -1085,7 +1085,7 @@ Use it: A preview that sighted pointer users can do without: the link itself mus
 
 ### image-annotator
 
-A picture on which areas are marked and named: drawn by dragging, or added with a button and placed with the keys (arrows move, Alt and the arrows resize, Delete removes), each named in a list beside the picture; areas come out as fractions of the picture, every change said aloud.
+A picture on which areas are marked and named: drawn by dragging, or added with a button and placed with the keys (arrows move, plus and minus resize, Delete removes), each named in a list beside the picture; areas come out as fractions of the picture, every change said aloud.
 
 Use it: Labelling what is in a picture: damage on a photo, rooms on a plan, objects for training a model, notes on a design. For cutting a picture use image-cropper; for named points that play at moments of a video use hotspots.
 
@@ -1095,7 +1095,7 @@ Use it: Labelling what is in a picture: damage on a photo, rooms on a plan, obje
 
 ### image-cropper
 
-A picture with a frame over it that chooses the part to keep: dragged or resized by its corners, or moved with the arrow keys and resized with Alt and the arrows, optionally held to a shape (square, 16:9); the choice comes out as fractions and as pixels of the original.
+A picture with a frame over it that chooses the part to keep: dragged or resized by its corners, or moved with the arrow keys and resized with plus and minus, optionally held to a shape (square, 16:9); the choice comes out as fractions and as pixels of the original.
 
 Use it: Cropping an avatar, a cover picture, a product photo before upload. The cutting itself is the project's (a canvas, the server); this gives the rectangle. For marking areas on a picture use image-annotator; for comparing two pictures use compare-slider.
 

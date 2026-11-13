@@ -129,6 +129,12 @@ tile server. Shown at `/maps` and checked by `scripts/checks/maps.ts`. CONVENTIO
   list), **`tour`** (a card beside each element in turn, ringed, focus in the card, Escape ends), and
   **`notification-list`** (read and unread in words, all or unread, mark one or all, times from a given
   moment). Shown at `/boards`.
+- **`code-block`** (copy said aloud, wrap, line numbers, marked lines, `renderLine` for a highlighter),
+  **`markdown-editor`** (a toolbar and Ctrl/⌘ with B, I, K that wrap the chosen words; the preview is the
+  project's renderer), **`image-cropper`** (a frame dragged, or moved by arrows and resized by plus and
+  minus, held to a shape; fractions and pixels out) and **`image-annotator`** (areas drawn or added by a
+  button, moved and resized by keys, named in a list). Resizing is never on Alt with an arrow, which is
+  the browser's Back and Forward. Shown at `/editors`.
 - Showcase: the header's row of page links scrolls sideways when there are more pages than fit.
 
 ## 2026-11-13

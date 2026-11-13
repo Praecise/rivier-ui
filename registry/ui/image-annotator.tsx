@@ -2,7 +2,7 @@
 /**
  * @name image-annotator
  * @category ui
- * @description A picture on which areas are marked and named: drawn by dragging, or added with a button and placed with the keys (arrows move, Alt and the arrows resize, Delete removes), each named in a list beside the picture; areas come out as fractions of the picture, every change said aloud.
+ * @description A picture on which areas are marked and named: drawn by dragging, or added with a button and placed with the keys (arrows move, plus and minus resize, Delete removes), each named in a list beside the picture; areas come out as fractions of the picture, every change said aloud.
  * @when Labelling what is in a picture: damage on a photo, rooms on a plan, objects for training a model, notes on a design. For cutting a picture use image-cropper; for named points that play at moments of a video use hotspots.
  * @example
  * <ImageAnnotator src="/plan.png" alt="Ground floor plan" defaultAreas={[{ id: "a", x: 0.1, y: 0.2, width: 0.3, height: 0.25, label: "Kitchen" }]} onAreasChange={save} />
@@ -35,7 +35,7 @@ const LABELS: ImageAnnotatorLabels = {
   remove: (label) => `Remove ${label}`,
   name: (index) => `Name of area ${index}`,
   unnamed: (index) => `Area ${index}`,
-  help: "Arrow keys move the area, with Shift further; Alt with the arrow keys resizes it; Delete removes it.",
+  help: "Arrow keys move the area, with Shift further; plus and minus resize it; Delete removes it.",
   added: (label) => `${label} added`,
   removed: (label) => `${label} removed`,
   area: "area",
@@ -96,9 +96,13 @@ export function ImageAnnotator({ src, alt, areas: areasProp, defaultAreas = [], 
     const step = event.shiftKey ? 0.05 : 0.01;
     const moves: Record<string, [number, number]> = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
     const move = moves[event.key];
+    const grow = event.key === "+" || event.key === "=" ? 0.02 : event.key === "-" || event.key === "_" ? -0.02 : 0;
     if (move) {
       event.preventDefault();
-      update(area.id, (a) => (event.altKey ? { ...a, width: a.width + move[0], height: a.height + move[1] } : { ...a, x: a.x + move[0], y: a.y + move[1] }));
+      update(area.id, (a) => ({ ...a, x: a.x + move[0], y: a.y + move[1] }));
+    } else if (grow !== 0) {
+      event.preventDefault();
+      update(area.id, (a) => ({ x: a.x - grow / 2, y: a.y - grow / 2, width: a.width + grow, height: a.height + grow, id: a.id, label: a.label }));
     } else if (event.key === "Delete" || event.key === "Backspace") {
       event.preventDefault();
       remove(area.id);

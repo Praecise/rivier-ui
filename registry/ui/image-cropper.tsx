@@ -2,7 +2,7 @@
 /**
  * @name image-cropper
  * @category ui
- * @description A picture with a frame over it that chooses the part to keep: dragged or resized by its corners, or moved with the arrow keys and resized with Alt and the arrows, optionally held to a shape (square, 16:9); the choice comes out as fractions and as pixels of the original.
+ * @description A picture with a frame over it that chooses the part to keep: dragged or resized by its corners, or moved with the arrow keys and resized with plus and minus, optionally held to a shape (square, 16:9); the choice comes out as fractions and as pixels of the original.
  * @when Cropping an avatar, a cover picture, a product photo before upload. The cutting itself is the project's (a canvas, the server); this gives the rectangle. For marking areas on a picture use image-annotator; for comparing two pictures use compare-slider.
  * @example
  * <ImageCropper src="/photo.jpg" alt="The harbour at dawn" aspect={1} onCropChange={(crop) => setCrop(crop.pixels)} />
@@ -19,7 +19,7 @@ export type Crop = { fractions: CropRect; pixels: CropRect };
 export type ImageCropperLabels = { area: string; help: string; size: (width: number, height: number) => string };
 const LABELS: ImageCropperLabels = {
   area: "Crop area",
-  help: "Arrow keys move the area, with Shift further. Alt with the arrow keys makes it larger or smaller.",
+  help: "Arrow keys move the area, with Shift further. Plus and minus make it larger or smaller.",
   size: (width, height) => `${width} by ${height} pixels`,
 };
 
@@ -75,13 +75,17 @@ export function ImageCropper({ src, alt, aspect, value, defaultValue, onCropChan
     const step = event.shiftKey ? 0.1 : 0.01;
     const moves: Record<string, [number, number]> = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
     const move = moves[event.key];
-    if (!move) return;
+    // Plus and minus resize about the centre. (Alt with an arrow is the browser's Back and Forward.)
+    const grow = event.key === "+" || event.key === "=" ? 0.02 : event.key === "-" || event.key === "_" ? -0.02 : 0;
+    if (!move && grow === 0) return;
     event.preventDefault();
     // The picture is not mirrored in a right-to-left page, so Right is always right.
-    const next = event.altKey ? fit({ ...crop, width: crop.width + move[0], height: crop.height + move[1] }) : fit({ ...crop, x: crop.x + move[0], y: crop.y + move[1] });
+    const next = move ? fit({ ...crop, x: crop.x + move[0], y: crop.y + move[1] }) : fit({ x: crop.x - grow / 2, y: crop.y - grow / 2, width: crop.width + grow, height: crop.height + grow });
     setCrop(next);
-    const px = pixelsOf(next);
-    if (event.altKey) announce(labels.size(px.width, px.height));
+    if (grow !== 0) {
+      const px = pixelsOf(next);
+      announce(labels.size(px.width, px.height));
+    }
   };
   const onPointerDown = (mode: "move" | "nw" | "ne" | "sw" | "se", event: PointerEvent<HTMLElement>): void => {
     event.stopPropagation();
