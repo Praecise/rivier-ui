@@ -2609,6 +2609,34 @@ Use it: Parts of a whole at a glance, when there are few parts and they differ c
 />
 ```
 
+### fan-chart
+
+A forecast drawn honestly: what was observed as a solid line, then the median forecast with nested bands for its intervals (90 %, 50 % …) that widen as the forecast reaches further, with arrow-key reading of every point.
+
+Use it: Showing a prediction or an estimate with its uncertainty: a forecast, a model's range, a confidence band around a trend. For a series with no uncertainty use line-chart; for the spread of measured values use box-plot.
+
+```tsx
+<FanChart
+  label="Visitors, observed and forecast"
+  data={[
+    { week: 1, observed: 120 },
+    { week: 2, observed: 132 },
+    { week: 3, observed: 128, median: 128, low90: 128, high90: 128, low50: 128, high50: 128 },
+    { week: 4, median: 136, low90: 118, high90: 152, low50: 128, high50: 143 },
+    { week: 5, median: 141, low90: 110, high90: 170, low50: 126, high50: 155 },
+  ]}
+  x="week"
+  observed="observed"
+  median="median"
+  intervals={[
+    { low: "low90", high: "high90", label: "90% interval" },
+    { low: "low50", high: "high50", label: "50% interval" },
+  ]}
+  forecastFrom={3}
+  labels={{ observed: "Observed", median: "Forecast (median)", forecast: "Forecast" }}
+/>
+```
+
 ### heatmap
 
 A matrix of cells (day by hour, for example) coloured on one-hue scale from faint to the highlight colour, with a tooltip, arrow-key reading and a scale legend.
@@ -2700,6 +2728,26 @@ Use it: Showing how two measures relate across many things: does one rise with t
   name="name"
   xLabel="Price"
   yLabel="Rating"
+/>
+```
+
+### small-multiples
+
+The same small chart repeated for each group (a region, a product) in a grid that fits its width, every panel on one shared scale so they can be compared at a glance, each read by arrow keys.
+
+Use it: Comparing the shape of one measure across many groups, where one chart with many lines would tangle: more than five series, or groups of very different sizes. For up to five series on one chart use line-chart; for one value per group use bar-chart.
+
+```tsx
+<SmallMultiples
+  label="Monthly visits by region"
+  data={[
+    { region: "North", month: 1, visits: 40 }, { region: "North", month: 2, visits: 52 }, { region: "North", month: 3, visits: 61 },
+    { region: "South", month: 1, visits: 30 }, { region: "South", month: 2, visits: 28 }, { region: "South", month: 3, visits: 35 },
+  ]}
+  facet="region"
+  x="month"
+  y="visits"
+  kind="area"
 />
 ```
 

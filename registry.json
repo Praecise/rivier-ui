@@ -3863,6 +3863,41 @@
       }
     },
     {
+      "name": "fan-chart",
+      "type": "registry:component",
+      "title": "Fan Chart",
+      "description": "A forecast drawn honestly: what was observed as a solid line, then the median forecast with nested bands for its intervals (90 %, 50 % …) that widen as the forecast reaches further, with arrow-key reading of every point.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale",
+        "d3-shape"
+      ],
+      "devDependencies": [
+        "@types/d3-scale",
+        "@types/d3-shape"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/fan-chart.tsx",
+          "type": "registry:component",
+          "target": "components/viz/fan-chart.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing a prediction or an estimate with its uncertainty: a forecast, a model's range, a confidence band around a trend. For a series with no uncertainty use line-chart; for the spread of measured values use box-plot.",
+        "example": "<FanChart\n  label=\"Visitors, observed and forecast\"\n  data={[\n    { week: 1, observed: 120 },\n    { week: 2, observed: 132 },\n    { week: 3, observed: 128, median: 128, low90: 128, high90: 128, low50: 128, high50: 128 },\n    { week: 4, median: 136, low90: 118, high90: 152, low50: 128, high50: 143 },\n    { week: 5, median: 141, low90: 110, high90: 170, low50: 126, high50: 155 },\n  ]}\n  x=\"week\"\n  observed=\"observed\"\n  median=\"median\"\n  intervals={[\n    { low: \"low90\", high: \"high90\", label: \"90% interval\" },\n    { low: \"low50\", high: \"high50\", label: \"50% interval\" },\n  ]}\n  forecastFrom={3}\n  labels={{ observed: \"Observed\", median: \"Forecast (median)\", forecast: \"Forecast\" }}\n/>",
+        "client": true
+      }
+    },
+    {
       "name": "heatmap",
       "type": "registry:component",
       "title": "Heatmap",
@@ -4023,6 +4058,41 @@
         "category": "viz",
         "when": "Showing how two measures relate across many things: does one rise with the other, which stand apart. Give `size` for a third measure as bubble area. For change over time use line-chart; for one measure across categories use bar-chart or dot-plot; for thousands of overlapping points use density-chart.",
         "example": "<ScatterChart\n  label=\"Price against rating\"\n  data={[\n    { name: \"Alder\", price: 12, rating: 4.1, sold: 320, kind: \"Tea\" },\n    { name: \"Birch\", price: 18, rating: 4.6, sold: 120, kind: \"Tea\" },\n    { name: \"Cedar\", price: 9, rating: 3.8, sold: 540, kind: \"Coffee\" },\n  ]}\n  x=\"price\"\n  y=\"rating\"\n  size=\"sold\"\n  group=\"kind\"\n  name=\"name\"\n  xLabel=\"Price\"\n  yLabel=\"Rating\"\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "small-multiples",
+      "type": "registry:component",
+      "title": "Small Multiples",
+      "description": "The same small chart repeated for each group (a region, a product) in a grid that fits its width, every panel on one shared scale so they can be compared at a glance, each read by arrow keys.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale",
+        "d3-shape"
+      ],
+      "devDependencies": [
+        "@types/d3-scale",
+        "@types/d3-shape"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/small-multiples.tsx",
+          "type": "registry:component",
+          "target": "components/viz/small-multiples.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Comparing the shape of one measure across many groups, where one chart with many lines would tangle: more than five series, or groups of very different sizes. For up to five series on one chart use line-chart; for one value per group use bar-chart.",
+        "example": "<SmallMultiples\n  label=\"Monthly visits by region\"\n  data={[\n    { region: \"North\", month: 1, visits: 40 }, { region: \"North\", month: 2, visits: 52 }, { region: \"North\", month: 3, visits: 61 },\n    { region: \"South\", month: 1, visits: 30 }, { region: \"South\", month: 2, visits: 28 }, { region: \"South\", month: 3, visits: 35 },\n  ]}\n  facet=\"region\"\n  x=\"month\"\n  y=\"visits\"\n  kind=\"area\"\n/>",
         "client": true
       }
     },
