@@ -106,6 +106,32 @@
       }
     },
     {
+      "name": "explainer-spec",
+      "type": "registry:lib",
+      "title": "Explainer Spec",
+      "description": "The plain-data description of an explainer film (scenes of a title, a chart, a map, a 3D model, a then-and-now comparison, a quote or a caption, each with a length, a transition, captions, a narration cue and a provenance label) and a validator that lists every fault in words.",
+      "categories": [
+        "lib"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme"
+      ],
+      "files": [
+        {
+          "path": "registry/lib/explainer-spec.ts",
+          "type": "registry:lib",
+          "target": "lib/explainer-spec.ts"
+        }
+      ],
+      "meta": {
+        "category": "lib",
+        "when": "An assistant or a project writes a film as JSON and hands it to motion/explainer. Run validateExplainer first and show its faults: each says where the fault is and how to mend it. For a film drawn by hand from React, use film-stage directly.",
+        "example": "const spec: ExplainerSpec = {\n  title: \"How the river rose\",\n  lang: \"en\",\n  scenes: [\n    { id: \"intro\", kind: \"title\", duration: 4, title: \"How the river rose\", subtitle: \"Spring 2026\" },\n    {\n      id: \"levels\", kind: \"chart\", duration: 8, chart: \"line-chart\",\n      props: { label: \"Water level by day\", data: [{ day: 1, level: 2.1 }, { day: 2, level: 2.9 }], x: \"day\", series: [{ key: \"level\", label: \"Level (m)\" }] },\n      captions: [{ start: 0.5, end: 4, text: \"The level rose for four days.\" }],\n      provenance: { kind: \"measured\", note: \"Gauge readings\" },\n    },\n  ],\n};\nconst faults = validateExplainer(spec); // [] when it is sound",
+        "client": false
+      }
+    },
+    {
       "name": "motion",
       "type": "registry:lib",
       "title": "Motion",
@@ -3020,6 +3046,72 @@
         "when": "Spacing a run of siblings evenly: form fields, a button row, a header with actions. For columns that reflow by width use grid; for unequal tiles use bento-grid.",
         "example": "<Stack gap=\"lg\">\n  <h2>Title</h2>\n  <p>Body</p>\n</Stack>\n<Stack direction=\"horizontal\" gap=\"sm\" align=\"center\" justify=\"between\" wrap>\n  <span>Plan</span>\n  <Button size=\"sm\">Change</Button>\n</Stack>\n<Stack asChild gap=\"xs\"><ul><li>One</li><li>Two</li></ul></Stack>",
         "client": false
+      }
+    },
+    {
+      "name": "explainer",
+      "type": "registry:component",
+      "title": "Explainer",
+      "description": "Turns an explainer spec (plain JSON: scenes of a title, any chart, a map, a 3D model, a then-and-now comparison, a quote or a caption) into a film on film-stage: playable, scrubbable, with captions, narration in step, a provenance label on every scene that says how it was made, and frames drawn on request for export.",
+      "categories": [
+        "motion"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/area-chart",
+        "@rivier-ui/bar-chart",
+        "@rivier-ui/box-plot",
+        "@rivier-ui/bullet-chart",
+        "@rivier-ui/calendar-heatmap",
+        "@rivier-ui/candlestick-chart",
+        "@rivier-ui/captions",
+        "@rivier-ui/chord-diagram",
+        "@rivier-ui/choropleth",
+        "@rivier-ui/circle-pack",
+        "@rivier-ui/cn",
+        "@rivier-ui/compare-slider",
+        "@rivier-ui/density-chart",
+        "@rivier-ui/donut-chart",
+        "@rivier-ui/dot-plot",
+        "@rivier-ui/explainer-spec",
+        "@rivier-ui/fan-chart",
+        "@rivier-ui/film-stage",
+        "@rivier-ui/funnel-chart",
+        "@rivier-ui/gantt-chart",
+        "@rivier-ui/geo-hexbin",
+        "@rivier-ui/geo-map",
+        "@rivier-ui/geo-markers",
+        "@rivier-ui/geo-routes",
+        "@rivier-ui/heatmap",
+        "@rivier-ui/histogram",
+        "@rivier-ui/line-chart",
+        "@rivier-ui/model-viewer",
+        "@rivier-ui/network-graph",
+        "@rivier-ui/parallel-coordinates",
+        "@rivier-ui/provenance-label",
+        "@rivier-ui/radar-chart",
+        "@rivier-ui/sankey-chart",
+        "@rivier-ui/scatter-chart",
+        "@rivier-ui/slope-chart",
+        "@rivier-ui/small-multiples",
+        "@rivier-ui/stream-chart",
+        "@rivier-ui/sunburst",
+        "@rivier-ui/treemap",
+        "@rivier-ui/waterfall-chart"
+      ],
+      "files": [
+        {
+          "path": "registry/motion/explainer.tsx",
+          "type": "registry:component",
+          "target": "components/motion/explainer.tsx"
+        }
+      ],
+      "meta": {
+        "category": "motion",
+        "when": "An assistant or a project describes a short explanatory film as data and wants it played: a story with numbers, a report as a film, a change on a map. Validate the spec with lib/explainer-spec first; a spec with faults shows them in words instead of a film. For a film drawn by hand use film-stage; for a video file use video-player.",
+        "example": "<Explainer spec={spec} />\n\n// Arranged by the project, and exported frame by frame by scripts/export-film.ts\n<Explainer spec={spec} deterministic exportName=\"main\">\n  <FilmStageFrame aspect={16 / 9}>\n    <ExplainerProvenance />\n    <ExplainerCaptions />\n  </FilmStageFrame>\n</Explainer>",
+        "client": true
       }
     },
     {

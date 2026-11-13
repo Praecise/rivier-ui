@@ -45,6 +45,29 @@ function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
 }
 ```
 
+### explainer-spec
+
+The plain-data description of an explainer film (scenes of a title, a chart, a map, a 3D model, a then-and-now comparison, a quote or a caption, each with a length, a transition, captions, a narration cue and a provenance label) and a validator that lists every fault in words.
+
+Use it: An assistant or a project writes a film as JSON and hands it to motion/explainer. Run validateExplainer first and show its faults: each says where the fault is and how to mend it. For a film drawn by hand from React, use film-stage directly.
+
+```tsx
+const spec: ExplainerSpec = {
+  title: "How the river rose",
+  lang: "en",
+  scenes: [
+    { id: "intro", kind: "title", duration: 4, title: "How the river rose", subtitle: "Spring 2026" },
+    {
+      id: "levels", kind: "chart", duration: 8, chart: "line-chart",
+      props: { label: "Water level by day", data: [{ day: 1, level: 2.1 }, { day: 2, level: 2.9 }], x: "day", series: [{ key: "level", label: "Level (m)" }] },
+      captions: [{ start: 0.5, end: 4, text: "The level rose for four days." }],
+      provenance: { kind: "measured", note: "Gauge readings" },
+    },
+  ],
+};
+const faults = validateExplainer(spec); // [] when it is sound
+```
+
 ### motion
 
 The motion tokens as numbers for the motion package (easing, durations, a pointer spring), the useMotionSafe gate, and the entrance engine the reveal components share.
@@ -2092,6 +2115,24 @@ Use it: Spacing a run of siblings evenly: form fields, a button row, a header wi
 ```
 
 ## Motion and transitions
+
+### explainer
+
+Turns an explainer spec (plain JSON: scenes of a title, any chart, a map, a 3D model, a then-and-now comparison, a quote or a caption) into a film on film-stage: playable, scrubbable, with captions, narration in step, a provenance label on every scene that says how it was made, and frames drawn on request for export.
+
+Use it: An assistant or a project describes a short explanatory film as data and wants it played: a story with numbers, a report as a film, a change on a map. Validate the spec with lib/explainer-spec first; a spec with faults shows them in words instead of a film. For a film drawn by hand use film-stage; for a video file use video-player.
+
+```tsx
+<Explainer spec={spec} />
+
+// Arranged by the project, and exported frame by frame by scripts/export-film.ts
+<Explainer spec={spec} deterministic exportName="main">
+  <FilmStageFrame aspect={16 / 9}>
+    <ExplainerProvenance />
+    <ExplainerCaptions />
+  </FilmStageFrame>
+</Explainer>
+```
 
 ### film-stage
 

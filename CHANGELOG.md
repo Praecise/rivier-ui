@@ -81,6 +81,27 @@ tile server. Shown at `/maps` and checked by `scripts/checks/maps.ts`. CONVENTIO
 - **`geo-tiles`**: raster tiles from the project's own address template, with a required attribution and no
   default host.
 
+### Explainers (`lib`, `motion`, `scripts`)
+
+- **`explainer-spec`** (lib): the types of an explainer film as plain data (scenes of a title, any of 28
+  charts by name, a map with choropleth, marker, route or hexbin layers and a camera that moves over the
+  scene, a 3D model that turns, a then-and-now comparison that sweeps, a quote, a caption over a picture),
+  each with a length, a transition, captions, a narration cue and a provenance of `measured`,
+  `reconstructed`, `generated` or `invented`. `validateExplainer` returns every fault with its path and words
+  that say how to mend it (a duration in milliseconds, a repeated id, an unknown chart, a chart or map that
+  does not say how it was made). `explainerTimeline` and `explainerCues` put scenes and captions on the
+  film's clock.
+- **`explainer`** (motion): plays a spec on `film-stage`: playable, scrubbable, captions, narration and a
+  sound bed in step, and `ExplainerProvenance` (a `provenance-label` that follows the scene on stage).
+  Entrances and camera moves are worked out from the scene's own time, so `renderAt` draws any moment the
+  same way, and they are final under reduced motion. A spec with faults shows them as an alert instead of a
+  film. Parts: `ExplainerCaptions`, `ExplainerProvenance`, `ExplainerAudio`; `renderPicture` takes a
+  framework's image component. Shown at `/explainers`, checked by `scripts/checks/explainers.ts`.
+- **`scripts/export-film.ts`** (`npm run export-film -- url=… name=…`): opens a page with a deterministic
+  stage, calls `window.__filmStage.<name>.renderAt(t)` for each frame, saves PNG frames, and writes an MP4
+  with ffmpeg when it is on the PATH, else a zip of the frames with a `manifest.json` (written here: no
+  package). Tried on 2026-11-13 against `/explainers` at 6 fps: 168 frames, a valid zip.
+
 ## 2026-11-13
 
 More that the existing components can do. Every change is an added prop or part with the old behaviour
