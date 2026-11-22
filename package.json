@@ -62,6 +62,7 @@
     "lint:install": "npm install --prefix lint",
     "lint": "node lint/node_modules/eslint/bin/eslint.js --config lint/eslint.config.ts registry scripts site/src/app lint/eslint.config.ts",
     "check": "node --experimental-strip-types --no-warnings scripts/check.ts",
+    "unit": "node --experimental-strip-types --no-warnings --test scripts/prefix.test.ts",
     "site:typecheck": "tsc --noEmit -p site/tsconfig.json",
     "export-film": "node --experimental-strip-types --no-warnings scripts/export-film.ts"
   },

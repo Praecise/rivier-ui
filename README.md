@@ -64,7 +64,14 @@ Inside a project created with Rivier Architect, the same through its plugin:
 `add` copies the files into `src/components/<category>/` and `src/lib/`, puts the theme in
 `src/styles/rivier-ui.css`, imports it after Tailwind in the global stylesheet, and installs the packages the
 items need at their latest release. It never overwrites a file you have changed unless you say `overwrite`.
-Options are plain words (`dir=`, `overwrite`, `dry`).
+Options are plain words (`dir=`, `overwrite`, `dry`, `prefix=`).
+
+**A project whose Tailwind has a prefix** (`@import "tailwindcss" prefix(tw);`) says so:
+`rivier-ui add dialog prefix=tw`. Every class in what is copied is then written with it (`tw:flex`,
+`tw:hover:bg-accent`), and `cn` is told the prefix so that a class passed in still replaces a component's own.
+That covers classes wherever they are kept: in `className`, in `cn` and `cva`, in a compound variant, and a class
+list held in a constant or chosen by a condition. Without the prefix a class makes no CSS at all and the part is
+simply unstyled, with nothing to report it. `doctor prefix=tw` compares with the prefixed source.
 
 ## Theme
 
@@ -121,7 +128,10 @@ or are props with English defaults, so a product in any language can use it.
   `shadcn add @rivier-ui/button` puts the component, what it depends on and the theme in the same places as
   `rivier-ui add` and installs the packages. One difference: it does not import the theme into the global
   stylesheet (add `@import "tw-animate-css";` and `@import "../styles/rivier-ui.css";` after Tailwind by
-  hand). Checked again on 2026-11-22 against the site's own `/r/` addresses (https://ui.rivier.ai): the
+  hand). In a project with a Tailwind prefix, use `rivier-ui add … prefix=<word>` instead: the shadcn
+  command writes the prefix only onto classes in `className` and in a variant table, and leaves a class list
+  kept in a constant or in `compoundVariants` without it (tested 2026-11-22: the calendar's arrows and day
+  cells, the select's scroll buttons and the link button's size came out unstyled). Checked again on 2026-11-22 against the site's own `/r/` addresses (https://ui.rivier.ai): the
   copied file keeps its header comment. Its MCP server has not been tested.
 
 ## Working on the library
@@ -131,6 +141,7 @@ npm install            # once
 npm run lint:install   # once: the lint tools have their own packages (lint/)
 npm run typecheck      # TypeScript, strict
 npm run lint           # ESLint with the React rules a project's lint runs on a copied component
+npm run unit           # the prefix writer: what it finds, what it leaves, and every component prefixed whole
 npm run registry       # checks every header and writes registry.json, r/, llms.txt
 npm run site:install   # copies the whole registry into the showcase site with the library's own command
 npm run site:dev       # the site, http://localhost:3320: landing, docs, a page per item, the showcase

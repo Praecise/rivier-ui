@@ -4,6 +4,17 @@ There are no version numbers yet: entries are dated, newest first.
 
 ## 2026-11-22
 
+- **`add prefix=<word>`, for a project whose Tailwind has a prefix.** Every class in what is copied is written
+  with the prefix, wherever it is kept: `className`, `cn`, `cva` and its compound variants, and a class list
+  held in a constant or chosen by a condition. `cn` is told the prefix. `doctor prefix=<word>` compares with
+  the prefixed source. Found by a product that installed through the shadcn command, which prefixes only
+  `className` and variant tables: its calendar's arrows and day cells came out with no styles and nothing said
+  so. `npm run unit` checks the writer, and that no component is left with a class it missed. The theme a
+  prefixed project gets names Tailwind's own variables with the prefix in its rules by language, and a class
+  that reads one of those variables reads the prefixed one. The whole showcase was built as a prefixed
+  project and run through the browser checks: 8,826 passed. Of the 8 that did not, 2 fail the same way
+  without a prefix (a hover check in a headless browser), 4 are a documentation-site check that looks for a
+  class by its unprefixed name, and 2 are the wizard's slide direction right-to-left, not yet explained.
 - **Public.** The library is public at https://ui.rivier.ai. The README, the contributing guide and the
   site no longer call it prelaunch or private. Version numbers have still not started.
 - **The site.** The showcase is now the library's website, at ui.rivier.ai: a landing page, documentation
