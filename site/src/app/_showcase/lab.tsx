@@ -5,6 +5,7 @@
 import { useEffect, useSyncExternalStore, type ReactNode } from "react";
 import { DirectionProvider, type Direction } from "@/components/ui/direction-provider";
 import { Group } from "./demo";
+import { SiteFooter } from "../_site/shell";
 import { SiteHeader } from "./site-header";
 import { ThemePanel } from "./theme-panel";
 
@@ -28,7 +29,7 @@ export function Lab({ id, title, description, dir, children }: { id: string; tit
   return (
     <DirectionProvider dir={dir}>
       <SiteHeader />
-      <main className="isolate overflow-x-clip" data-lab-ready={hydrated ? "" : undefined}>
+      <main id="main" tabIndex={-1} className="isolate overflow-x-clip" data-lab-ready={hydrated ? "" : undefined}>
         <section aria-label="Theme" className="mx-auto w-full max-w-page px-(--gutter) pt-8">
           <ThemePanel />
         </section>
@@ -36,6 +37,7 @@ export function Lab({ id, title, description, dir, children }: { id: string; tit
           {children}
         </Group>
       </main>
+      <SiteFooter />
     </DirectionProvider>
   );
 }

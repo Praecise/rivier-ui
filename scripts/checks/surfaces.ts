@@ -46,6 +46,17 @@ export async function run(kit: Kit): Promise<void> {
   check((await attr("[data-slot=menubar-checkbox-item]", "aria-checked")) === "true", "menubar: a checkbox item says it is on");
   await keys("Enter");
   check((await text("[data-testid=grid]")) === "grid off", "menubar: Enter on a checkbox item switches it");
+  // With a menu open, the arrow key opens the menu beside it, and that menu stays open.
+  await keys("Enter");
+  await kit.sleep(300);
+  await keys(kit.dir === "rtl" ? "ArrowRight" : "ArrowLeft");
+  await kit.sleep(600);
+  check(
+    (await count("[data-slot=menubar-content][data-state=open]")) === 1 && (await attr(`${menubar} [data-slot=menubar-trigger]`, "aria-expanded")) === "true",
+    "menubar: with a menu open, the arrow key opens the menu beside it",
+  );
+  await keys("Escape");
+  await kit.sleep(300);
 
   // Navigation menu.
   const nav = await kit.demo("Navigation menu");

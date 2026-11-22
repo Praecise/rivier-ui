@@ -63,7 +63,16 @@ export async function runAxe(page: Page, selector: string): Promise<string[]> {
     const axe = (window as unknown as { axe: { run: (context: unknown, options: unknown) => Promise<unknown> } }).axe;
     const context = { include: [...document.querySelectorAll(target)] };
     if (context.include.length === 0) return { violations: [{ id: "no-match", help: `nothing matches ${target}`, nodes: [] }] };
-    return axe.run(context, { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"] } });
+    // What the sticky header covers depends on how far the page has been scrolled, and a control that is half
+    // under it reads as a target that is too small. The page is scanned from the top, where the header covers
+    // nothing, and put back where it was.
+    const scrolled = window.scrollY;
+    window.scrollTo({ top: 0, behavior: "instant" });
+    try {
+      return await axe.run(context, { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"] } });
+    } finally {
+      window.scrollTo({ top: scrolled, behavior: "instant" });
+    }
   }, selector)) as AxeResult;
   return result.violations.map(
     (violation) =>

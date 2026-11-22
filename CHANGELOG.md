@@ -4,6 +4,22 @@ Prelaunch. There are no version numbers yet: entries are dated, newest first. Nu
 
 ## 2026-11-22
 
+- **The site.** The showcase is now the library's website, at ui.rivier.ai: a landing page, documentation
+  (introduction, installation, theming, the command, for assistants, accessibility, the conventions and
+  this changelog), a page for every item with its example, its whole source and the demonstration the
+  checks drive, search with Ctrl or Cmd and K, a light or dark switch, and any page right-to-left with
+  `?dir=rtl`. It is built from the library's own components (`navbar`, `code-block`, `command`, `tabs`,
+  `collapsible`, `skip-link`). It serves `llms.txt`, `registry.json` and `r/<name>.json`, so the shadcn
+  command can add from it. The page that showed everything at once is at `/showcase`.
+  `npm run site:stage -- <folder>` lays the site out as a plain Next.js app for a host to build and serve.
+- **`accessible-icon`.** A name for an icon that stands alone. With it, every Radix primitive has a
+  component here.
+- **`menubar`: the arrow key between open menus.** A menu no longer animates out: one still on screen
+  took the focus arriving in the next menu for a move outside the bar, and closed every menu.
+- **Checks.** The accessibility scan runs with the page at the top, so what the sticky header covers no
+  longer depends on how far a check has scrolled.
+- **Packages** at their latest releases; `@types/node` at 24, the Node the checks run on.
+
 - **`date-picker`: a date that can be typed.** Three new parts, for one day: `DatePickerField` holds
   `DatePickerInput` (a text field) and `DatePickerOpen` (the button that opens the calendar), in place of
   `DatePickerTrigger`. The field shows the day as digits in the locale's own order and numerals
