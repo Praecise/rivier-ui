@@ -33,7 +33,7 @@ export default function Page() {
       <Main>
         <section className="mx-auto grid w-full max-w-page items-center gap-10 px-(--gutter) py-12 lg:grid-cols-[1fr_1fr] lg:py-20">
           <div className="min-w-0">
-            <Badge variant="soft">Prelaunch</Badge>
+            <Badge variant="soft">Open source, Apache 2.0</Badge>
             <h1 className="mt-5 text-4xl font-medium leading-tight tracking-tight sm:text-6xl">Components you own, themed from one place.</h1>
             <p className="mt-5 max-w-xl text-lg text-muted-foreground">
               Rivier UI is a component library for AI-native development. Copy the source into your project, restyle all of it with three attributes, and give your

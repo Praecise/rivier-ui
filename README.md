@@ -5,8 +5,10 @@ that an assistant can find the right one, use it correctly and restyle a whole p
 
 It is the sibling of Rivier Architect (the repository `rivier-architect`). Each works without the other.
 
-Prelaunch: changes are dated and there are no version numbers yet. Licensed under Apache 2.0 (`LICENSE`).
-The repository is private until launch.
+The library is public. Its website is **https://ui.rivier.ai**: the documentation, a page for every item
+with its example, its source and a working demonstration, and the registry that tools install from.
+Licensed under Apache 2.0 (`LICENSE`). Changes are dated and there are no version numbers yet
+(`CHANGELOG.md`).
 
 ## What makes it different
 
@@ -31,8 +33,23 @@ The repository is private until launch.
 
 The project needs React 19, Tailwind CSS 4 and the `@/` import alias (a Next.js app has all three).
 
+From the website, with the shadcn command. Name the registry once in the project's `components.json`:
+
+```json
+{ "registries": { "@rivier-ui": "https://ui.rivier.ai/r/{name}.json" } }
+```
+
 ```sh
-# from this repository
+npx shadcn@latest add @rivier-ui/button @rivier-ui/dialog
+```
+
+Then import the theme after Tailwind in the global stylesheet (`@import "tw-animate-css";` and
+`@import "../styles/rivier-ui.css";`): that command does not. Each item's page on the website also has its
+whole source, to copy by hand.
+
+From a copy of this repository, with the library's own command, which also imports the theme:
+
+```sh
 npm run ui -- list                              # everything
 npm run ui -- list chart                        # search
 npm run ui -- info bento-grid                   # what, when, example
@@ -128,5 +145,5 @@ scanned or downloaded) and committed in `site/public/models/`.
 
 A component is one file in `registry/<category>/`. Its dependencies are read from its imports; nothing is
 listed by hand. It is shown on a showcase page (`site/src/app/<group>/`) and tested by that page's checks
-(`scripts/checks/<group>.ts`). Rules: `CONVENTIONS.md`. Changes: `CHANGELOG.md` (prelaunch: dated, no
+(`scripts/checks/<group>.ts`). Rules: `CONVENTIONS.md`. Changes: `CHANGELOG.md` (dated, no
 version numbers).

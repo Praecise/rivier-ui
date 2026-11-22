@@ -52,7 +52,7 @@ export default function Page() {
       <h2 id="own">With Rivier UI's own command</h2>
       <p>
         The library's own command copies the files with their headers, puts the theme in place, imports it into the global stylesheet, and installs the packages. It
-        never overwrites a file you have changed unless you say <C>overwrite</C>. It runs from a copy of the library, which opens at launch:
+        never overwrites a file you have changed unless you say <C>overwrite</C>. It runs from a copy of the library's repository:
       </p>
       <Code
         language="sh"
