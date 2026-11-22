@@ -2,6 +2,19 @@
 
 Prelaunch. There are no version numbers yet: entries are dated, newest first. Numbering starts at launch.
 
+## 2026-11-22
+
+- **`date-picker`: a date that can be typed.** Three new parts, for one day: `DatePickerField` holds
+  `DatePickerInput` (a text field) and `DatePickerOpen` (the button that opens the calendar), in place of
+  `DatePickerTrigger`. The field shows the day as digits in the locale's own order and numerals
+  ("14/11/2026" in en-GB) and reads the same back with any separators, eight digits with none, and the
+  year first ("2026-11-14") in every locale. The picker's value follows the typing: a whole day that can
+  be chosen is the value at once, anything else is no value, so a form never submits a day other than the
+  one in the field. `min`, `max` and `unavailable` refuse days the calendar would not offer; text that is
+  not a day is marked `aria-invalid` when the field is left or Enter is pressed, and `onReject` tells the
+  project. Alt+ArrowDown opens the calendar. The button and the range picker are unchanged. The item now
+  also brings `input`.
+
 ## 2026-11-13
 
 More that the existing components can do. Every change is an added prop or part with the old behaviour

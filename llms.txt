@@ -619,9 +619,9 @@ Use it: Something the person holds for a limited time: a reserved seat, a price 
 
 ### date-picker
 
-A button that shows a date, or a range of dates, and opens a calendar in a popover to choose it. Values are "YYYY-MM-DD" strings.
+A button that shows a date, or a range of dates, and opens a calendar in a popover to choose it; or a field the date is typed into, with the calendar beside it. Values are "YYYY-MM-DD" strings.
 
-Use it: A date or a stay inside a form or a toolbar, where a calendar that is always open would take too much room. When the calendar is the main thing on the screen use calendar itself. Never the browser's native date input. Name the button by passing `aria-labelledby` with the id of its visible label: the chosen date is added to the name.
+Use it: A date or a stay inside a form or a toolbar, where a calendar that is always open would take too much room. When the calendar is the main thing on the screen use calendar itself. Never the browser's native date input. Name the button by passing `aria-labelledby` with the id of its visible label: the chosen date is added to the name. Where the date is known before the calendar is opened (a birthday, a date read off a document, one years away) use the typed field: DatePickerField with DatePickerInput and DatePickerOpen.
 
 ```tsx
 // One day, uncontrolled, submitted with a form as "date"
@@ -637,6 +637,16 @@ const [stay, setStay] = useState<CalendarRange>({ start: null, end: null });
   <DatePickerTrigger aria-label="Stay" placeholder="Arrival – departure" />
   <DatePickerCalendar numberOfMonths={2} />
 </DateRangePicker>
+
+// One day, typed in the locale's order of digits or chosen from the calendar
+<p id="due-label">Due</p>
+<DatePicker name="due" locale="en-GB">
+  <DatePickerField>
+    <DatePickerInput aria-labelledby="due-label" min="2026-11-01" onReject={(typed) => setError(`${typed} is not a date that can be chosen.`)} />
+    <DatePickerOpen />
+  </DatePickerField>
+  <DatePickerCalendar min="2026-11-01" />
+</DatePicker>
 ```
 
 ### dialog

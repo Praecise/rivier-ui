@@ -936,7 +936,7 @@
       "name": "date-picker",
       "type": "registry:ui",
       "title": "Date Picker",
-      "description": "A button that shows a date, or a range of dates, and opens a calendar in a popover to choose it. Values are \"YYYY-MM-DD\" strings.",
+      "description": "A button that shows a date, or a range of dates, and opens a calendar in a popover to choose it; or a field the date is typed into, with the calendar beside it. Values are \"YYYY-MM-DD\" strings.",
       "categories": [
         "ui"
       ],
@@ -948,6 +948,7 @@
         "@rivier-ui/button",
         "@rivier-ui/calendar",
         "@rivier-ui/cn",
+        "@rivier-ui/input",
         "@rivier-ui/popover",
         "@rivier-ui/use-controllable-state"
       ],
@@ -960,8 +961,8 @@
       ],
       "meta": {
         "category": "ui",
-        "when": "A date or a stay inside a form or a toolbar, where a calendar that is always open would take too much room. When the calendar is the main thing on the screen use calendar itself. Never the browser's native date input. Name the button by passing `aria-labelledby` with the id of its visible label: the chosen date is added to the name.",
-        "example": "// One day, uncontrolled, submitted with a form as \"date\"\n<p id=\"date-label\">Date</p>\n<DatePicker defaultValue=\"2026-11-14\" name=\"date\" locale=\"en-GB\">\n  <DatePickerTrigger aria-labelledby=\"date-label\" placeholder=\"Choose a date\" />\n  <DatePickerCalendar min=\"2026-11-01\" disabled={(day) => (closed.has(day) ? \"nothing open\" : false)} />\n</DatePicker>\n\n// A range, controlled, two months where there is room\nconst [stay, setStay] = useState<CalendarRange>({ start: null, end: null });\n<DateRangePicker value={stay} onValueChange={setStay} startName=\"from\" endName=\"to\" locale=\"en-GB\">\n  <DatePickerTrigger aria-label=\"Stay\" placeholder=\"Arrival – departure\" />\n  <DatePickerCalendar numberOfMonths={2} />\n</DateRangePicker>",
+        "when": "A date or a stay inside a form or a toolbar, where a calendar that is always open would take too much room. When the calendar is the main thing on the screen use calendar itself. Never the browser's native date input. Name the button by passing `aria-labelledby` with the id of its visible label: the chosen date is added to the name. Where the date is known before the calendar is opened (a birthday, a date read off a document, one years away) use the typed field: DatePickerField with DatePickerInput and DatePickerOpen.",
+        "example": "// One day, uncontrolled, submitted with a form as \"date\"\n<p id=\"date-label\">Date</p>\n<DatePicker defaultValue=\"2026-11-14\" name=\"date\" locale=\"en-GB\">\n  <DatePickerTrigger aria-labelledby=\"date-label\" placeholder=\"Choose a date\" />\n  <DatePickerCalendar min=\"2026-11-01\" disabled={(day) => (closed.has(day) ? \"nothing open\" : false)} />\n</DatePicker>\n\n// A range, controlled, two months where there is room\nconst [stay, setStay] = useState<CalendarRange>({ start: null, end: null });\n<DateRangePicker value={stay} onValueChange={setStay} startName=\"from\" endName=\"to\" locale=\"en-GB\">\n  <DatePickerTrigger aria-label=\"Stay\" placeholder=\"Arrival – departure\" />\n  <DatePickerCalendar numberOfMonths={2} />\n</DateRangePicker>\n\n// One day, typed in the locale's order of digits or chosen from the calendar\n<p id=\"due-label\">Due</p>\n<DatePicker name=\"due\" locale=\"en-GB\">\n  <DatePickerField>\n    <DatePickerInput aria-labelledby=\"due-label\" min=\"2026-11-01\" onReject={(typed) => setError(`${typed} is not a date that can be chosen.`)} />\n    <DatePickerOpen />\n  </DatePickerField>\n  <DatePickerCalendar min=\"2026-11-01\" />\n</DatePicker>",
         "client": true
       }
     },

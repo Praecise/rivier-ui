@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { Calendar, CalendarMonths, CalendarNext, CalendarPrevious, type CalendarRange } from "@/components/ui/calendar";
-import { DatePicker, DatePickerCalendar, DatePickerTrigger, DateRangePicker } from "@/components/ui/date-picker";
+import { DatePicker, DatePickerCalendar, DatePickerField, DatePickerInput, DatePickerOpen, DatePickerTrigger, DateRangePicker } from "@/components/ui/date-picker";
 import { SlotPicker, SlotPickerEmpty, SlotPickerGroup, SlotPickerItem } from "@/components/ui/slot-picker";
 import { TimePicker } from "@/components/ui/time-picker";
 import { Demo } from "./demo";
@@ -22,6 +22,8 @@ export function Dates() {
   const [range, setRange] = useState<CalendarRange>({ start: null, end: null });
   const [days, setDays] = useState<string[]>(["2026-11-03", "2026-11-05"]);
   const [stay, setStay] = useState<CalendarRange>({ start: null, end: null });
+  const [due, setDue] = useState<string | null>("2026-11-14");
+  const [refused, setRefused] = useState<string | null>(null);
   const [slot, setSlot] = useState("10:00");
   const [time, setTime] = useState<string | null>("09:30");
   const [afternoon, setAfternoon] = useState<string | null>("09:30");
@@ -103,6 +105,29 @@ export function Dates() {
               Stay: <span data-testid="stay">{stay.start && stay.end ? `${stay.start} to ${stay.end}` : "not chosen"}</span>
             </p>
           </div>
+        </form>
+      </Demo>
+
+      <Demo title="Date picker: typed">
+        <form className="flex flex-col gap-2" onSubmit={(event) => event.preventDefault()}>
+          <p id="due-label" className="text-sm font-medium">
+            Due (typed or chosen, from 1 November)
+          </p>
+          <DatePicker value={due} onValueChange={(day) => { setDue(day); setRefused(null); }} name="due" locale="en-GB">
+            <DatePickerField className="w-56">
+              <DatePickerInput aria-labelledby="due-label" aria-describedby="due-note" min="2026-11-01" unavailable={unavailable} onReject={setRefused} />
+              <DatePickerOpen />
+            </DatePickerField>
+            <DatePickerCalendar today={TODAY} min="2026-11-01" disabled={unavailable} />
+          </DatePicker>
+          <p id="due-note" className="text-sm text-muted-foreground">
+            Due: <span data-testid="due">{due ?? "none"}</span>
+            {refused === null ? null : (
+              <>
+                . <span data-testid="refused">{refused} is not a date that can be chosen.</span>
+              </>
+            )}
+          </p>
         </form>
       </Demo>
 
