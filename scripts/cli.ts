@@ -7,7 +7,9 @@
 //   rivier-ui theme                   copy (or refresh) only the theme
 //   rivier-ui doctor                  check a project: theme imported, packages present, files changed
 //
-// Options, as plain words: dir=<project folder> (default: the current folder), overwrite, dry.
+// Options, as plain words: dir=<project folder> (default: the current folder), overwrite, dry,
+// and prefix=<word> for a project whose Tailwind has a prefix (`@import "tailwindcss" prefix(tw)`):
+// every class in what is copied is then written with it (`tw:flex`), and `cn` is told the prefix.
 // Run from anywhere:  node --experimental-strip-types <path to>/rivier-ui/scripts/cli.ts add button
 // or, from this repository:  npm run ui -- add button dir=../../my-project
 //
@@ -16,6 +18,7 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
+import { prefixClasses, prefixMerge } from "./prefix.ts";
 import { CATEGORIES, loadItems, readTheme, withDependencies, type Item } from "./registry.ts";
 
 const args = process.argv.slice(2);
@@ -28,6 +31,15 @@ const projectDir = resolve(option("dir") || process.cwd());
 /** Where "@/…" points in the project: src/ when the project has one, else the project root. */
 const sourceDir = existsSync(join(projectDir, "src")) ? join(projectDir, "src") : projectDir;
 const THEME_TARGET = "styles/rivier-ui.css";
+const prefix = option("prefix");
+if (prefix && !/^[a-z][a-z0-9]*$/.test(prefix)) throw new Error(`prefix=${prefix}: a Tailwind prefix is lower-case letters and digits, as in prefix=tw.`);
+
+/** An item as this project gets it: as written, or with the project's prefix on every class. */
+function sourceFor(item: Item): string {
+  if (!prefix) return item.source;
+  if (item.name === "cn") return prefixMerge(item.source, prefix);
+  return item.file.endsWith(".tsx") ? prefixClasses(item.source, prefix) : item.source;
+}
 const THEME_PACKAGES = ["tw-animate-css"];
 const BASE_PACKAGES = ["tailwindcss"];
 
@@ -117,7 +129,7 @@ function add(items: Item[], wanted: string[]): void {
   const chosen = wanted.includes("all") ? items : withDependencies(items, wanted);
   console.log(`Rivier UI -> ${projectDir}${flag("dry") ? "  (dry run: nothing is written)" : ""}`);
   installTheme();
-  for (const item of chosen) report(item.target, place(item.target, item.source));
+  for (const item of chosen) report(item.target, place(item.target, sourceFor(item)));
   installPackages(missingPackages([...BASE_PACKAGES, ...THEME_PACKAGES, ...chosen.flatMap((item) => item.dependencies)]));
   // The types of packages that do not carry their own: without them the project's type-check fails on the copied file.
   installPackages(missingPackages(chosen.flatMap((item) => item.devDependencies)), true);
@@ -171,7 +183,7 @@ function doctor(items: Item[]): number {
   const sheet = globalStylesheet();
   say(Boolean(sheet && readFileSync(sheet, "utf8").includes("rivier-ui.css")), "global stylesheet imports the theme");
   const installed = items.filter((item) => existsSync(join(sourceDir, item.target)));
-  const changed = installed.filter((item) => readFileSync(join(sourceDir, item.target), "utf8").replace(/\r\n/g, "\n") !== item.source);
+  const changed = installed.filter((item) => readFileSync(join(sourceDir, item.target), "utf8").replace(/\r\n/g, "\n") !== sourceFor(item));
   console.log(`  info ${installed.length} of ${items.length} items installed; ${changed.length} differ from the library${changed.length ? `: ${changed.map((item) => item.name).join(", ")}` : ""}`);
   const names = new Set(installed.map((item) => item.name));
   for (const item of installed) {
@@ -192,7 +204,7 @@ const HELP = `Rivier UI
   rivier-ui theme                   copy (or refresh) only the theme
   rivier-ui doctor                  check a project
 
-Options: dir=<project folder>   overwrite   dry`;
+Options: dir=<project folder>   overwrite   dry   prefix=<tailwind prefix>`;
 
 try {
   const items = loadItems();
