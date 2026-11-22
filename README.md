@@ -102,10 +102,10 @@ or are props with English defaults, so a product in any language can use it.
   `@rivier-ui`. Tested with the shadcn command 4.23.0 on 2026-11-12: with the `r/` folder served over HTTP
   and `"registries": { "@rivier-ui": "<address>/r/{name}.json" }` in the project's `components.json`,
   `shadcn add @rivier-ui/button` puts the component, what it depends on and the theme in the same places as
-  `rivier-ui add` and installs the packages. Two differences: it does not import the theme into the global
+  `rivier-ui add` and installs the packages. One difference: it does not import the theme into the global
   stylesheet (add `@import "tw-animate-css";` and `@import "../styles/rivier-ui.css";` after Tailwind by
-  hand), and it drops the header comment from the copied file, which is the part an assistant reads. So
-  `rivier-ui add` stays the recommended way. Its MCP server has not been tested.
+  hand). Checked again on 2026-11-22 against the site's own `/r/` addresses (https://ui.rivier.ai): the
+  copied file keeps its header comment. Its MCP server has not been tested.
 
 ## Working on the library
 
@@ -116,9 +116,10 @@ npm run typecheck      # TypeScript, strict
 npm run lint           # ESLint with the React rules a project's lint runs on a copied component
 npm run registry       # checks every header and writes registry.json, r/, llms.txt
 npm run site:install   # copies the whole registry into the showcase site with the library's own command
-npm run site:dev       # the showcase, http://localhost:3320: every item, with the theme switches
-npm run smoke          # with the showcase running: the overview page in a real browser
-npm run check          # with the showcase running: every component page: keyboard, focus, roles, right-to-left, 390 px, axe-core
+npm run site:dev       # the site, http://localhost:3320: landing, docs, a page per item, the showcase
+npm run smoke          # with the site running: the page that shows everything (/showcase) in a real browser
+npm run site:stage -- <folder>   # the site as a plain Next.js app, for a host to build and serve (ui.rivier.ai)
+npm run check          # with the site running: every component page: keyboard, focus, roles, right-to-left, 390 px, axe-core
 npm run export-film -- url=http://localhost:3320/explainers name=demo   # frames of a deterministic stage: MP4 with ffmpeg, else a zip
 ```
 

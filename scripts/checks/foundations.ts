@@ -86,5 +86,13 @@ export async function run(kit: Kit): Promise<void> {
   check((await page.evaluate(() => document.documentElement.dataset["theme"])) === "light", "a change in another tab is followed");
   await kit.clickText("[data-slot=theme-panel] button", "system");
 
+  // An icon that stands alone: hidden as a drawing, named in words.
+  const named = await kit.demo("An icon with a name");
+  const icon = await page.evaluate((s) => {
+    const svg = document.querySelector(`${s} svg`);
+    return { hidden: svg?.getAttribute("aria-hidden"), label: svg?.nextElementSibling?.textContent ?? "" };
+  }, named);
+  check(icon.hidden === "true" && icon.label === "Verified", "an accessible icon hides the drawing and says its label");
+
   await kit.axe("main", "after the checks");
 }

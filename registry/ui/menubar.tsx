@@ -23,8 +23,13 @@ import { cn } from "@/lib/cn";
 
 const item =
   "relative flex min-h-9 cursor-default items-center gap-2 rounded-control px-2.5 py-1.5 text-sm select-none -outline-offset-2 data-disabled:pointer-events-none data-disabled:opacity-50 data-highlighted:bg-accent data-highlighted:text-accent-foreground pointer-coarse:min-h-10 [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4";
+/*
+ * No closing animation. A menu that is still on screen while it animates out sees focus arrive in the menu
+ * the arrow key has just opened, takes that for a move outside the bar, and closes every menu. So a menu
+ * here closes at once.
+ */
 const surface =
-  "z-50 min-w-48 overflow-x-hidden overflow-y-auto rounded-surface border bg-popover p-1 text-popover-foreground ease-out animation-duration-(--duration-base) fade-in-0 fade-out-0 zoom-in-95 zoom-out-95 data-[state=closed]:animate-out data-[state=open]:animate-in motion-reduce:animate-none!";
+  "z-50 min-w-48 overflow-x-hidden overflow-y-auto rounded-surface border bg-popover p-1 text-popover-foreground ease-out animation-duration-(--duration-base) fade-in-0 zoom-in-95 data-[state=open]:animate-in motion-reduce:animate-none!";
 
 /** The bar. It scrolls sideways on a narrow screen rather than wrapping. */
 export function Menubar({ className, ...props }: ComponentProps<typeof MenubarPrimitive.Root>) {

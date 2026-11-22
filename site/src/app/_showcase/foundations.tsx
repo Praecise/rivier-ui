@@ -1,8 +1,9 @@
 "use client";
 // Showcase: reading direction, the shared live region, and type that follows the script.
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, BadgeCheck } from "lucide-react";
 import { useState } from "react";
+import { AccessibleIcon } from "@/components/ui/accessible-icon";
 import { Button } from "@/components/ui/button";
 import { DirectionProvider, directionOf, useDirection } from "@/components/ui/direction-provider";
 import { Slider } from "@/components/ui/slider";
@@ -72,6 +73,16 @@ export function Foundations() {
             Basket: <span data-testid="basket">{count}</span>
           </p>
         </div>
+      </Demo>
+
+      <Demo title="An icon with a name">
+        <p className="flex items-center gap-2 text-sm">
+          Rosalind Franklin
+          <AccessibleIcon label="Verified">
+            <BadgeCheck strokeWidth={1.5} className="size-4" />
+          </AccessibleIcon>
+        </p>
+        <p className="mt-3 text-sm text-muted-foreground">The tick is drawn for the eye and named for a screen reader.</p>
       </Demo>
 
       <Demo title="Type that follows the script" className="@3xl:col-span-2">

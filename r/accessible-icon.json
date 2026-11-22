@@ -1,0 +1,30 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "accessible-icon",
+  "type": "registry:ui",
+  "title": "Accessible Icon",
+  "description": "Gives an icon that stands alone a name for screen readers, and hides the drawing itself from them.",
+  "categories": [
+    "ui"
+  ],
+  "dependencies": [
+    "radix-ui"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/accessible-icon.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/accessible-icon.tsx",
+      "content": "/**\n * @name accessible-icon\n * @category ui\n * @description Gives an icon that stands alone a name for screen readers, and hides the drawing itself from them.\n * @when An icon that carries meaning with no words beside it and is not itself a control: a status mark in a table cell, a warning beside a figure. An icon-only button or link takes `aria-label` on the control instead; an icon beside its own words is decoration and takes `aria-hidden`; for other words that only a screen reader needs use visually-hidden.\n * @example\n * <AccessibleIcon label=\"Verified\"><BadgeCheck strokeWidth={1.5} className=\"size-4\" /></AccessibleIcon>\n */\nimport { AccessibleIcon as AccessibleIconPrimitive } from \"radix-ui\";\nimport type { ComponentProps } from \"react\";\n\n/** `label` is what is read out. The one child is the icon. */\nexport function AccessibleIcon(props: ComponentProps<typeof AccessibleIconPrimitive.Root>) {\n  return <AccessibleIconPrimitive.Root {...props} />;\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "An icon that carries meaning with no words beside it and is not itself a control: a status mark in a table cell, a warning beside a figure. An icon-only button or link takes `aria-label` on the control instead; an icon beside its own words is decoration and takes `aria-hidden`; for other words that only a screen reader needs use visually-hidden.",
+    "example": "<AccessibleIcon label=\"Verified\"><BadgeCheck strokeWidth={1.5} className=\"size-4\" /></AccessibleIcon>",
+    "client": false
+  }
+}

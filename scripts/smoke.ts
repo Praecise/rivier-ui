@@ -66,7 +66,7 @@ async function run(browser: Browser, width: number, height: number, label: strin
   });
   await page.setViewport({ width, height, deviceScaleFactor: 1, isMobile: width < 600, hasTouch: width < 600 });
   // Not "networkidle": 3D scenes keep a headless, software-rendered browser busy for good.
-  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60_000 });
+  await page.goto(`${url}/showcase`, { waitUntil: "domcontentloaded", timeout: 60_000 });
   await page.waitForSelector("[data-slot=theme-panel]", { timeout: 60_000 });
   await sleep(2500);
   await scrollThrough(page);
