@@ -56,6 +56,10 @@ readable by an assistant. `registry/ui/button.tsx` and `registry/ui/card.tsx` ar
 - Heights: `h-control`, `h-control-sm`, `h-control-lg`. Text: `text-sm` for controls, `text-base` for reading.
 - Every root element takes `className` and merges it last with `cn(...)`, and sets `data-slot="<name>"`.
 - Variants with `cva`, exported as `<name>Variants` when another component may reuse the look.
+- A class kept outside `className`, `cn` and `cva` is kept as a list of two or more (`const nav = "absolute
+  top-3"`), or passed through `cn("…")`. A single utility alone in a constant (`const gap = "gap-2"`) cannot be
+  told from any other word, and a project with a Tailwind prefix would get it without the prefix: `npm run unit`
+  fails on a component that leaves a class list unprefixed.
 - Responsive by default: works from 320px wide; touch targets at least 40px; no fixed widths that overflow.
   Use container queries (`@container`, `@md:`) where a component's layout depends on its own width.
 - Right-to-left safe: logical utilities (`ps-`, `pe-`, `ms-`, `me-`, `start-`, `end-`, `text-start`).
