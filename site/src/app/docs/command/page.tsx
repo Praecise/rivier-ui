@@ -16,7 +16,7 @@ export default function Page() {
     >
       <p>
         <C>rivier-ui</C> is the library's own command. It runs from a copy of the library, as <C>npm run ui --</C>, and works on the project named with <C>dir=</C>.
-        The library's repository opens at launch; until then, <a href="/docs/installation">Installation</a> has the ways that work from this site.
+        <a href="/docs/installation">Installation</a> also has the ways that work from this site alone.
       </p>
 
       <h2 id="commands">What it does</h2>

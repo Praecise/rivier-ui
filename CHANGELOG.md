@@ -1,9 +1,11 @@
 # Changelog
 
-Prelaunch. There are no version numbers yet: entries are dated, newest first. Numbering starts at launch.
+There are no version numbers yet: entries are dated, newest first.
 
 ## 2026-11-22
 
+- **Public.** The library is public at https://ui.rivier.ai. The README, the contributing guide and the
+  site no longer call it prelaunch or private. Version numbers have still not started.
 - **The site.** The showcase is now the library's website, at ui.rivier.ai: a landing page, documentation
   (introduction, installation, theming, the command, for assistants, accessibility, the conventions and
   this changelog), a page for every item with its example, its whole source and the demonstration the

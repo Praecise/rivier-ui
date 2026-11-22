@@ -18,7 +18,7 @@ export default function Page() {
     >
       <p>
         Rivier UI is a library of React components that you copy into a project and own. It is written so that an assistant can find the right component, use it
-        correctly, and restyle a whole product from one place. It is in prelaunch: changes are dated, and version numbers start at launch.
+        correctly, and restyle a whole product from one place. It is public and licensed under Apache 2.0. Changes are dated; there are no version numbers yet.
       </p>
 
       <h2 id="different">What makes it different</h2>

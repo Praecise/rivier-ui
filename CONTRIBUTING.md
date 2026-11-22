@@ -1,6 +1,6 @@
 # Contributing to Rivier UI
 
-Prelaunch: the repository is private, and this guide is for when it opens. Contributions are accepted under
+The library is public (https://ui.rivier.ai). Contributions are accepted under
 the repository's licence (`LICENSE`).
 
 ## Adding or changing a component

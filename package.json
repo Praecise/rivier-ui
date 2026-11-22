@@ -65,6 +65,6 @@
     "site:typecheck": "tsc --noEmit -p site/tsconfig.json",
     "export-film": "node --experimental-strip-types --no-warnings scripts/export-film.ts"
   },
-  "description": "Rivier UI: a component library for AI-native development. Prelaunch: no version numbers.",
+  "description": "Rivier UI: a component library for AI-native development. https://ui.rivier.ai",
   "license": "Apache-2.0"
 }
