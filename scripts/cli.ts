@@ -18,7 +18,7 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
-import { prefixClasses, prefixMerge } from "./prefix.ts";
+import { prefixClasses, prefixMerge, prefixTheme } from "./prefix.ts";
 import { CATEGORIES, loadItems, readTheme, withDependencies, type Item } from "./registry.ts";
 
 const args = process.argv.slice(2);
@@ -33,6 +33,9 @@ const sourceDir = existsSync(join(projectDir, "src")) ? join(projectDir, "src") 
 const THEME_TARGET = "styles/rivier-ui.css";
 const prefix = option("prefix");
 if (prefix && !/^[a-z][a-z0-9]*$/.test(prefix)) throw new Error(`prefix=${prefix}: a Tailwind prefix is lower-case letters and digits, as in prefix=tw.`);
+
+/** The theme as this project gets it. */
+const themeFor = (): string => (prefix ? prefixTheme(readTheme(), prefix) : readTheme());
 
 /** An item as this project gets it: as written, or with the project's prefix on every class. */
 function sourceFor(item: Item): string {
@@ -84,7 +87,7 @@ function globalStylesheet(): string | undefined {
 }
 
 function installTheme(): void {
-  report(THEME_TARGET, place(THEME_TARGET, readTheme()));
+  report(THEME_TARGET, place(THEME_TARGET, themeFor()));
   const sheet = globalStylesheet();
   if (!sheet) {
     console.log(`  note    import "tw-animate-css" and "${THEME_TARGET}" after Tailwind in your global stylesheet`);
@@ -179,7 +182,7 @@ function doctor(items: Item[]): number {
   console.log(`Rivier UI doctor: ${projectDir}`);
   const theme = join(sourceDir, THEME_TARGET);
   say(existsSync(theme), `theme present (${show(theme)})`);
-  if (existsSync(theme)) say(readFileSync(theme, "utf8").replace(/\r\n/g, "\n") === readTheme(), "theme is the current one (run \"rivier-ui theme overwrite\" to refresh; your edits would be lost)");
+  if (existsSync(theme)) say(readFileSync(theme, "utf8").replace(/\r\n/g, "\n") === themeFor(), "theme is the current one (run \"rivier-ui theme overwrite\" to refresh; your edits would be lost)");
   const sheet = globalStylesheet();
   say(Boolean(sheet && readFileSync(sheet, "utf8").includes("rivier-ui.css")), "global stylesheet imports the theme");
   const installed = items.filter((item) => existsSync(join(sourceDir, item.target)));

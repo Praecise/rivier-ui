@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
-import { looksLikeClassList, prefixClasses, prefixMerge, unprefixed } from "./prefix.ts";
+import { isUtility, looksLikeClassList, prefixClasses, prefixMerge, prefixTheme, unprefixed } from "./prefix.ts";
 import { libraryDir } from "./registry.ts";
 
 const tw = (source: string): string => prefixClasses(source, "tw");
@@ -48,6 +48,32 @@ test("what is not a class is left alone", () => {
     `const props = { "aria-label": label, "data-state": state };`,
   ]) assert.equal(tw(source), source, source);
   assert.equal(tw(`cn(side === "top" && "mb-2")`), `cn(side === "top" && "tw:mb-2")`);
+});
+
+test("one utility in a map or chosen by a condition is found when its value is a real one", () => {
+  assert.equal(tw(`const TONE = { good: "text-success", bad: "text-destructive", none: "" };`), `const TONE = { good: "tw:text-success", bad: "tw:text-destructive", none: "" };`);
+  assert.equal(tw(`const edge = side === "top" ? "top-2" : "bottom-2";`), `const edge = side === "top" ? "tw:top-2" : "tw:bottom-2";`);
+  assert.equal(tw(`const SIZES = { sm: "size-4", md: "size-6" } as const;`), `const SIZES = { sm: "tw:size-4", md: "tw:size-6" } as const;`);
+  assert.equal(tw(`{ fill: "fill-chart-1", stroke: "stroke-chart-1" }`), `{ fill: "tw:fill-chart-1", stroke: "tw:stroke-chart-1" }`);
+  for (const option of [`position?: "top-start" | "top-end";`, `side = "bottom"`, `align: "start"`, `type: "text-reveal"`]) assert.equal(tw(option), option);
+  assert.equal(isUtility("hover:bg-accent"), true);
+  assert.equal(isUtility("top-start"), false);
+});
+
+test("a class that is a mark keeps its name: a highlighter's, and one a selector in the file names", () => {
+  assert.equal(tw("<code className={language ? `language-${language}` : undefined} />"), "<code className={language ? `language-${language}` : undefined} />");
+  assert.equal(tw(`<div className="toaster group [.toaster_&]:p-2" />`), `<div className="toaster tw:group tw:[.toaster_&]:p-2" />`);
+  assert.equal(tw(`const INVERSE = "bg-background [.dark_&]:bg-card";`), `const INVERSE = "tw:bg-background tw:[.dark_&]:bg-card";`);
+});
+
+test("a class that reads one of Tailwind's own variables reads the prefixed one", () => {
+  assert.equal(tw(`<i className="ps-[calc(var(--spacing)*3)] rounded-[calc(var(--radius-control)-2px)] h-(--control-h) text-[var(--radius-control-override)]" />`),
+    `<i className="tw:ps-[calc(var(--tw-spacing)*3)] tw:rounded-[calc(var(--tw-radius-control)-2px)] tw:h-(--control-h) tw:text-[var(--radius-control-override)]" />`);
+});
+
+test("the theme's rules by language name Tailwind's variables with the prefix; what is inside @theme is left", () => {
+  const css = `:root {\n  --radius: 4px;\n}\n@theme inline {\n  --text-huge: 4rem;\n  --color-card: var(--card);\n}\n:lang(ar) {\n  --tracking-tight: 0em;\n  --leading-tight: 1.5;\n  --text-3xl--line-height: 1.45;\n}`;
+  assert.equal(prefixTheme(css, "tw"), `:root {\n  --radius: 4px;\n}\n@theme inline {\n  --text-huge: 4rem;\n  --color-card: var(--card);\n}\n:lang(ar) {\n  --tw-tracking-tight: 0em;\n  --tw-leading-tight: 1.5;\n  --tw-text-3xl--line-height: 1.45;\n}`);
 });
 
 test("a template keeps what it interpolates", () => {

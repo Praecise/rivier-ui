@@ -14,8 +14,9 @@
 // What is deliberately left alone: comments, imports, the names of variants (`variant: "outline"`,
 // `defaultVariants`), the name of a property, a string compared with `===`, and the arguments of
 // any other function.
-// One thing cannot be found: a single utility kept outside those places (`const gap = "gap-2"`).
-// `unprefixed` lists what still looks like a class list afterwards, for a check.
+// A single utility kept outside those places is taken only when its value is one the theme or
+// Tailwind's scale has (`"text-success"`, `"top-2"`): a lone word of any other kind cannot be told
+// from an option of a prop. `unprefixed` lists what still looks like a class afterwards, for a check.
 
 const CLASS_CALLS = new Set(["cn", "clsx", "cva"]);
 const CLASS_KEY = /^class(Name|Names)?$/;
@@ -37,13 +38,39 @@ export function looksLikeClassList(text: string): boolean {
   return sure.length >= 2 && tokens.some((token) => (token.includes("-") && !token.startsWith("data-") && !token.startsWith("aria-")) || WORDS.has(token));
 }
 
+// One utility by itself, kept in a map or chosen by a condition (`{ good: "text-success" }`,
+// `top ? "top-2" : "bottom-2"`). A lone word can be anything, so only a utility whose value is one
+// the theme or Tailwind's scale has is taken: `top-2` is, `top-start` (an option of a prop) is not.
+const COLOUR = /^(bg|text|fill|stroke|border|ring|outline|decoration|divide|from|via|to|accent|caret)-(background|foreground|card|popover|primary|secondary|muted|accent|highlight|destructive|success|warning|border|input|ring|overlay|chart-[1-5]|current|transparent|inherit|white|black)(-foreground|-soft|-strong)?(\/\d+)?$/;
+const SCALE = /^-?(size|w|h|min-w|min-h|max-w|max-h|p|px|py|ps|pe|pt|pb|m|mx|my|ms|me|mt|mb|gap|gap-x|gap-y|inset|inset-x|inset-y|top|bottom|start|end|left|right|basis|translate-x|translate-y|space-x|space-y|rounded|z|opacity|order|col-span|row-span|grid-cols|grid-rows|line-clamp|duration|delay|border|ring|outline)-(\d+(\.\d+)?|px|full|auto|screen|fit|min|max|none|control|control-sm|control-lg|surface|instant|base|slow|\d+\/\d+|\[.+\]|\(.+\))$/;
+const PLACING = /^(items|justify|self|content|place-items|place-content|text)-(start|center|end|stretch|between|around|evenly|baseline|left|right|justify)$/;
+const TYPE = /^(text-(xs|sm|base|lg|xl|[2-9]xl)|font-(thin|light|normal|medium|semibold|bold|mono|sans|serif)|leading-(none|tight|snug|normal|relaxed|loose|\d+)|tracking-(tighter|tight|normal|wide|wider|widest))$/;
+
+/** Whether one word is a utility beyond doubt, variants (`hover:`) aside. */
+export function isUtility(token: string): boolean {
+  const name = token.slice(token.lastIndexOf(":") + 1).replace(/^!|!$/g, "");
+  return COLOUR.test(name) || SCALE.test(name) || PLACING.test(name) || TYPE.test(name);
+}
+
+/** Theme variables Tailwind writes itself, and so writes with the prefix (`--tw-spacing`): a class that reads one by name has to follow. */
+const TAILWIND_VARIABLE = /var\(--(spacing(?![\w-])|color-|radius-(?:control|surface|sm|md|lg|xl)(?![\w-])|container-|text-|leading-|tracking-|font-|breakpoint-)/g;
+
+/** Classes a selector in the same file names (`[.dark_&]:…`, `group-[.toaster]:…`): they are marks on an element, not utilities, and keep their name. */
+function marksIn(source: string): Set<string> {
+  const marks = new Set<string>(["dark"]);
+  for (const match of source.matchAll(/\[[^\]\s"'`]*?\.([A-Za-z][A-Za-z0-9-]*)/g)) marks.add(match[1]!);
+  return marks;
+}
+
 /** One class list with the prefix on every class. `${…}` in a template is carried as it is; a class that begins with one is left alone. */
-function prefixList(text: string, prefix: string): string {
+function prefixList(text: string, prefix: string, marks: Set<string>): string {
   let out = "";
   let token = "";
   let depth = 0;
   const flush = (): void => {
-    if (token) out += token.startsWith("${") || token.startsWith(`${prefix}:`) ? token : `${prefix}:${token}`;
+    // `language-ts` is the class a highlighter looks for, by a convention that is not Tailwind's.
+    const kept = token.startsWith("${") || token.startsWith(`${prefix}:`) || token.startsWith("language-") || marks.has(token);
+    if (token) out += kept ? token : `${prefix}:${token.replace(TAILWIND_VARIABLE, `var(--${prefix}-$1`)}`;
     token = "";
   };
   for (let at = 0; at < text.length; at++) {
@@ -153,16 +180,18 @@ const isImport = (source: string, literal: Literal): boolean => {
 function isClasses(source: string, literal: Literal): boolean {
   if (!literal.text.trim() || literal.compared || isImport(source, literal)) return false;
   if (literal.key) return false;
-  return literal.inClass || looksLikeClassList(literal.text);
+  const text = literal.text.trim();
+  return literal.inClass || looksLikeClassList(text) || (!/\s/.test(text) && isUtility(text));
 }
 
 /** The source of a component with the prefix on every class found. */
 export function prefixClasses(source: string, prefix: string): string {
   let out = "";
   let from = 0;
+  const marks = marksIn(source);
   for (const literal of literals(source)) {
     if (!isClasses(source, literal)) continue;
-    out += source.slice(from, literal.start + 1) + prefixList(literal.text, prefix);
+    out += source.slice(from, literal.start + 1) + prefixList(literal.text, prefix, marks);
     from = literal.end;
   }
   return out + source.slice(from);
@@ -174,7 +203,7 @@ export function unprefixed(source: string, prefix: string): string[] {
   for (const literal of literals(source)) {
     if (literal.compared || literal.key || isImport(source, literal)) continue;
     const bare = literal.text.split(/\s+/).filter((token) => token && !token.startsWith(`${prefix}:`) && !token.startsWith("${"));
-    if (bare.length >= 2 && looksLikeClassList(bare.join(" "))) {
+    if ((bare.length >= 2 && looksLikeClassList(bare.join(" "))) || (bare.length === 1 && literal.text.trim() === bare[0] && isUtility(bare[0]!))) {
       missed.push(`${source.slice(0, literal.start).split("\n").length}: ${literal.text.slice(0, 80)}`);
     }
   }
@@ -184,4 +213,25 @@ export function unprefixed(source: string, prefix: string): string[] {
 /** `cn` for a project with a prefix: tailwind-merge has to know it to tell which classes replace which. */
 export function prefixMerge(source: string, prefix: string): string {
   return source.replace("extendTailwindMerge({", `extendTailwindMerge({\n  prefix: "${prefix}",`);
+}
+
+/**
+ * The theme for a project with a prefix. Tailwind then writes its own theme variables with the prefix
+ * (`--tw-tracking-tight`), so the rules that change them by language have to name them the same way.
+ * What the theme declares inside `@theme` is Tailwind's to rename, and is left as it is.
+ */
+export function prefixTheme(css: string, prefix: string): string {
+  let depth = 0;
+  let themeAt = -1;
+  return css
+    .split("\n")
+    .map((line) => {
+      const inTheme = themeAt !== -1;
+      if (!inTheme && /^\s*@theme\b/.test(line)) themeAt = depth;
+      const renamed = inTheme || themeAt !== -1 ? line : line.replace(/^(\s*)--(tracking|leading|text)-/, `$1--${prefix}-$2-`);
+      depth += (line.match(/{/g) ?? []).length - (line.match(/}/g) ?? []).length;
+      if (themeAt !== -1 && depth <= themeAt) themeAt = -1;
+      return renamed;
+    })
+    .join("\n");
 }
