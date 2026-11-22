@@ -1,0 +1,32 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "word-rotate",
+  "type": "registry:component",
+  "title": "Word Rotate",
+  "description": "One word in a sentence that changes to the next of a list in place, rising and fading, once through the list (or round and round with `loop`, pausing while hovered or focused); screen readers hear the whole list once, and under reduced motion the last word simply stands.",
+  "categories": [
+    "motion"
+  ],
+  "dependencies": [
+    "motion"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn",
+    "@rivier-ui/motion"
+  ],
+  "files": [
+    {
+      "path": "registry/motion/word-rotate.tsx",
+      "type": "registry:component",
+      "target": "components/motion/word-rotate.tsx",
+      "content": "\"use client\";\n/**\n * @name word-rotate\n * @category motion\n * @description One word in a sentence that changes to the next of a list in place, rising and fading, once through the list (or round and round with `loop`, pausing while hovered or focused); screen readers hear the whole list once, and under reduced motion the last word simply stands.\n * @when A headline that names several things one after another: \"Charts for teams / schools / newsrooms\". Keep the words about the same length. For a whole heading appearing use text-reveal; for a number counting up use number-ticker.\n * @example\n * <h1>Maps for <WordRotate words={[\"teams\", \"schools\", \"newsrooms\"]} /></h1>\n */\nimport { AnimatePresence, motion } from \"motion/react\";\nimport { useEffect, useState, type ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\nimport { useMotionSafe } from \"@/lib/motion\";\n\nexport type WordRotateProps = Omit<ComponentProps<\"span\">, \"children\"> & {\n  words: readonly string[];\n  /** Milliseconds each word stays. Default 2200. */\n  interval?: number;\n  /** Go round again and again. Default false: once through, then the last word stays (no motion lasts past a few seconds). */\n  loop?: boolean;\n  /** Stops it where it is. */\n  paused?: boolean;\n  /** Joins the words for screen readers. Default: Intl's list format in `locale`. */\n  locale?: string;\n};\n\nexport function WordRotate({ words, interval = 2200, loop = false, paused = false, locale = \"en-US\", className, ...props }: WordRotateProps) {\n  const safe = useMotionSafe();\n  const [index, setIndex] = useState(0);\n  const [hold, setHold] = useState(false);\n  const last = words.length - 1;\n  const running = safe && !paused && !hold && words.length > 1 && (loop || index < last);\n  useEffect(() => {\n    if (!running) return;\n    const timer = window.setTimeout(() => setIndex((i) => (i >= last ? 0 : i + 1)), interval);\n    return () => window.clearTimeout(timer);\n  }, [running, index, interval, last]);\n  const shown = safe ? (words[index] ?? \"\") : (words[last] ?? \"\");\n  const spoken = new Intl.ListFormat(locale, { type: \"disjunction\" }).format(words);\n  return (\n    <span data-slot=\"word-rotate\" className={cn(\"relative inline-grid align-bottom\", className)} onPointerEnter={() => setHold(true)} onPointerLeave={() => setHold(false)} onFocus={() => setHold(true)} onBlur={() => setHold(false)} {...props}>\n      <span className=\"sr-only\">{spoken}</span>\n      {/* The widest word holds the space, so the sentence does not jump. */}\n      <span aria-hidden=\"true\" className=\"invisible col-start-1 row-start-1\">\n        {words.reduce((a, b) => (b.length > a.length ? b : a), \"\")}\n      </span>\n      <span aria-hidden=\"true\" className=\"col-start-1 row-start-1 overflow-hidden\">\n        <AnimatePresence mode=\"popLayout\" initial={false}>\n          <motion.span\n            key={shown}\n            className=\"inline-block\"\n            initial={safe ? { opacity: 0, y: \"60%\" } : false}\n            animate={{ opacity: 1, y: \"0%\" }}\n            exit={safe ? { opacity: 0, y: \"-60%\" } : { opacity: 0 }}\n            transition={{ duration: 0.35, ease: [0.2, 0, 0, 1] }}\n          >\n            {shown}\n          </motion.span>\n        </AnimatePresence>\n      </span>\n    </span>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "motion",
+    "when": "A headline that names several things one after another: \"Charts for teams / schools / newsrooms\". Keep the words about the same length. For a whole heading appearing use text-reveal; for a number counting up use number-ticker.",
+    "example": "<h1>Maps for <WordRotate words={[\"teams\", \"schools\", \"newsrooms\"]} /></h1>",
+    "client": true
+  }
+}

@@ -2,6 +2,151 @@
 
 Prelaunch. There are no version numbers yet: entries are dated, newest first. Numbering starts at launch.
 
+## 2026-11-13: full ground
+
+Charts, maps, explainers and the other gaps found by the audit in `docs/GAPS-2026-11-13.md`. Everything is
+added: no item, prop or part was removed or renamed.
+
+New packages, each open source, with no hosted service and nothing sent anywhere (the owner's consent for
+full ground covers MIT, ISC, BSD and Apache-2.0 packages of that kind):
+
+| Package | Licence | Why |
+| --- | --- | --- |
+| `d3-array` | ISC | Bins, quantiles and extents: histogram, box plot, fan chart, density |
+| `d3-hierarchy` | ISC | Treemap, sunburst and circle-pack layouts |
+| `d3-sankey` | BSD-3-Clause | Sankey node and link layout |
+| `d3-force` | ISC | The network graph's layout, run to rest before it is drawn |
+| `d3-contour` | ISC | Density contours |
+| `d3-delaunay` | ISC | The nearest point under the pointer in scatter, density and map layers |
+| `d3-geo` | ISC | Map projections, paths, the graticule and great-circle routes |
+
+### Charts (`viz`)
+
+Each is drawn from d3 maths in the theme's series colours, measured by its container, read item by item by
+arrow keys (Home, End, Escape) with what it reads said in its live region and shown in a tooltip, carries its
+data as a table for screen readers, and fades in once, not at all under reduced motion. Shown at `/charts`
+and checked by `scripts/checks/charts.ts`.
+
+- **`scatter-chart`**: points by two numbers, a bubble chart with `size`, groups in fixed colours and shapes,
+  the nearest point under the pointer (d3-delaunay).
+- **`histogram`**: equal bins (d3-array), counts or shares.
+- **`box-plot`**: quartiles, whiskers at 1.5 boxes and outliers per group, or `variant="violin"`.
+- **`fan-chart`**: observed values, then a median forecast with nested interval bands and a forecast rule.
+- **`small-multiples`**: a panel per group on one shared scale, line, area or bars, in a grid that fits.
+- **`treemap`**, **`sunburst`**, **`circle-pack`**: a tree (`ChartTreeNode`) as rectangles, rings or
+  circles; Enter or a click opens a group, Backspace or the trail goes back (`path`, `defaultPath`,
+  `onPathChange`).
+- **`sankey-chart`**: flows between stages (d3-sankey), nodes and bands both readable.
+- **`network-graph`**: a force layout run to rest before drawing (d3-force), a node's links lit with it.
+- **`calendar-heatmap`**: a value per "YYYY-MM-DD" day as a calendar; Down is the next day, Right a week on.
+- **`gantt-chart`**: tasks under groups with progress, dependencies, milestones and a line for today.
+- **`density-chart`**: contour bands of where points crowd (d3-contour), points optionally on top.
+- **`radar-chart`**, **`waterfall-chart`**, **`funnel-chart`**, **`bullet-chart`**, **`candlestick-chart`**,
+  **`chord-diagram`**, **`parallel-coordinates`**, **`dot-plot`** (dots, lollipop, dumbbell, beeswarm),
+  **`stream-chart`**, **`slope-chart`**: the other forms the audit found missing. Direction (rise or fall,
+  up or down a day) is always said in words or drawn as a shape, never by colour alone.
+- **`chart-brush`**: an overview with two handles (Radix Slider) that choose the rows another chart shows.
+- **`bar-chart`**: `normalize` stacks each category to 100 %; the tooltip and the table keep the amounts
+  and add the share.
+- **`chart`**: new shared parts for charts of a project's own: `ChartBaseProps`, `ChartEmpty`,
+  `useChartCursor`, `chartSequential`, `chartDiverging`, `chartLinear`, `widestText`, `fitText`, the tree
+  helpers and `ChartTrail`.
+- **Fixed in `chart`, for every chart.** In a right-to-left page the SVG took the page's direction, which
+  turns SVG text anchors round: axis labels were drawn on the wrong side of their tick. The SVG is now drawn
+  left to right (words in a right-to-left script still read right to left inside a label). The hidden data
+  table is now hidden by a wrapper: on the table itself, a wide table still widened the page on a phone.
+
+### Maps (`viz`)
+
+Drawn from GeoJSON the project passes: no tiles, no hosted data, nothing fetched unless the project names a
+tile server. Shown at `/maps` and checked by `scripts/checks/maps.ts`. CONVENTIONS lists six categories and no
+`map`, so they are in `viz`.
+
+- **`geo-map`**: any d3-geo projection by name (equal-earth, natural-earth, mercator, equirectangular,
+  orthographic, conic-equal-area, azimuthal-equal-area, transverse-mercator) or as a function, fitted to
+  `fit`; zoom and pan folded into the projection (crisp lines, exact tile maths) by dragging, pinching,
+  Ctrl or ⌘ with the wheel (the wheel alone still scrolls the page), a double click, buttons and keys (arrows
+  pan, + and - zoom, 0 resets), controlled with `view` and `onViewChange`. Parts: `GeoGraticule`,
+  `GeoFeatures`, `GeoScaleBar`, `GeoTable`, and `GeoLayer`, the readable layer every other layer is built on
+  (a named group in the Tab order, items read by arrow keys, said aloud, shown in a tooltip and brought into
+  view). Works inside `map-frame`.
+- **`choropleth`**: regions by a number, sequential, diverging or in classes (`choroplethScale`), and
+  `ChoroplethLegend`, which says each step's range in words.
+- **`geo-markers`**: points in group colours and shapes, or bubbles sized by area.
+- **`geo-routes`**: great-circle routes or arcs, width by amount, an arrow for the direction, distances.
+- **`geo-hexbin`**: points gathered into hexagons or squares on screen, re-gathered on zoom (the binning is
+  written here; no package).
+- **`geo-tiles`**: raster tiles from the project's own address template, with a required attribution and no
+  default host.
+
+### Explainers (`lib`, `motion`, `scripts`)
+
+- **`explainer-spec`** (lib): the types of an explainer film as plain data (scenes of a title, any of 28
+  charts by name, a map with choropleth, marker, route or hexbin layers and a camera that moves over the
+  scene, a 3D model that turns, a then-and-now comparison that sweeps, a quote, a caption over a picture),
+  each with a length, a transition, captions, a narration cue and a provenance of `measured`,
+  `reconstructed`, `generated` or `invented`. `validateExplainer` returns every fault with its path and words
+  that say how to mend it (a duration in milliseconds, a repeated id, an unknown chart, a chart or map that
+  does not say how it was made). `explainerTimeline` and `explainerCues` put scenes and captions on the
+  film's clock.
+- **`explainer`** (motion): plays a spec on `film-stage`: playable, scrubbable, captions, narration and a
+  sound bed in step, and `ExplainerProvenance` (a `provenance-label` that follows the scene on stage).
+  Entrances and camera moves are worked out from the scene's own time, so `renderAt` draws any moment the
+  same way, and they are final under reduced motion. A spec with faults shows them as an alert instead of a
+  film. Parts: `ExplainerCaptions`, `ExplainerProvenance`, `ExplainerAudio`; `renderPicture` takes a
+  framework's image component. Shown at `/explainers`, checked by `scripts/checks/explainers.ts`.
+- **`scripts/export-film.ts`** (`npm run export-film -- url=… name=…`): opens a page with a deterministic
+  stage, calls `window.__filmStage.<name>.renderAt(t)` for each frame, saves PNG frames, and writes an MP4
+  with ffmpeg when it is on the PATH, else a zip of the frames with a `manifest.json` (written here: no
+  package). Tried on 2026-11-13 against `/explainers` at 6 fps: 168 frames, a valid zip.
+
+### The other gaps (`ui`, `motion`, `layout`, `three`, `lib`)
+
+- **`data-grid`**: records to sort (Shift for several columns, said aloud), narrow (a filter per column, a
+  search across all), group (with sum, mean, count, min or max per group), pin, show and hide, choose
+  (checkboxes, the page at once), page, window (thousands of rows drawn only where seen, positions kept
+  with `aria-rowindex`) and edit in place (Enter or F2, Enter keeps, Escape leaves). The WAI-ARIA grid
+  pattern: one tab stop, arrow keys, Home and End, Ctrl with them, Page Up and Down, focus handed to a
+  cell's control. Written here: `@tanstack/react-table` 9 was installed for it and left out, because
+  wrapping its typed feature registry in a generic grid without `any` cost more than the behaviour.
+  `@tanstack/react-virtual` was removed with it. Shown at `/grid`.
+- **`form`**: on Radix Form: the browser's rules and the project's `match`, messages in words under each
+  field, and `FormErrorSummary`, the faults of a failed submit as links to the fields, said once. Radix
+  checks a field when it is left, so a message can appear just as the submit button is pressed and move it:
+  `FormSubmit` still submits when the press ends where the button was.
+- **`tags-input`**, **`otp-input`**, **`password-input`** (show and hide, Caps Lock, rules marked in words),
+  **`currency-input`** (the locale's decimal mark, grouping and symbol; a plain number out),
+  **`color-picker`** (OKLCH: a field drawn from the maths, a slider per axis, swatches, OKLCH or hex),
+  **`rating`** (on Radix RadioGroup; read-only with the score in words). Shown at `/entry`.
+- **`alert-dialog`**, **`hover-card`**, **`collapsible`**, **`menubar`**, **`navigation-menu`**, **`toolbar`**:
+  the Radix primitives the library lacked, in the theme's look, with their keyboard patterns.
+- **`button-group`** (joined buttons, a text slot), **`resizable`** (the window splitter pattern: drag,
+  arrows, Home, End, Enter to fold), **`sidebar`** (folds to a rail of icons whose names are still read,
+  Ctrl/⌘+B, a sheet on narrow screens), **`visually-hidden`**, **`skip-link`**, and **`use-hotkeys`** (lib:
+  shortcuts and sequences by the key's place on any layout, never while typing, and `formatHotkey`). Shown
+  at `/surfaces`.
+- **`tree-view`** (the WAI-ARIA tree: arrows, Home, End, type-ahead, `*`), **`kanban`** (drag, or lift with
+  Space and carry with the arrows, or each card's "Move to" menu; every move said), **`flow-diagram`** (steps
+  dragged or moved by arrows, linked by C then Enter or by a handle, Delete, zoom and pan, the links also as a
+  list), **`tour`** (a card beside each element in turn, ringed, focus in the card, Escape ends), and
+  **`notification-list`** (read and unread in words, all or unread, mark one or all, times from a given
+  moment). Shown at `/boards`.
+- **`code-block`** (copy said aloud, wrap, line numbers, marked lines, `renderLine` for a highlighter),
+  **`markdown-editor`** (a toolbar and Ctrl/⌘ with B, I, K that wrap the chosen words; the preview is the
+  project's renderer), **`image-cropper`** (a frame dragged, or moved by arrows and resized by plus and
+  minus, held to a shape; fractions and pixels out) and **`image-annotator`** (areas drawn or added by a
+  button, moved and resized by keys, named in a list). Resizing is never on Alt with an arrow, which is
+  the browser's Back and Forward. Shown at `/editors`.
+- **`pattern`** (layout: dots, grid or lines in the hairline colour), **`word-rotate`** (once through its
+  words by default, the whole list said once, pauses on hover and focus), **`orbit`**, **`animated-beam`**
+  (a flat line whose dots light up in turn: opacity only, no gradient) and **`confetti`** (a canvas burst in
+  the chart colours, never under reduced motion). Gradient glows, shimmer and meteors stay out: the theme is
+  flat.
+- **`point-cloud`** (three: data as points in a framed cube, group colours from the series, with
+  `PointCloudTable`) and **`model-annotations`** (labels that follow points on a model, written straight to
+  the page each frame, and the same notes as a list). Shown at `/effects`.
+- Showcase: the header's row of page links scrolls sideways when there are more pages than fit.
+
 ## 2026-11-13
 
 More that the existing components can do. Every change is an added prop or part with the old behaviour

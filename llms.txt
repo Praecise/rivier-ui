@@ -45,6 +45,29 @@ function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
 }
 ```
 
+### explainer-spec
+
+The plain-data description of an explainer film (scenes of a title, a chart, a map, a 3D model, a then-and-now comparison, a quote or a caption, each with a length, a transition, captions, a narration cue and a provenance label) and a validator that lists every fault in words.
+
+Use it: An assistant or a project writes a film as JSON and hands it to motion/explainer. Run validateExplainer first and show its faults: each says where the fault is and how to mend it. For a film drawn by hand from React, use film-stage directly.
+
+```tsx
+const spec: ExplainerSpec = {
+  title: "How the river rose",
+  lang: "en",
+  scenes: [
+    { id: "intro", kind: "title", duration: 4, title: "How the river rose", subtitle: "Spring 2026" },
+    {
+      id: "levels", kind: "chart", duration: 8, chart: "line-chart",
+      props: { label: "Water level by day", data: [{ day: 1, level: 2.1 }, { day: 2, level: 2.9 }], x: "day", series: [{ key: "level", label: "Level (m)" }] },
+      captions: [{ start: 0.5, end: 4, text: "The level rose for four days." }],
+      provenance: { kind: "measured", note: "Gauge readings" },
+    },
+  ],
+};
+const faults = validateExplainer(spec); // [] when it is sound
+```
+
 ### motion
 
 The motion tokens as numbers for the motion package (easing, durations, a pointer spring), the useMotionSafe gate, and the entrance engine the reveal components share.
@@ -87,6 +110,18 @@ function Stepper({ value, defaultValue = 0, onValueChange }: { value?: number; d
   const [count, setCount] = useControllableState({ value, defaultValue, onChange: onValueChange });
   return <button onClick={() => setCount(count + 1)}>{count}</button>;
 }
+```
+
+### use-hotkeys
+
+Binds keyboard shortcuts ("mod+k", "shift+?", "g i") to handlers on the page or on one element, by the key's place for letters so they work on keyboards of every script, left alone while typing in a field; and formats a shortcut for showing ("⌘K" on Apple, "Ctrl+K" elsewhere).
+
+Use it: Shortcuts for frequent actions: opening command, saving, moving between items. Show each one where its action is (kbd, a menu's shortcut slot) and keep a list of them. Do not take keys a screen reader or the browser uses (single letters without a modifier only inside a focused widget; never Tab or the arrows on the page).
+
+```tsx
+useHotkeys("mod+k", () => setOpen(true));
+useHotkeys("g i", () => router.push("/inbox"), { sequenceTimeout: 800 });
+<Kbd>{formatHotkey("mod+k")}</Kbd>
 ```
 
 ### use-media
@@ -138,6 +173,28 @@ Use it: Questions and answers, or long settings where people need a few sections
     <AccordionContent>Yes, within thirty days.</AccordionContent>
   </AccordionItem>
 </Accordion>
+```
+
+### alert-dialog
+
+A modal question that must be answered before anything else: a title, what will happen, and two buttons, with focus starting on the safe one and Escape choosing it. It cannot be dismissed by clicking outside.
+
+Use it: Confirming something that cannot be undone or costs something: deleting, leaving with unsaved work, paying. For a window of content use dialog; for a change that can be undone, do it and offer undo-line instead of asking.
+
+```tsx
+<AlertDialog>
+  <AlertDialogTrigger asChild><Button variant="destructive">Delete the project</Button></AlertDialogTrigger>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Delete the project?</AlertDialogTitle>
+      <AlertDialogDescription>Its 14 files are deleted for everyone. This cannot be undone.</AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel>Keep it</AlertDialogCancel>
+      <AlertDialogAction variant="destructive" onClick={remove}>Delete</AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
 ```
 
 ### alert
@@ -253,6 +310,20 @@ Use it: Pages nested three or more levels deep, above the page title. The last i
     <BreadcrumbItem><BreadcrumbPage>Atlas</BreadcrumbPage></BreadcrumbItem>
   </BreadcrumbList>
 </Breadcrumb>
+```
+
+### button-group
+
+Buttons joined into one block with shared edges (rounded only at the ends), side by side or stacked, with an optional piece of text or a separator between them.
+
+Use it: Related actions that belong together: a split button (an action and its menu), zoom out and in, previous and next. For a choice of one use segmented-control or toggle-group; for a set of commands over content use toolbar.
+
+```tsx
+<ButtonGroup aria-label="Zoom">
+  <Button variant="outline" size="icon" aria-label="Zoom out"><Minus /></Button>
+  <ButtonGroupText>100%</ButtonGroupText>
+  <Button variant="outline" size="icon" aria-label="Zoom in"><Plus /></Button>
+</ButtonGroup>
 ```
 
 ### button
@@ -417,6 +488,40 @@ Use it: Filters in effect above a list (Chip with ChipRemove), suggested replies
   <ChipGroupItem value="calm">Calm</ChipGroupItem>
   <ChipGroupItem value="lively">Lively</ChipGroupItem>
 </ChipGroup>
+```
+
+### code-block
+
+Code to read and copy: a title or file name, the language, optional line numbers and highlighted lines, a switch between wrapping and scrolling long lines, and a copy button that says when it has copied.
+
+Use it: Showing code, commands or configuration in documentation and answers. Colouring by syntax comes from the project (pass `renderLine` with a highlighter's output); the block works without it. For code to edit, bring an editor (CodeMirror, Monaco); for a short word of code in a sentence use `<code>`.
+
+```tsx
+<CodeBlock title="Install" language="sh" code={"npm install\nnpm run dev"} />
+<CodeBlock language="ts" code={source} lineNumbers highlight={[3, 4]} />
+```
+
+### collapsible
+
+One section of content that opens and closes under a button that says whether it is open: the disclosure pattern.
+
+Use it: Hiding detail that only some people need: more options, the rest of a long answer, a transcript. For several such sections in a column use accordion; for a menu of actions use dropdown-menu.
+
+```tsx
+<Collapsible>
+  <CollapsibleTrigger>More options</CollapsibleTrigger>
+  <CollapsibleContent>…</CollapsibleContent>
+</Collapsible>
+```
+
+### color-picker
+
+A colour chosen in OKLCH (lightness, chroma, hue: even steps the eye sees as even): a field of lightness and chroma to point at, a slider for each of the three that the keys drive, swatches of the project's colours, and the value as text that can be typed, in OKLCH or hex.
+
+Use it: Choosing a brand colour, a highlight, a label colour. To choose among a few fixed colours use toggle-group or radio-group with swatches; for the theme's highlight use theme-provider (its accent hue and chroma are this picker's).
+
+```tsx
+<ColorPicker aria-label="Label colour" defaultValue="oklch(0.62 0.17 250)" swatches={["oklch(0.62 0.17 250)", "oklch(0.7 0.15 150)", "#d95926"]} />
 ```
 
 ### combobox
@@ -615,6 +720,39 @@ Use it: Something the person holds for a limited time: a reserved seat, a price 
     expiredLabel="no longer: the hold has ended"
   />
 </p>
+```
+
+### currency-input
+
+An amount of money typed the way the locale writes it (its decimal mark, its grouping, its symbol before or after), shown formatted when the field is left, kept as a plain number, with Up and Down to step it and a range it is held to.
+
+Use it: Prices, budgets, transfers, any amount in a currency. Also numbers with a unit through `unit` instead of `currency` (kilograms, percent). For a small whole number with buttons use number-stepper; for a range use slider.
+
+```tsx
+<CurrencyInput aria-label="Budget" currency="EUR" locale="de-DE" defaultValue={1250.5} min={0} name="budget" />
+```
+
+### data-grid
+
+A table of records a person works in: sorting by one or several columns, a filter per column and a search across all, grouping with totals, columns pinned to the start, shown and hidden, rows chosen by checkbox, pages or a window of rows for thousands, and cells edited in place; one tab stop and arrow keys from cell to cell, to the WAI-ARIA grid pattern.
+
+Use it: Lists of records that are sorted, narrowed, compared and changed: orders, accounts, files, results. For a few rows to read use table; for side-by-side comparison of two to four things use compare-table; for an endless feed use virtual-list.
+
+```tsx
+<DataGrid
+  label="Orders"
+  rows={orders}
+  rowId={(order) => order.id}
+  columns={[
+    { key: "id", header: "Order", pin: "start", width: 110 },
+    { key: "customer", header: "Customer" },
+    { key: "status", header: "Status" },
+    { key: "total", header: "Total", type: "number", aggregate: "sum", editable: true },
+  ]}
+  selectable
+  pageSize={20}
+  onCellEdit={(id, key, value) => save(id, key, value)}
+/>
 ```
 
 ### date-picker
@@ -841,6 +979,37 @@ Use it: Every control in a form. Put the control inside FieldControl; render Fie
 </Field>
 ```
 
+### flow-diagram
+
+A diagram of boxes joined by arrows that the person edits: nodes dragged or moved with the arrow keys, joined by pressing C and choosing the next node (or by pointer), removed with Delete, zoomed and panned; every change said aloud and the whole diagram also given as a list of steps and links.
+
+Use it: Processes, pipelines and simple node graphs the person builds or rearranges: an approval flow, a data pipeline, a decision tree. For a graph to look at, laid out automatically, use network-graph; for stages with amounts use sankey-chart; for work moving between columns use kanban.
+
+```tsx
+const [nodes, setNodes] = useState([{ id: "a", label: "Order placed", x: 40, y: 60 }, { id: "b", label: "Paid", x: 260, y: 60 }]);
+const [edges, setEdges] = useState([{ id: "a-b", source: "a", target: "b" }]);
+<FlowDiagram aria-label="Order flow" nodes={nodes} edges={edges} onNodesChange={setNodes} onEdgesChange={setEdges} />
+```
+
+### form
+
+A form that checks itself with the browser's own rules (required, type, length, range, pattern) and the project's, shows each field's message in words under it, and after a failed submit lists every fault at the top as links to the fields, said once.
+
+Use it: Any form with rules: sign-up, checkout, settings. The rules live on the controls (`required`, `type="email"`, `min`) or in a `match` function; a server's answer goes in `serverInvalid` with its message. For a single field with no rules, field is enough; for a guided form over several steps use wizard.
+
+```tsx
+<Form onSubmit={(event) => { event.preventDefault(); save(new FormData(event.currentTarget)); }}>
+  <FormErrorSummary title="There is a problem" />
+  <FormField name="email">
+    <FormLabel>Email</FormLabel>
+    <FormControl asChild><Input type="email" required /></FormControl>
+    <FormMessage match="valueMissing">Enter your email address.</FormMessage>
+    <FormMessage match="typeMismatch">Enter an email address like name@example.com.</FormMessage>
+  </FormField>
+  <FormSubmit asChild><Button>Create account</Button></FormSubmit>
+</Form>
+```
+
 ### gallery
 
 A set of picture tiles that open a full-screen viewer: a mosaic of one large and several small, an even grid, or a row that scrolls sideways.
@@ -901,6 +1070,39 @@ const spots = [
 </VideoPlayerProvider>
 ```
 
+### hover-card
+
+A small card of more about a link (a person's profile, a page's summary) that opens after a pause on hover or keyboard focus, and stays while the pointer moves onto it.
+
+Use it: A preview that sighted pointer users can do without: the link itself must lead to the same content, because touch screens and screen readers do not get the card. For a few words use tooltip; for content people act on use popover.
+
+```tsx
+<HoverCard>
+  <HoverCardTrigger asChild><a href="/team/ada">Ada</a></HoverCardTrigger>
+  <HoverCardContent>Designer on the maps team since 2024.</HoverCardContent>
+</HoverCard>
+```
+
+### image-annotator
+
+A picture on which areas are marked and named: drawn by dragging, or added with a button and placed with the keys (arrows move, plus and minus resize, Delete removes), each named in a list beside the picture; areas come out as fractions of the picture, every change said aloud.
+
+Use it: Labelling what is in a picture: damage on a photo, rooms on a plan, objects for training a model, notes on a design. For cutting a picture use image-cropper; for named points that play at moments of a video use hotspots.
+
+```tsx
+<ImageAnnotator src="/plan.png" alt="Ground floor plan" defaultAreas={[{ id: "a", x: 0.1, y: 0.2, width: 0.3, height: 0.25, label: "Kitchen" }]} onAreasChange={save} />
+```
+
+### image-cropper
+
+A picture with a frame over it that chooses the part to keep: dragged or resized by its corners, or moved with the arrow keys and resized with plus and minus, optionally held to a shape (square, 16:9); the choice comes out as fractions and as pixels of the original.
+
+Use it: Cropping an avatar, a cover picture, a product photo before upload. The cutting itself is the project's (a canvas, the server); this gives the rectangle. For marking areas on a picture use image-annotator; for comparing two pictures use compare-slider.
+
+```tsx
+<ImageCropper src="/photo.jpg" alt="The harbour at dawn" aspect={1} onCropChange={(crop) => setCrop(crop.pixels)} />
+```
+
 ### input-group
 
 An input with a leading or trailing icon, text or button inside one shared border.
@@ -929,6 +1131,20 @@ Use it: Short free text: a name, an email, a number. Wrap it in field for a labe
 <Input type="email" placeholder="you@example.com" />
 <Input size="sm" defaultValue="Rivier" />
 <Input aria-invalid="true" aria-label="Email" defaultValue="not-an-email" />
+```
+
+### kanban
+
+Cards in columns (to do, doing, done) that move between and within columns three ways: dragged with a mouse, lifted with Space and carried with the arrow keys, or sent by each card's "Move to" menu; every move is said aloud.
+
+Use it: Work that passes through stages: tasks, applications, orders. For one ordered list use sortable-list; for a schedule over time use gantt-chart; for records to sort and filter use data-grid.
+
+```tsx
+<Kanban
+  aria-label="Tasks"
+  columns={[{ id: "todo", title: "To do" }, { id: "doing", title: "Doing" }, { id: "done", title: "Done" }]}
+  defaultCards={[{ id: "1", column: "todo", title: "Write the brief" }, { id: "2", column: "doing", title: "Draw the map" }]}
+/>
 ```
 
 ### kbd
@@ -1012,6 +1228,16 @@ Use it: Looking closely at pictures that are shown small on the page: a listing'
 </Lightbox>
 ```
 
+### markdown-editor
+
+A field for writing Markdown with a toolbar that wraps the chosen words (bold, italic, code, link) or starts a line (heading, list, quote), the same as Ctrl/⌘ with B, I and K, and a tab that shows the project's own preview.
+
+Use it: Comments, notes and descriptions where people write a little formatting. The preview is the project's (its Markdown renderer and its sanitiser); without one, leave `renderPreview` out and there is no preview tab. For rich text without markup bring an editor (Tiptap, Lexical); for plain text use textarea.
+
+```tsx
+<MarkdownEditor aria-label="Comment" defaultValue="**Hello**" renderPreview={(text) => <MyMarkdown source={text} />} name="comment" />
+```
+
 ### media-row-list
 
 The pictures or clips a person has added, as rows they can put in order, describe and choose a cover from: each row shows its state in words (an upload's, or one the project names), its progress or its error with pause, resume and retry, a field for its text alternative that can be required, a "cover" choice, a remove button, and room for a status line and controls of the project's own.
@@ -1043,6 +1269,25 @@ const row: MediaRow = {
   hideCover: true, altRequired: true, altError: "Say what the clip shows.",
 };
 <MediaRowList aria-label="Clips" items={[row]} variant="lines" onAltChange={describe} onPause={pause} onResume={resume} onDropped={({ values }) => save(values)} />
+```
+
+### menubar
+
+A row of menus that stays on screen, as in a desktop application: File, Edit, View, each opening a menu of items, checkbox and radio items and sub-menus, moved through with the arrow keys from one menu to the next.
+
+Use it: An editor or tool with many commands grouped by kind. For a site's navigation use navbar or navigation-menu; for one button's actions use dropdown-menu; on a phone, prefer a toolbar or a single menu.
+
+```tsx
+<Menubar>
+  <MenubarMenu>
+    <MenubarTrigger>File</MenubarTrigger>
+    <MenubarContent>
+      <MenubarItem>New <MenubarShortcut>⌘N</MenubarShortcut></MenubarItem>
+      <MenubarSeparator />
+      <MenubarItem>Print</MenubarItem>
+    </MenubarContent>
+  </MenubarMenu>
+</Menubar>
 ```
 
 ### message
@@ -1091,6 +1336,44 @@ Use it: The top of a site or app with up to about seven top-level links. The lin
 </Navbar>
 ```
 
+### navigation-menu
+
+A site's main links where some open a panel of further links (a mega menu): the panel opens on hover or on Enter, and the arrow keys move between the top links, to the Radix navigation pattern.
+
+Use it: A site with sections that each hold several pages. For a few plain links use navbar (which also folds them into a sheet on phones); for commands use menubar or dropdown-menu. Below `md`, put the same links in navbar's sheet.
+
+```tsx
+<NavigationMenu aria-label="Main">
+  <NavigationMenuList>
+    <NavigationMenuItem>
+      <NavigationMenuTrigger>Products</NavigationMenuTrigger>
+      <NavigationMenuContent>
+        <NavigationMenuLink href="/maps">Maps</NavigationMenuLink>
+        <NavigationMenuLink href="/charts">Charts</NavigationMenuLink>
+      </NavigationMenuContent>
+    </NavigationMenuItem>
+    <NavigationMenuItem><NavigationMenuLink href="/pricing">Pricing</NavigationMenuLink></NavigationMenuItem>
+  </NavigationMenuList>
+</NavigationMenu>
+```
+
+### notification-list
+
+An inbox of notices: each with its kind, title, words and time ("5 min ago"), unread ones marked by a dot and the word "Unread", a switch between all and unread, marking one or all as read, and room for each notice's own action; every change said aloud.
+
+Use it: The list behind a bell in an app's header (put it in a popover or sheet), or an activity page. For a message that appears and goes by itself use toaster; for a problem on the page use alert; for a conversation use thread.
+
+```tsx
+<NotificationList
+  aria-label="Notifications"
+  now="2026-11-13T12:00:00Z"
+  defaultItems={[
+    { id: "1", title: "Report ready", body: "The October report can be downloaded.", time: "2026-11-13T11:55:00Z" },
+    { id: "2", title: "New comment", body: "On the map of the coast.", time: "2026-11-12T09:00:00Z", read: true },
+  ]}
+/>
+```
+
 ### number-stepper
 
 A number with a button either side to take one away or add one, that can also be typed: a spin button.
@@ -1107,6 +1390,16 @@ Use it: A small whole number that is usually changed by a step or two: people in
   <NumberStepperInput />
   <NumberStepperIncrement aria-label="One night more" />
 </NumberStepper>
+```
+
+### otp-input
+
+A one-time code typed into a row of single-character boxes: typing moves on, Backspace goes back, arrow keys move between boxes, a pasted or autofilled code fills them all, and the whole code is one value.
+
+Use it: A short code sent by message or shown by an app: sign-in, confirming an email or a phone. For a password use password-input; for any other short text use input.
+
+```tsx
+<OtpInput aria-label="Code from the message" length={6} onComplete={(code) => verify(code)} name="code" />
 ```
 
 ### pagination
@@ -1149,6 +1442,23 @@ Use it: An assistant's reply contains something to look at or work in, not only 
   <PartFrameHeader><PartFrameTitle>Plan for Saturday</PartFrameTitle></PartFrameHeader>
   <PartFrameContent>…</PartFrameContent>
 </PartFrame>
+```
+
+### password-input
+
+A password field with a button that shows and hides what was typed, a note when Caps Lock is on, and an optional list of the project's rules, each marked met or not met in words as the person types.
+
+Use it: Signing in (current-password) or choosing a password (new-password, with `rules`). For a one-time code use otp-input; for other secrets that must never be shown, a plain input of type password.
+
+```tsx
+<PasswordInput
+  aria-label="New password"
+  autoComplete="new-password"
+  rules={[
+    { label: "At least 12 characters", test: (v) => v.length >= 12 },
+    { label: "A number", test: (v) => /\d/.test(v) },
+  ]}
+/>
 ```
 
 ### popover
@@ -1226,6 +1536,31 @@ Use it: Picking one of two to five options that should all be visible. For a lon
   <Label><RadioGroupItem value="monthly" /> Monthly</Label>
   <Label><RadioGroupItem value="yearly" /> Yearly</Label>
 </RadioGroup>
+```
+
+### rating
+
+A score of one to five (or any number) shown as stars and chosen like radio buttons: arrow keys move the score, each star named "3 of 5"; or, read-only, a score shown with its number in words.
+
+Use it: Rating a thing on a short scale: a review, feedback after a task. For yes and no use toggle or switch; for a number on a long scale use slider; for showing an average of many ratings use the read-only form with the count beside it.
+
+```tsx
+<Rating aria-label="Your rating" defaultValue={4} name="rating" />
+<Rating readOnly value={4.3} aria-label="Average rating" />
+```
+
+### resizable
+
+Panels side by side (or stacked) with a handle between each pair that is dragged, or moved with the arrow keys, to share the space differently; Home and End go to the limits and Enter folds a panel away and back: the WAI-ARIA window splitter pattern.
+
+Use it: Layouts whose parts the person sizes: a list beside a detail view, an editor beside its preview, a map beside its table. For a panel docked beside the whole page use dock; for two fixed columns use split.
+
+```tsx
+<ResizablePanelGroup defaultSizes={[30, 70]} aria-label="Mail">
+  <ResizablePanel minSize={20} id="folders">Folders</ResizablePanel>
+  <ResizableHandle aria-label="Resize the folders" />
+  <ResizablePanel id="messages">Messages</ResizablePanel>
+</ResizablePanelGroup>
 ```
 
 ### scene-strip
@@ -1371,6 +1706,32 @@ Use it: Navigation, filters, details or a longer form beside the page. `side` is
 </Sheet>
 ```
 
+### sidebar
+
+An application's side navigation: groups of links with icons that fold to a slim rail of icons (their names still read out) and back with a button or Ctrl/⌘+B, and that becomes a sheet from the side on narrow screens; with the main area beside it.
+
+Use it: The frame of an app with many sections: a dashboard, settings, a workspace. For a site's header links use navbar; for a panel of tools the person resizes use dock or resizable.
+
+```tsx
+<SidebarProvider>
+  <Sidebar aria-label="Workspace">
+    <SidebarHeader>Acme</SidebarHeader>
+    <SidebarContent>
+      <SidebarGroup label="Work">
+        <SidebarMenu>
+          <SidebarMenuItem><SidebarMenuButton href="/inbox" icon={<Inbox />} current>Inbox</SidebarMenuButton></SidebarMenuItem>
+          <SidebarMenuItem><SidebarMenuButton href="/reports" icon={<ChartBar />}>Reports</SidebarMenuButton></SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarGroup>
+    </SidebarContent>
+  </Sidebar>
+  <SidebarInset>
+    <SidebarTrigger />
+    …
+  </SidebarInset>
+</SidebarProvider>
+```
+
 ### skeleton
 
 A pulsing block that stands in for content that is loading: a bare block sized by hand, lines of text, or a wrapper that takes the exact size of the real content. It is still under reduced motion.
@@ -1389,6 +1750,18 @@ Use it: Content whose shape is known is on its way. Nothing may jump when it arr
     <PriceCard price={price ?? PLACEHOLDER_PRICE} />
   </Skeleton>
 </section>
+```
+
+### skip-link
+
+A link at the very start of the page, hidden until it has keyboard focus, that jumps past the header and navigation to the main content (WCAG 2.4.1).
+
+Use it: Every page with a header or navigation before its content: put it first inside `<body>`, and give the main content the id it points to. Several can go in a row (to the content, to the search).
+
+```tsx
+<SkipLink href="#main">Skip to content</SkipLink>
+…
+<main id="main" tabIndex={-1}>…</main>
 ```
 
 ### slider
@@ -1609,6 +1982,16 @@ Use it: Views of the same thing that people switch between without leaving the p
 </Tabs>
 ```
 
+### tags-input
+
+A field that collects several short values as removable tags: typed and added with Enter or a comma, pasted as a list, picked from suggestions, removed by their button or with Backspace, each change said aloud.
+
+Use it: Free-form lists of words: labels on a note, email addresses to invite, skills. For choosing from a fixed list use combobox or chips; for one value use input.
+
+```tsx
+<TagsInput aria-label="Labels" defaultValue={["urgent"]} suggestions={["design", "bug", "later"]} name="labels" />
+```
+
 ### textarea
 
 A multi-line text input that grows with its content, with an invalid state.
@@ -1776,6 +2159,23 @@ Use it: A toolbar state such as bold, mute or pin. For a setting use switch; for
 <Toggle variant="outline" size="sm" defaultPressed>Pinned</Toggle>
 ```
 
+### toolbar
+
+A row of controls (buttons, toggles, toggle groups, links, separators) that is one stop in the Tab order and moved through with the arrow keys, to the WAI-ARIA toolbar pattern.
+
+Use it: A cluster of related commands over a piece of content: text formatting over an editor, tools over a canvas, actions over a list. For a site's links use navbar; for two to five choices of which one is on use segmented-control.
+
+```tsx
+<Toolbar aria-label="Formatting">
+  <ToolbarToggleGroup type="multiple" aria-label="Style">
+    <ToolbarToggleItem value="bold" aria-label="Bold"><Bold /></ToolbarToggleItem>
+    <ToolbarToggleItem value="italic" aria-label="Italic"><Italic /></ToolbarToggleItem>
+  </ToolbarToggleGroup>
+  <ToolbarSeparator />
+  <ToolbarButton>Share</ToolbarButton>
+</Toolbar>
+```
+
 ### tooltip
 
 A few words that appear beside a control on hover or keyboard focus.
@@ -1791,6 +2191,41 @@ Use it: Naming an icon-only button or adding a short hint. It does not open on t
     <TooltipContent>Copy link</TooltipContent>
   </Tooltip>
 </TooltipProvider>
+```
+
+### tour
+
+A guided walk through an interface: a card beside each element in turn, with the element ringed, its step number ("2 of 5"), Back, Next and Skip, focus moved into the card, the element scrolled into view, and Escape to end at any point.
+
+Use it: Showing a new or changed interface once, on request or the first time: where things are, a new feature. Keep it to a few steps and let people leave at once; never block the page. For one hint use tooltip or popover; for a task done in steps use wizard.
+
+```tsx
+<Tour
+  open={touring}
+  onOpenChange={setTouring}
+  steps={[
+    { target: "#search", title: "Search", body: "Find any file by its name or its words." },
+    { target: "#share", title: "Share", body: "Send a link to the people you work with." },
+  ]}
+/>
+```
+
+### tree-view
+
+A hierarchy of items that open and close (folders and files, sections and pages), moved through to the WAI-ARIA tree pattern: Up and Down through what is visible, Right to open or go in, Left to close or go up, Home, End, typing a letter to jump, * to open every sibling, and Enter to choose.
+
+Use it: Navigating or choosing within nested items: a file tree, a table of contents, categories. For flat lists use a list or virtual-list; for a few levels of site links use navigation-menu; for nested data to compare use data-grid grouping.
+
+```tsx
+<TreeView
+  aria-label="Files"
+  items={[
+    { id: "src", label: "src", children: [{ id: "app", label: "app.tsx" }, { id: "lib", label: "lib", children: [{ id: "cn", label: "cn.ts" }] }] },
+    { id: "readme", label: "README.md" },
+  ]}
+  defaultExpanded={["src"]}
+  onSelectedChange={(id) => open(id)}
+/>
 ```
 
 ### undo-line
@@ -1864,6 +2299,16 @@ Use it: More items than the page should hold at once (a few hundred or more): a 
 const list = useRef<VirtualListHandle>(null);
 <VirtualList handleRef={list} count={10000} aria-label="Lines">{(index) => <p className="p-2">Line {index + 1}</p>}</VirtualList>
 <Button onClick={() => list.current?.scrollToIndex(4999, { align: "center" })}>Go to line 5,000</Button>
+```
+
+### visually-hidden
+
+Text that screen readers read and sighted people do not see, such as the name of an icon-only control or a heading that the layout makes obvious; with `focusable`, it appears while it has keyboard focus.
+
+Use it: Words that only assistive technology needs. For a link past repeated content use skip-link; for an icon button's name prefer `aria-label` on the button.
+
+```tsx
+<button type="button"><Bell aria-hidden="true" /><VisuallyHidden>Notifications</VisuallyHidden></button>
 ```
 
 ### wizard
@@ -2037,6 +2482,19 @@ Use it: A strip of logos, short quotes or tags where no single item must be read
 </Marquee>
 ```
 
+### pattern
+
+A quiet background of dots, a grid or diagonal lines drawn in the theme's hairline colour, filling the box it sits in, behind the content and hidden from screen readers.
+
+Use it: A section or a card that needs a texture to set it apart without a colour or a gradient: a hero, an empty state, a canvas. Keep it faint; for a photograph or an illustration use an image.
+
+```tsx
+<section className="relative overflow-hidden">
+  <Pattern variant="grid" />
+  <h2 className="relative">Plans</h2>
+</section>
+```
+
 ### section
 
 A band of a page with consistent vertical rhythm, an optional eyebrow, title and description, and three tones: default, muted, inverse.
@@ -2092,6 +2550,51 @@ Use it: Spacing a run of siblings evenly: form fields, a button row, a header wi
 ```
 
 ## Motion and transitions
+
+### animated-beam
+
+A flat line drawn between two elements inside a container, bowed if asked, along which a row of dots lights up in turn from the start to the end, showing that something flows from one to the other; it follows the elements as the layout changes and stands still under reduced motion.
+
+Use it: A diagram in a page that says data or work moves between parts: a source feeding a product, a step handing to the next. Decoration: say the same in words nearby. For a real diagram the person edits use flow-diagram; for amounts use sankey-chart.
+
+```tsx
+const box = useRef(null), a = useRef(null), b = useRef(null);
+<div ref={box} className="relative flex justify-between">
+  <div ref={a}>Source</div>
+  <div ref={b}>Product</div>
+  <AnimatedBeam containerRef={box} fromRef={a} toRef={b} curvature={40} />
+</div>
+```
+
+### confetti
+
+A short burst of flat paper pieces in the chart colours from a point, falling and fading on a canvas over the page, started from code (the handle's `fire`) and never under reduced motion; it says nothing and takes no clicks.
+
+Use it: Marking a rare success the person worked for: a first project published, a goal reached. Never for routine actions, never on page load. Say the success in words as well (a toast, a heading): the burst is decoration.
+
+```tsx
+const confetti = useRef<ConfettiHandle>(null);
+<Confetti handleRef={confetti} />
+<Button onClick={(e) => confetti.current?.fire({ x: e.clientX, y: e.clientY })}>Publish</Button>
+```
+
+### explainer
+
+Turns an explainer spec (plain JSON: scenes of a title, any chart, a map, a 3D model, a then-and-now comparison, a quote or a caption) into a film on film-stage: playable, scrubbable, with captions, narration in step, a provenance label on every scene that says how it was made, and frames drawn on request for export.
+
+Use it: An assistant or a project describes a short explanatory film as data and wants it played: a story with numbers, a report as a film, a change on a map. Validate the spec with lib/explainer-spec first; a spec with faults shows them in words instead of a film. For a film drawn by hand use film-stage; for a video file use video-player.
+
+```tsx
+<Explainer spec={spec} />
+
+// Arranged by the project, and exported frame by frame by scripts/export-film.ts
+<Explainer spec={spec} deterministic exportName="main">
+  <FilmStageFrame aspect={16 / 9}>
+    <ExplainerProvenance />
+    <ExplainerCaptions />
+  </FilmStageFrame>
+</Explainer>
+```
 
 ### film-stage
 
@@ -2180,6 +2683,16 @@ Use it: A headline statistic: customers, revenue, a percentage. Not for values t
 <NumberTicker value={12480} />
 <NumberTicker value={0.9997} options={{ style: "percent", maximumFractionDigits: 2 }} />
 <NumberTicker value={48000} locale="de-DE" options={{ style: "currency", currency: "EUR", maximumFractionDigits: 0 }} />
+```
+
+### orbit
+
+Items set evenly on a ring around a centre that turns slowly, the items staying upright, with the centre in the middle; it pauses while hovered or focused, and under reduced motion the ring stands still.
+
+Use it: Showing that several things connect to one: integrations around a product, sources around a result. Use few items (three to eight) of the same size, each with its own name. For a row of logos use marquee; for a real network use network-graph.
+
+```tsx
+<Orbit center={<Logo />} items={[<Icon key="a" />, <Icon key="b" />, <Icon key="c" />]} itemLabels={["Maps", "Charts", "Films"]} />
 ```
 
 ### page-transition
@@ -2371,6 +2884,16 @@ const [open, setOpen] = useState(false);
 <Button onClick={() => startViewTransition(() => flushSync(() => setLayout("grid")))}>Grid</Button>
 ```
 
+### word-rotate
+
+One word in a sentence that changes to the next of a list in place, rising and fading, once through the list (or round and round with `loop`, pausing while hovered or focused); screen readers hear the whole list once, and under reduced motion the last word simply stands.
+
+Use it: A headline that names several things one after another: "Charts for teams / schools / newsrooms". Keep the words about the same length. For a whole heading appearing use text-reveal; for a number counting up use number-ticker.
+
+```tsx
+<h1>Maps for <WordRotate words={["teams", "schools", "newsrooms"]} /></h1>
+```
+
 ## 3D
 
 ### floating-shapes
@@ -2410,6 +2933,23 @@ Use it: Showing reach or places at a glance: offices, regions, where requests co
     ]}
   />
 </Scene>
+```
+
+### model-annotations
+
+Labels pinned to points on a 3D model that follow them as the model turns, each a button that opens its note, hidden while its point is behind the camera or out of view; the same notes are always given as a list, so nobody has to find them by turning.
+
+Use it: Pointing out parts of a 3D object: the parts of a machine, features of a building, finds on a scan. Put the tracker inside the scene and the labels over it, in the same positioned box. For a flat picture use hotspots; for a model with no notes use model-viewer.
+
+```tsx
+const store = useAnnotationStore();
+<div className="relative">
+  <Scene label="A vase" aspect={1}>
+    <ModelStage><Vase /></ModelStage>
+    <ModelAnnotationTracker store={store} points={[{ id: "handle", position: [0.6, 0.4, 0] }]} />
+  </Scene>
+  <ModelAnnotations store={store} annotations={[{ id: "handle", label: "Handle", note: "Added later, in a darker clay." }]} />
+</div>
 ```
 
 ### model-stage
@@ -2486,6 +3026,19 @@ Use it: A quiet moving ground behind a hero or a section. Use it inside scene an
 </Scene>
 ```
 
+### point-cloud
+
+Data as points in 3D: three numbers place each point inside a framed cube, a fourth field gives its group colour from the chart series; it goes inside scene (and model-stage to turn it), with PointCloudTable as its text alternative.
+
+Use it: Three measures that belong together and are best turned in space: a scan, positions in a volume, an embedding. It is harder to read exactly than a 2D chart, so pass a scatter-chart as the scene's fallback and keep the table. For two measures use scatter-chart; for thousands of points in 2D use density-chart.
+
+```tsx
+<Scene label="Samples by depth, width and height" aspect={4 / 3} fallback={<ScatterChart label="Samples" data={rows} x="width" y="height" />}>
+  <ModelStage><PointCloud data={rows} x="width" y="height" z="depth" group="kind" /></ModelStage>
+</Scene>
+<PointCloudTable caption="Samples" data={rows} x="width" y="height" z="depth" group="kind" />
+```
+
 ### scene
 
 The wrapper every 3D component is used inside: a transparent WebGL canvas that mounts late, pauses off screen and falls back to a static block.
@@ -2533,7 +3086,7 @@ Use it: One series over time whose volume matters, or a few series that add up t
 
 A bar chart, vertical or horizontal, grouped or stacked, always measured from zero, with a tooltip on hover and arrow-key reading.
 
-Use it: Comparing amounts across categories. Use `orientation="horizontal"` for long names or a ranking, `stacked` when the series add up to a total. For change over many points in time use line-chart; for a single number use a stat, not one bar.
+Use it: Comparing amounts across categories. Use `orientation="horizontal"` for long names or a ranking, `stacked` when the series add up to a total, `normalize` to compare each category's split as shares of 100 %. For change over many points in time use line-chart; for a single number use a stat, not one bar.
 
 ```tsx
 <BarChart
@@ -2552,6 +3105,88 @@ Use it: Comparing amounts across categories. Use `orientation="horizontal"` for 
 />
 ```
 
+### box-plot
+
+The spread of a measure in each of several groups side by side: a box from the first to the third quartile, the median across it, whiskers to the furthest values within 1.5 boxes, and the values beyond them as points; or, as a violin, the shape of each spread.
+
+Use it: Comparing distributions across groups: which is higher, which is wider, which has outliers. For one group's full shape use histogram; for a few exact numbers per group use bar-chart or dot-plot.
+
+```tsx
+<BoxPlot
+  label="Response time by region"
+  data={[
+    { region: "North", ms: 120 }, { region: "North", ms: 140 }, { region: "North", ms: 135 }, { region: "North", ms: 310 },
+    { region: "South", ms: 90 }, { region: "South", ms: 110 }, { region: "South", ms: 105 }, { region: "South", ms: 98 },
+  ]}
+  group="region"
+  value="ms"
+  valueLabel="Milliseconds"
+/>
+```
+
+### bullet-chart
+
+One measure against its target and its bands (poor, fair, good) in a single slim row: the value as a bar, the target as a tick, the bands as steps of grey behind them. Several rows stack, each on its own scale.
+
+Use it: Showing how a few measures stand against their goals in little space: a dashboard of targets, a scorecard. For one value against a limit with nothing else use radial-progress or progress; to compare many values with each other use bar-chart.
+
+```tsx
+<BulletChart
+  label="Quarter targets"
+  items={[
+    { label: "Revenue", value: 270, target: 250, ranges: [150, 225, 300] },
+    { label: "New customers", value: 1400, target: 1600, ranges: [1000, 1500, 2000] },
+  ]}
+/>
+```
+
+### calendar-heatmap
+
+A value per day laid out as a calendar, a column for each week and a row for each weekday, coloured on one hue from faint to strong, with month and weekday names and arrow keys that move by day and by week.
+
+Use it: Showing a daily measure over months: activity, sales per day, rainfall, where the pattern by weekday and season matters. For a few weeks with exact values use bar-chart; for a trend use line-chart; to pick a day use calendar.
+
+```tsx
+<CalendarHeatmap
+  label="Workouts per day"
+  data={[{ day: "2026-01-05", count: 1 }, { day: "2026-01-06", count: 2 }, { day: "2026-01-09", count: 1 }]}
+  day="day"
+  value="count"
+  from="2026-01-01"
+  to="2026-03-31"
+/>
+```
+
+### candlestick-chart
+
+Opening, highest, lowest and closing values per period (a price, a reading): a thin line from low to high, a body from open to close, filled when it closed lower and hollow when it closed higher, so the direction is never colour alone.
+
+Use it: Showing the range and the direction of a value within each period: prices by day, temperatures by day with their extremes. For the close alone use line-chart; for spread across many observations use box-plot.
+
+```tsx
+<CandlestickChart
+  label="Price by day"
+  data={[
+    { day: new Date("2026-03-02"), open: 10, high: 12, low: 9.5, close: 11.4 },
+    { day: new Date("2026-03-03"), open: 11.4, high: 11.8, low: 10.1, close: 10.3 },
+    { day: new Date("2026-03-04"), open: 10.3, high: 11, low: 10, close: 10.9 },
+  ]}
+  x="day"
+/>
+```
+
+### chart-brush
+
+A small overview of a whole series with a window over it whose two handles are dragged or moved by arrow keys to choose the stretch another chart shows: the range is two row indexes, so it fits any chart.
+
+Use it: Letting people zoom a long time series to a part of it: a year of daily values shown a month at a time. Give the chart above only the rows between the two indexes. For a fixed set of periods use segmented-control or tabs; for choosing dates use date-picker.
+
+```tsx
+const [range, setRange] = useState<[number, number]>([0, 29]);
+<LineChart label="Visits" data={days.slice(range[0], range[1] + 1)} x="day" series={[{ key: "visits", label: "Visits" }]} />
+<ChartBrush data={days} x="day" y="visits" value={range} onValueChange={setRange} labels={{ start: "From", end: "To" }} />
+```
+
 ### chart
 
 The shared parts every chart is built from: a container that measures itself and carries the text alternative, an SVG root, a tooltip, a legend, series styles, and axis and format helpers.
@@ -2568,6 +3203,75 @@ Use it: Building a chart of your own that should match the others. For the commo
   )}
 </ChartContainer>
 <ChartLegend items={[{ label: "Signups", index: 0 }]} mark="rect" />
+```
+
+### chord-diagram
+
+Flows between the members of one group, both ways, around a circle: each member an arc sized by all it sends, each ribbon joining two members with ends as wide as what goes each way, lit with its member on hover or focus.
+
+Use it: Showing exchanges within a set where both directions matter: moves between regions, trade between countries, messages between teams. Keep it to about a dozen members. For flows in one direction through stages use sankey-chart; for links without amounts use network-graph.
+
+```tsx
+<ChordDiagram
+  label="Moves between neighbourhoods"
+  names={["North", "South", "East"]}
+  matrix={[
+    [0, 120, 40],
+    [80, 0, 60],
+    [30, 90, 0],
+  ]}
+/>
+```
+
+### choropleth
+
+A geo-map layer that colours each region by a number, on one hue from faint to strong, on two hues either side of a midpoint, or in classes with stated edges; with a legend that says each step's range in words and a table of every region's value.
+
+Use it: Showing a rate or a share that varies by region: turnout by district, rainfall by county. Use rates, not raw counts (large regions look important whatever their count); for counts use geo-markers bubbles. Goes inside geo-map.
+
+```tsx
+const scale = choroplethScale(regions.features.map((f) => f.properties.rate), { thresholds: [10, 20, 30] });
+<GeoMap label="Rate by region" fit={regions}>
+  <Choropleth label="Rate by region" data={regions} value={(f) => f.properties?.rate} name={(f) => f.properties?.name} scale={scale} />
+</GeoMap>
+<ChoroplethLegend title="Rate (%)" scale={scale} />
+```
+
+### circle-pack
+
+A hierarchy as circles inside circles: each group an outline holding its parts, each part a circle whose area is its size, with zooming into a group by click or Enter and back out by the trail or Backspace.
+
+Use it: Showing groups and their members when the grouping matters more than precise sizes: topics and their articles, teams and their projects. To compare sizes closely use treemap or bar-chart; for levels as rings use sunburst.
+
+```tsx
+<CirclePack
+  label="Articles by topic"
+  data={{
+    name: "All articles",
+    children: [
+      { name: "Science", children: [{ name: "Space", value: 40 }, { name: "Biology", value: 25 }] },
+      { name: "Arts", children: [{ name: "Film", value: 30 }, { name: "Music", value: 18 }] },
+    ],
+  }}
+/>
+```
+
+### density-chart
+
+Where many points crowd together, drawn as filled contour bands of one hue from faint to strong (like the lines of a height map), with the points optionally on top and each point reachable by arrow keys.
+
+Use it: Two measures over hundreds or thousands of points, where a scatter-chart would be a blot: where the bulk lies, whether there are two clusters. For under a few hundred points use scatter-chart; for one measure's spread use histogram.
+
+```tsx
+<DensityChart
+  label="Trip length against fare"
+  data={[{ km: 2, fare: 8 }, { km: 3, fare: 10 }, { km: 2.5, fare: 9 }, { km: 12, fare: 31 }, { km: 11, fare: 29 }]}
+  x="km"
+  y="fare"
+  xLabel="Distance (km)"
+  yLabel="Fare"
+  showPoints
+/>
 ```
 
 ### donut-chart
@@ -2590,6 +3294,174 @@ Use it: Parts of a whole at a glance, when there are few parts and they differ c
 />
 ```
 
+### dot-plot
+
+Values as dots along a shared axis, one row per category: plain dots for one or more series, a lollipop (a stick to the dot), a dumbbell (two values joined, for a before and after), or a beeswarm (every single value as its own dot, packed so none overlap).
+
+Use it: Comparing values across categories with less ink than bars, especially when zero is not meaningful (dot, dumbbell), showing a change between two moments per category (dumbbell), or showing every observation in a few groups (beeswarm). For totals from zero use bar-chart; for a summary of spread use box-plot.
+
+```tsx
+<DotPlot
+  label="Satisfaction before and after"
+  data={[
+    { team: "Support", before: 62, after: 78 },
+    { team: "Sales", before: 70, after: 74 },
+    { team: "Product", before: 55, after: 71 },
+  ]}
+  y="team"
+  series={[{ key: "before", label: "Before" }, { key: "after", label: "After" }]}
+  variant="dumbbell"
+/>
+```
+
+### fan-chart
+
+A forecast drawn honestly: what was observed as a solid line, then the median forecast with nested bands for its intervals (90 %, 50 % …) that widen as the forecast reaches further, with arrow-key reading of every point.
+
+Use it: Showing a prediction or an estimate with its uncertainty: a forecast, a model's range, a confidence band around a trend. For a series with no uncertainty use line-chart; for the spread of measured values use box-plot.
+
+```tsx
+<FanChart
+  label="Visitors, observed and forecast"
+  data={[
+    { week: 1, observed: 120 },
+    { week: 2, observed: 132 },
+    { week: 3, observed: 128, median: 128, low90: 128, high90: 128, low50: 128, high50: 128 },
+    { week: 4, median: 136, low90: 118, high90: 152, low50: 128, high50: 143 },
+    { week: 5, median: 141, low90: 110, high90: 170, low50: 126, high50: 155 },
+  ]}
+  x="week"
+  observed="observed"
+  median="median"
+  intervals={[
+    { low: "low90", high: "high90", label: "90% interval" },
+    { low: "low50", high: "high50", label: "50% interval" },
+  ]}
+  forecastFrom={3}
+  labels={{ observed: "Observed", median: "Forecast (median)", forecast: "Forecast" }}
+/>
+```
+
+### funnel-chart
+
+The steps of a process that people (or things) drop out of, as centred bars that narrow with the count, each with its count, its share of the first step and its share of the step before.
+
+Use it: Showing where a sequence loses the most: sign-up steps, a sales pipeline, a hiring process. For flows that split and join use sankey-chart; for amounts that are not a sequence use bar-chart horizontal.
+
+```tsx
+<FunnelChart
+  label="Sign-up steps"
+  data={[
+    { step: "Visited", people: 1200 },
+    { step: "Started", people: 640 },
+    { step: "Confirmed email", people: 410 },
+    { step: "Finished", people: 290 },
+  ]}
+  x="step"
+  value="people"
+/>
+```
+
+### gantt-chart
+
+Tasks as bars along a time axis, one row each, under optional group headings: how far each has got, which must finish before another starts (arrows), milestones as diamonds and a line for today, with Up and Down reading each task.
+
+Use it: Planning or reporting work over time: a project plan, a release schedule, a timeline of events with lengths. For events without length use timeline (a list) or a line-chart annotation; for a calendar of single days use calendar or calendar-heatmap.
+
+```tsx
+<GanttChart
+  label="Launch plan"
+  tasks={[
+    { id: "design", label: "Design", start: "2026-03-02", end: "2026-03-13", group: "Product", progress: 1 },
+    { id: "build", label: "Build", start: "2026-03-09", end: "2026-04-03", group: "Product", progress: 0.4, dependsOn: ["design"] },
+    { id: "launch", label: "Launch", start: "2026-04-06", end: "2026-04-06", group: "Marketing", milestone: true, dependsOn: ["build"] },
+  ]}
+  today="2026-03-20"
+/>
+```
+
+### geo-hexbin
+
+A geo-map layer that gathers many points into hexagons or squares of equal size on screen, each coloured on one hue by how many points (or how much weight) fall in it, re-gathered as the map zooms; each cell read by arrow keys and listed in a table.
+
+Use it: Thousands of points where single marks would pile up: sightings, incidents, trips, addresses. For a few dozen named places use geo-markers; for values that belong to regions use choropleth. Goes inside geo-map.
+
+```tsx
+<GeoMap label="Sightings" fit={area}>
+  <GeoFeatures data={area} />
+  <GeoHexbin label="Sightings" points={sightings} radius={14} valueLabel="Sightings" />
+</GeoMap>
+```
+
+### geo-map
+
+A map drawn from GeoJSON the project passes (no tiles, no hosted data), in any d3-geo projection fitted to its box, zoomed and panned by dragging, pinching, Ctrl and the wheel, a double click, buttons or keys, with parts for a graticule, plain shapes, a scale bar, and layers that are read item by item by arrow keys.
+
+Use it: Showing places, regions or routes from data the project holds: a choropleth, sites on a map, flows between cities. Add layers inside it: choropleth, geo-markers, geo-routes, geo-hexbin, geo-tiles. Inside layout/map-frame it loads only when asked. For a street map with search and directions, bring a map engine and put it in map-frame; for a spinning globe as decoration use three/globe.
+
+```tsx
+<GeoMap label="Regions of the study area" fit={regions} projection="equal-earth">
+  <GeoGraticule />
+  <GeoFeatures data={regions} />
+  <GeoMarkers label="Sites" points={[{ id: "a", name: "Site A", lon: 10.7, lat: 59.9 }]} />
+  <GeoScaleBar />
+</GeoMap>
+```
+
+### geo-markers
+
+A geo-map layer of places: points in their group's colour and shape with optional names, or bubbles whose area is a number; each read by arrow keys and listed in a table.
+
+Use it: Marking sites, cities or events on a map, or comparing counts by place (bubbles: area, never radius, carries the number). For values that belong to whole regions use choropleth; for thousands of points use geo-hexbin. Goes inside geo-map.
+
+```tsx
+<GeoMap label="Our stores" fit={country}>
+  <GeoFeatures data={country} />
+  <GeoMarkers
+    label="Stores"
+    points={[
+      { id: "a", name: "Harbour", lon: 5.32, lat: 60.39, value: 120 },
+      { id: "b", name: "Station", lon: 10.75, lat: 59.91, value: 340 },
+    ]}
+    variant="bubble"
+    valueLabel="Visits"
+  />
+</GeoMap>
+```
+
+### geo-routes
+
+A geo-map layer of journeys and flows between places: great-circle routes (the shortest way over the globe) or arcs drawn over the map, thicker for larger amounts, with an arrow for the direction; each read by arrow keys and listed in a table.
+
+Use it: Showing movement between places: flights, deliveries, migration, trade. Keep to a few dozen routes, or aggregate them first. For flows without geography use sankey-chart or chord-diagram. Goes inside geo-map.
+
+```tsx
+<GeoMap label="Flights from the hub" projection="natural-earth">
+  <GeoGraticule />
+  <GeoRoutes
+    label="Flights"
+    routes={[
+      { id: "1", name: "Hub to Port", from: [10.7, 59.9], to: [-74, 40.7], value: 12 },
+      { id: "2", name: "Hub to Cape", from: [10.7, 59.9], to: [18.4, -33.9], value: 4 },
+    ]}
+    valueLabel="Flights a week"
+  />
+</GeoMap>
+```
+
+### geo-tiles
+
+A geo-map layer of raster map tiles from an address template the project gives ("…/{z}/{x}/{y}.png"), placed under the other layers and following the zoom, with the attribution the tile provider asks for. It has no default address: nothing is fetched unless the project names a server.
+
+Use it: A geo-map needs a picture of streets or terrain under the data and the project has a tile server it may use (its own, or a provider whose terms it accepts). Use projection="mercator" (tiles are drawn in Web Mercator). Tiles come from a third party, so put the map in layout/map-frame with a MapFrameNotice and nothing is requested before the person asks. Without tiles, draw shapes with GeoFeatures.
+
+```tsx
+<GeoMap label="Delivery area" fit={area} projection="mercator">
+  <GeoTiles url="https://tiles.example.org/{z}/{x}/{y}.png" attribution="© Example contributors" />
+  <GeoFeatures data={area} variant="line" />
+</GeoMap>
+```
+
 ### heatmap
 
 A matrix of cells (day by hour, for example) coloured on one-hue scale from faint to the highlight colour, with a tooltip, arrow-key reading and a scale legend.
@@ -2608,6 +3480,22 @@ Use it: Spotting patterns across two categories at once: when it is busy, which 
   x="hour"
   y="day"
   value="sessions"
+/>
+```
+
+### histogram
+
+How the values of one measure are spread: the range cut into equal bins, each bar as tall as the number of values that fall in it, with arrow-key reading of each bin.
+
+Use it: Seeing the shape of a distribution: where most values are, how wide, whether there are two humps or a long tail. To compare the spread of several groups use box-plot; to compare totals across categories use bar-chart.
+
+```tsx
+<Histogram
+  label="Delivery times"
+  data={[{ minutes: 22 }, { minutes: 31 }, { minutes: 28 }, { minutes: 45 }, { minutes: 26 }, { minutes: 33 }]}
+  value="minutes"
+  valueLabel="Minutes"
+  bins={8}
 />
 ```
 
@@ -2633,6 +3521,62 @@ Use it: Change over time or along a number, for up to about five series on one s
 />
 ```
 
+### network-graph
+
+Things and the links between them, placed by a force layout that is run to rest before it is drawn (so it is the same every time and never moves on its own), with each node's links lit on hover or focus and every node reachable by arrow keys.
+
+Use it: Showing who or what is connected to what: clusters, bridges between groups, the most linked items. Keep it to a few hundred nodes. For amounts flowing in one direction use sankey-chart; for a hierarchy use treemap or tree-view; for a process the person edits use flow-diagram.
+
+```tsx
+<NetworkGraph
+  label="Libraries and what they use"
+  nodes={[{ id: "app", group: "Apps" }, { id: "ui", group: "Libraries" }, { id: "charts", group: "Libraries" }, { id: "maths", group: "Libraries" }]}
+  links={[{ source: "app", target: "ui" }, { source: "app", target: "charts" }, { source: "charts", target: "maths" }]}
+/>
+```
+
+### parallel-coordinates
+
+Many measures of many things at once: one upright axis per measure, each thing a line that crosses every axis at its value, so trade-offs and clusters show as patterns of crossing or parallel lines; each line lit and read by arrow keys.
+
+Use it: Comparing things across four to ten measures with different units: cars by price, power and weight; plans by cost and limits. For two measures use scatter-chart; for a few things on one scale use radar-chart; for exact values use table or data-grid.
+
+```tsx
+<ParallelCoordinates
+  label="Laptops compared"
+  data={[
+    { name: "Alder", price: 900, weight: 1.3, battery: 12, kind: "Light" },
+    { name: "Birch", price: 1400, weight: 2.1, battery: 8, kind: "Power" },
+    { name: "Cedar", price: 700, weight: 1.6, battery: 10, kind: "Light" },
+  ]}
+  dimensions={[{ key: "price", label: "Price" }, { key: "weight", label: "Weight (kg)" }, { key: "battery", label: "Battery (h)" }]}
+  name="name"
+  group="kind"
+/>
+```
+
+### radar-chart
+
+Several measures on spokes around a centre, one closed shape per series, so profiles can be compared at a glance: which is stronger where, with arrow keys reading each spoke.
+
+Use it: Comparing two or three profiles across five to ten measures on the same scale: skills, product ratings, nutrition against a target. For exact comparison, or measures on different scales, use bar-chart or small-multiples; with more than three series the shapes tangle.
+
+```tsx
+<RadarChart
+  label="Two plans compared"
+  data={[
+    { measure: "Speed", basic: 3, plus: 4 },
+    { measure: "Storage", basic: 2, plus: 5 },
+    { measure: "Support", basic: 3, plus: 4 },
+    { measure: "Price", basic: 5, plus: 3 },
+    { measure: "Security", basic: 4, plus: 4 },
+  ]}
+  axis="measure"
+  series={[{ key: "basic", label: "Basic" }, { key: "plus", label: "Plus" }]}
+  max={5}
+/>
+```
+
 ### radial-progress
 
 A ring gauge for one value against a limit, with the value and a label in the centre.
@@ -2644,6 +3588,90 @@ Use it: One ratio: a quota used, a score, a goal reached. Size it with a width c
 <RadialProgress value={3} max={5} label="Steps done" formatValue={(value) => `${value} of 5`} className="w-40" />
 ```
 
+### sankey-chart
+
+Flows between stages as bands whose widths are the amounts: where a total comes from, where it goes and what is lost on the way, with every node and band reachable by arrow keys.
+
+Use it: Showing how amounts move through steps or between categories: a budget from sources to uses, visitors through a sign-up, energy from fuel to use. For a single funnel of shrinking steps use funnel-chart; for links without amounts use network-graph; for two-way flows between the same groups use chord-diagram.
+
+```tsx
+<SankeyChart
+  label="Where the money goes"
+  nodes={[{ id: "income", label: "Income" }, { id: "rent", label: "Rent" }, { id: "food", label: "Food" }, { id: "saved", label: "Saved" }]}
+  links={[
+    { source: "income", target: "rent", value: 1200 },
+    { source: "income", target: "food", value: 500 },
+    { source: "income", target: "saved", value: 300 },
+  ]}
+/>
+```
+
+### scatter-chart
+
+Points placed by two numbers, optionally sized by a third (a bubble chart) and grouped by a category, with the nearest point read under the pointer and every point reachable by arrow keys.
+
+Use it: Showing how two measures relate across many things: does one rise with the other, which stand apart. Give `size` for a third measure as bubble area. For change over time use line-chart; for one measure across categories use bar-chart or dot-plot; for thousands of overlapping points use density-chart.
+
+```tsx
+<ScatterChart
+  label="Price against rating"
+  data={[
+    { name: "Alder", price: 12, rating: 4.1, sold: 320, kind: "Tea" },
+    { name: "Birch", price: 18, rating: 4.6, sold: 120, kind: "Tea" },
+    { name: "Cedar", price: 9, rating: 3.8, sold: 540, kind: "Coffee" },
+  ]}
+  x="price"
+  y="rating"
+  size="sold"
+  group="kind"
+  name="name"
+  xLabel="Price"
+  yLabel="Rating"
+/>
+```
+
+### slope-chart
+
+Each thing's value at two moments joined by a line, so what rose, what fell and how the ranking changed read at once: names and values at both ends, rises solid and falls dashed so direction never rests on colour.
+
+Use it: Comparing many things between exactly two moments or conditions: this year and last, before and after a change. For many moments use line-chart or small-multiples; for one thing's change use a stat with its delta; for a few categories use dot-plot dumbbell.
+
+```tsx
+<SlopeChart
+  label="Share of trips by mode"
+  data={[
+    { mode: "Car", y2016: 52, y2026: 41 },
+    { mode: "Bike", y2016: 9, y2026: 18 },
+    { mode: "Transit", y2016: 24, y2026: 27 },
+  ]}
+  name="mode"
+  from="y2016"
+  to="y2026"
+  fromLabel="2016"
+  toLabel="2026"
+/>
+```
+
+### small-multiples
+
+The same small chart repeated for each group (a region, a product) in a grid that fits its width, every panel on one shared scale so they can be compared at a glance, each read by arrow keys.
+
+Use it: Comparing the shape of one measure across many groups, where one chart with many lines would tangle: more than five series, or groups of very different sizes. For up to five series on one chart use line-chart; for one value per group use bar-chart.
+
+```tsx
+<SmallMultiples
+  label="Monthly visits by region"
+  data={[
+    { region: "North", month: 1, visits: 40 }, { region: "North", month: 2, visits: 52 }, { region: "North", month: 3, visits: 61 },
+    { region: "South", month: 1, visits: 30 }, { region: "South", month: 2, visits: 28 }, { region: "South", month: 3, visits: 35 },
+  ]}
+  facet="region"
+  x="month"
+  y="visits"
+  kind="area"
+/>
+```
+
 ### sparkline
 
 A tiny line, area or bar chart with no axes, for a stat tile or a table cell, described in words for assistive technology.
@@ -2653,4 +3681,85 @@ Use it: The shape of a trend beside a number that carries the value. Size it wit
 ```tsx
 <Sparkline data={[4, 6, 5, 9, 12, 10, 14]} label="Signups, last 7 days" />
 <Sparkline data={[3, 8, 2, 7, 5]} type="bar" className="h-6 w-16" />
+```
+
+### stream-chart
+
+Several series stacked as flowing layers around a centre line instead of a baseline (a streamgraph), so the rise and fall of each layer and of the whole read as a shape over time; arrow keys read every moment.
+
+Use it: Showing how the mix of up to five categories shifts over a long time, where the overall shape matters more than exact values: listening by genre, topics over years. For exact totals use area-chart stacked (with a baseline); for exact values per series use line-chart.
+
+```tsx
+<StreamChart
+  label="Plays by genre"
+  data={[
+    { year: 2020, jazz: 20, folk: 30, rock: 50 },
+    { year: 2021, jazz: 28, folk: 34, rock: 44 },
+    { year: 2022, jazz: 40, folk: 30, rock: 38 },
+  ]}
+  x="year"
+  series={[{ key: "jazz", label: "Jazz" }, { key: "folk", label: "Folk" }, { key: "rock", label: "Rock" }]}
+/>
+```
+
+### sunburst
+
+A hierarchy as rings around a centre: each ring a level, each arc a part sized by its share of its parent, with zooming into any arc by click or Enter and back out by the centre, the trail or Backspace.
+
+Use it: Showing how a total divides level by level when the depth matters as much as the sizes: a path through categories, a file system, a budget in three levels. For sizes that must be compared closely use treemap (areas in rectangles are easier to judge than arcs); for one level use donut-chart.
+
+```tsx
+<Sunburst
+  label="Visits by source"
+  data={{
+    name: "All visits",
+    children: [
+      { name: "Search", children: [{ name: "Organic", value: 420 }, { name: "Paid", value: 160 }] },
+      { name: "Social", children: [{ name: "Video", value: 120 }, { name: "Posts", value: 80 }] },
+      { name: "Direct", value: 300 },
+    ],
+  }}
+/>
+```
+
+### treemap
+
+A whole split into nested rectangles whose areas are the parts' sizes: groups in their own colours, the parts inside them labelled where they fit, with zooming into a group by click or Enter and back out by the trail or Backspace.
+
+Use it: Showing how a large total divides across a hierarchy (a budget by department and team, storage by folder) when there are too many parts for a donut. For a few parts use donut-chart; to see the levels as rings use sunburst; to compare exact sizes use bar-chart.
+
+```tsx
+<Treemap
+  label="Spending by area"
+  data={{
+    name: "All spending",
+    children: [
+      { name: "Housing", children: [{ name: "Rent", value: 1200 }, { name: "Power", value: 140 }] },
+      { name: "Food", children: [{ name: "Groceries", value: 420 }, { name: "Cafés", value: 90 }] },
+      { name: "Travel", value: 260 },
+    ],
+  }}
+/>
+```
+
+### waterfall-chart
+
+How a starting amount becomes an ending one, step by step: each rise or fall a bar floating from the running total, totals standing on the baseline, signs printed on every step so rises and falls never rest on colour.
+
+Use it: Explaining a change between two totals: a budget's start to its end, revenue to profit, last year to this year by cause. For parts of one total use bar-chart stacked or treemap; for change over time use line-chart.
+
+```tsx
+<WaterfallChart
+  label="From revenue to profit"
+  data={[
+    { step: "Revenue", amount: 500, total: true },
+    { step: "Costs", amount: -220 },
+    { step: "Marketing", amount: -80 },
+    { step: "Other income", amount: 30 },
+    { step: "Profit", amount: 230, total: true },
+  ]}
+  x="step"
+  value="amount"
+  total="total"
+/>
 ```

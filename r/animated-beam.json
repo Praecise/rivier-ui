@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "animated-beam",
+  "type": "registry:component",
+  "title": "Animated Beam",
+  "description": "A flat line drawn between two elements inside a container, bowed if asked, along which a row of dots lights up in turn from the start to the end, showing that something flows from one to the other; it follows the elements as the layout changes and stands still under reduced motion.",
+  "categories": [
+    "motion"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/motion/animated-beam.tsx",
+      "type": "registry:component",
+      "target": "components/motion/animated-beam.tsx",
+      "content": "\"use client\";\n/**\n * @name animated-beam\n * @category motion\n * @description A flat line drawn between two elements inside a container, bowed if asked, along which a row of dots lights up in turn from the start to the end, showing that something flows from one to the other; it follows the elements as the layout changes and stands still under reduced motion.\n * @when A diagram in a page that says data or work moves between parts: a source feeding a product, a step handing to the next. Decoration: say the same in words nearby. For a real diagram the person edits use flow-diagram; for amounts use sankey-chart.\n * @example\n * const box = useRef(null), a = useRef(null), b = useRef(null);\n * <div ref={box} className=\"relative flex justify-between\">\n *   <div ref={a}>Source</div>\n *   <div ref={b}>Product</div>\n *   <AnimatedBeam containerRef={box} fromRef={a} toRef={b} curvature={40} />\n * </div>\n */\nimport { useEffect, useState, type ComponentProps, type CSSProperties, type RefObject } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport type AnimatedBeamProps = Omit<ComponentProps<\"svg\">, \"children\"> & {\n  /** The positioned box both elements are in; the beam is drawn over it. */\n  containerRef: RefObject<HTMLElement | null>;\n  fromRef: RefObject<HTMLElement | null>;\n  toRef: RefObject<HTMLElement | null>;\n  /** How far the line bows, in pixels; negative bows the other way. Default 0. */\n  curvature?: number;\n  /** How many dots travel along it. Default 8. */\n  dots?: number;\n  /** Seconds for the light to cross. Default 2. */\n  duration?: number;\n  /** The CSS variable of its colour. Default \"--highlight\". */\n  color?: string;\n};\n\ntype Line = { width: number; height: number; d: string; points: { x: number; y: number }[] };\n\nexport function AnimatedBeam({ containerRef, fromRef, toRef, curvature = 0, dots = 8, duration = 2, color = \"--highlight\", className, style, ...props }: AnimatedBeamProps) {\n  const [line, setLine] = useState<Line | null>(null);\n  useEffect(() => {\n    const container = containerRef.current;\n    const from = fromRef.current;\n    const to = toRef.current;\n    if (!container || !from || !to) return;\n    let frame = 0;\n    const measure = (): void => {\n      cancelAnimationFrame(frame);\n      frame = requestAnimationFrame(() => {\n        const box = container.getBoundingClientRect();\n        const a = from.getBoundingClientRect();\n        const b = to.getBoundingClientRect();\n        const x1 = a.left + a.width / 2 - box.left;\n        const y1 = a.top + a.height / 2 - box.top;\n        const x2 = b.left + b.width / 2 - box.left;\n        const y2 = b.top + b.height / 2 - box.top;\n        const cx = (x1 + x2) / 2;\n        const cy = (y1 + y2) / 2 - curvature;\n        const points = Array.from({ length: dots }, (_, i) => {\n          const t = (i + 0.5) / dots;\n          return { x: (1 - t) ** 2 * x1 + 2 * (1 - t) * t * cx + t ** 2 * x2, y: (1 - t) ** 2 * y1 + 2 * (1 - t) * t * cy + t ** 2 * y2 };\n        });\n        setLine({ width: box.width, height: box.height, d: `M${x1},${y1} Q${cx},${cy} ${x2},${y2}`, points });\n      });\n    };\n    measure();\n    const observer = new ResizeObserver(measure);\n    observer.observe(container);\n    observer.observe(from);\n    observer.observe(to);\n    return () => {\n      cancelAnimationFrame(frame);\n      observer.disconnect();\n    };\n  }, [containerRef, fromRef, toRef, curvature, dots]);\n  if (!line) return null;\n  return (\n    <svg\n      data-slot=\"animated-beam\"\n      aria-hidden=\"true\"\n      width={line.width}\n      height={line.height}\n      className={cn(\"pointer-events-none absolute inset-0 -z-10 overflow-visible\", className)}\n      style={{ color: `var(${color})`, ...style }}\n      {...props}\n    >\n      <path d={line.d} fill=\"none\" className=\"stroke-border-strong\" strokeWidth={1.5} />\n      {line.points.map((point, index) => (\n        <circle\n          key={index}\n          cx={point.x}\n          cy={point.y}\n          r={2.5}\n          fill=\"currentColor\"\n          className=\"animate-[beam_var(--beam-duration)_linear_infinite] opacity-15 motion-reduce:animate-none motion-reduce:opacity-60\"\n          style={{ [\"--beam-duration\" as string]: `${duration}s`, animationDelay: `${(index / line.points.length) * duration}s` } as CSSProperties}\n        />\n      ))}\n      <style>{\"@keyframes beam { 0%, 100% { opacity: 0.15 } 12% { opacity: 1 } 30% { opacity: 0.15 } }\"}</style>\n    </svg>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "motion",
+    "when": "A diagram in a page that says data or work moves between parts: a source feeding a product, a step handing to the next. Decoration: say the same in words nearby. For a real diagram the person edits use flow-diagram; for amounts use sankey-chart.",
+    "example": "const box = useRef(null), a = useRef(null), b = useRef(null);\n<div ref={box} className=\"relative flex justify-between\">\n  <div ref={a}>Source</div>\n  <div ref={b}>Product</div>\n  <AnimatedBeam containerRef={box} fromRef={a} toRef={b} curvature={40} />\n</div>",
+    "client": true
+  }
+}

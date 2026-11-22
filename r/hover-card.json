@@ -1,0 +1,31 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "hover-card",
+  "type": "registry:ui",
+  "title": "Hover Card",
+  "description": "A small card of more about a link (a person's profile, a page's summary) that opens after a pause on hover or keyboard focus, and stays while the pointer moves onto it.",
+  "categories": [
+    "ui"
+  ],
+  "dependencies": [
+    "radix-ui"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/hover-card.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/hover-card.tsx",
+      "content": "\"use client\";\n/**\n * @name hover-card\n * @category ui\n * @description A small card of more about a link (a person's profile, a page's summary) that opens after a pause on hover or keyboard focus, and stays while the pointer moves onto it.\n * @when A preview that sighted pointer users can do without: the link itself must lead to the same content, because touch screens and screen readers do not get the card. For a few words use tooltip; for content people act on use popover.\n * @example\n * <HoverCard>\n *   <HoverCardTrigger asChild><a href=\"/team/ada\">Ada</a></HoverCardTrigger>\n *   <HoverCardContent>Designer on the maps team since 2024.</HoverCardContent>\n * </HoverCard>\n */\nimport { HoverCard as HoverCardPrimitive } from \"radix-ui\";\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport function HoverCard({ openDelay = 500, closeDelay = 200, ...props }: ComponentProps<typeof HoverCardPrimitive.Root>) {\n  return <HoverCardPrimitive.Root openDelay={openDelay} closeDelay={closeDelay} {...props} />;\n}\n\nexport function HoverCardTrigger(props: ComponentProps<typeof HoverCardPrimitive.Trigger>) {\n  return <HoverCardPrimitive.Trigger data-slot=\"hover-card-trigger\" {...props} />;\n}\n\nexport function HoverCardContent({ className, sideOffset = 6, collisionPadding = 8, ...props }: ComponentProps<typeof HoverCardPrimitive.Content>) {\n  return (\n    <HoverCardPrimitive.Portal>\n      <HoverCardPrimitive.Content\n        data-slot=\"hover-card-content\"\n        sideOffset={sideOffset}\n        collisionPadding={collisionPadding}\n        className={cn(\n          \"z-50 w-72 max-w-[calc(100vw-1rem)] rounded-surface border bg-popover p-4 text-sm text-popover-foreground ease-out animation-duration-(--duration-instant) fade-in-0 fade-out-0 zoom-in-95 zoom-out-95 data-[state=closed]:animate-out data-[state=open]:animate-in motion-reduce:animate-none!\",\n          className,\n        )}\n        {...props}\n      />\n    </HoverCardPrimitive.Portal>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "A preview that sighted pointer users can do without: the link itself must lead to the same content, because touch screens and screen readers do not get the card. For a few words use tooltip; for content people act on use popover.",
+    "example": "<HoverCard>\n  <HoverCardTrigger asChild><a href=\"/team/ada\">Ada</a></HoverCardTrigger>\n  <HoverCardContent>Designer on the maps team since 2024.</HoverCardContent>\n</HoverCard>",
+    "client": true
+  }
+}

@@ -106,6 +106,32 @@
       }
     },
     {
+      "name": "explainer-spec",
+      "type": "registry:lib",
+      "title": "Explainer Spec",
+      "description": "The plain-data description of an explainer film (scenes of a title, a chart, a map, a 3D model, a then-and-now comparison, a quote or a caption, each with a length, a transition, captions, a narration cue and a provenance label) and a validator that lists every fault in words.",
+      "categories": [
+        "lib"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme"
+      ],
+      "files": [
+        {
+          "path": "registry/lib/explainer-spec.ts",
+          "type": "registry:lib",
+          "target": "lib/explainer-spec.ts"
+        }
+      ],
+      "meta": {
+        "category": "lib",
+        "when": "An assistant or a project writes a film as JSON and hands it to motion/explainer. Run validateExplainer first and show its faults: each says where the fault is and how to mend it. For a film drawn by hand from React, use film-stage directly.",
+        "example": "const spec: ExplainerSpec = {\n  title: \"How the river rose\",\n  lang: \"en\",\n  scenes: [\n    { id: \"intro\", kind: \"title\", duration: 4, title: \"How the river rose\", subtitle: \"Spring 2026\" },\n    {\n      id: \"levels\", kind: \"chart\", duration: 8, chart: \"line-chart\",\n      props: { label: \"Water level by day\", data: [{ day: 1, level: 2.1 }, { day: 2, level: 2.9 }], x: \"day\", series: [{ key: \"level\", label: \"Level (m)\" }] },\n      captions: [{ start: 0.5, end: 4, text: \"The level rose for four days.\" }],\n      provenance: { kind: \"measured\", note: \"Gauge readings\" },\n    },\n  ],\n};\nconst faults = validateExplainer(spec); // [] when it is sound",
+        "client": false
+      }
+    },
+    {
       "name": "motion",
       "type": "registry:lib",
       "title": "Motion",
@@ -182,6 +208,32 @@
         "category": "lib",
         "when": "Writing a component that should work both controlled (`value` + `onValueChange`) and uncontrolled (`defaultValue`), which every input-like component in the library does. Radix primitives already do this for their own state; use this for state the library adds on top.",
         "example": "function Stepper({ value, defaultValue = 0, onValueChange }: { value?: number; defaultValue?: number; onValueChange?: (value: number) => void }) {\n  const [count, setCount] = useControllableState({ value, defaultValue, onChange: onValueChange });\n  return <button onClick={() => setCount(count + 1)}>{count}</button>;\n}",
+        "client": true
+      }
+    },
+    {
+      "name": "use-hotkeys",
+      "type": "registry:lib",
+      "title": "Use Hotkeys",
+      "description": "Binds keyboard shortcuts (\"mod+k\", \"shift+?\", \"g i\") to handlers on the page or on one element, by the key's place for letters so they work on keyboards of every script, left alone while typing in a field; and formats a shortcut for showing (\"⌘K\" on Apple, \"Ctrl+K\" elsewhere).",
+      "categories": [
+        "lib"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme"
+      ],
+      "files": [
+        {
+          "path": "registry/lib/use-hotkeys.ts",
+          "type": "registry:lib",
+          "target": "lib/use-hotkeys.ts"
+        }
+      ],
+      "meta": {
+        "category": "lib",
+        "when": "Shortcuts for frequent actions: opening command, saving, moving between items. Show each one where its action is (kbd, a menu's shortcut slot) and keep a list of them. Do not take keys a screen reader or the browser uses (single letters without a modifier only inside a focused widget; never Tab or the arrows on the page).",
+        "example": "useHotkeys(\"mod+k\", () => setOpen(true));\nuseHotkeys(\"g i\", () => router.push(\"/inbox\"), { sequenceTimeout: 800 });\n<Kbd>{formatHotkey(\"mod+k\")}</Kbd>",
         "client": true
       }
     },
@@ -265,6 +317,37 @@
         "category": "ui",
         "when": "Questions and answers, or long settings where people need a few sections out of many. `type=\"single\"` keeps one open (add `collapsible` so it can be closed again); `type=\"multiple\"` lets several be open. For views that replace each other in one place use tabs. Do not hide content everyone needs.",
         "example": "<Accordion type=\"single\" collapsible defaultValue=\"shipping\">\n  <AccordionItem value=\"shipping\">\n    <AccordionTrigger>How long does delivery take?</AccordionTrigger>\n    <AccordionContent>Two to four working days.</AccordionContent>\n  </AccordionItem>\n  <AccordionItem value=\"returns\">\n    <AccordionTrigger>Can I send it back?</AccordionTrigger>\n    <AccordionContent>Yes, within thirty days.</AccordionContent>\n  </AccordionItem>\n</Accordion>",
+        "client": true
+      }
+    },
+    {
+      "name": "alert-dialog",
+      "type": "registry:ui",
+      "title": "Alert Dialog",
+      "description": "A modal question that must be answered before anything else: a title, what will happen, and two buttons, with focus starting on the safe one and Escape choosing it. It cannot be dismissed by clicking outside.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "class-variance-authority",
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/button",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/alert-dialog.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/alert-dialog.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Confirming something that cannot be undone or costs something: deleting, leaving with unsaved work, paying. For a window of content use dialog; for a change that can be undone, do it and offer undo-line instead of asking.",
+        "example": "<AlertDialog>\n  <AlertDialogTrigger asChild><Button variant=\"destructive\">Delete the project</Button></AlertDialogTrigger>\n  <AlertDialogContent>\n    <AlertDialogHeader>\n      <AlertDialogTitle>Delete the project?</AlertDialogTitle>\n      <AlertDialogDescription>Its 14 files are deleted for everyone. This cannot be undone.</AlertDialogDescription>\n    </AlertDialogHeader>\n    <AlertDialogFooter>\n      <AlertDialogCancel>Keep it</AlertDialogCancel>\n      <AlertDialogAction variant=\"destructive\" onClick={remove}>Delete</AlertDialogAction>\n    </AlertDialogFooter>\n  </AlertDialogContent>\n</AlertDialog>",
         "client": true
       }
     },
@@ -445,6 +528,33 @@
         "category": "ui",
         "when": "Pages nested three or more levels deep, above the page title. The last item is the current page: a BreadcrumbPage, not a link. For moving between sibling pages use tabs or the navbar. With a router link, pass it through `asChild`.",
         "example": "<Breadcrumb>\n  <BreadcrumbList>\n    <BreadcrumbItem><BreadcrumbLink href=\"/\">Home</BreadcrumbLink></BreadcrumbItem>\n    <BreadcrumbSeparator />\n    <BreadcrumbItem><BreadcrumbLink href=\"/projects\">Projects</BreadcrumbLink></BreadcrumbItem>\n    <BreadcrumbSeparator />\n    <BreadcrumbItem><BreadcrumbPage>Atlas</BreadcrumbPage></BreadcrumbItem>\n  </BreadcrumbList>\n</Breadcrumb>",
+        "client": false
+      }
+    },
+    {
+      "name": "button-group",
+      "type": "registry:ui",
+      "title": "Button Group",
+      "description": "Buttons joined into one block with shared edges (rounded only at the ends), side by side or stacked, with an optional piece of text or a separator between them.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/button-group.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/button-group.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Related actions that belong together: a split button (an action and its menu), zoom out and in, previous and next. For a choice of one use segmented-control or toggle-group; for a set of commands over content use toolbar.",
+        "example": "<ButtonGroup aria-label=\"Zoom\">\n  <Button variant=\"outline\" size=\"icon\" aria-label=\"Zoom out\"><Minus /></Button>\n  <ButtonGroupText>100%</ButtonGroupText>\n  <Button variant=\"outline\" size=\"icon\" aria-label=\"Zoom in\"><Plus /></Button>\n</ButtonGroup>",
         "client": false
       }
     },
@@ -689,6 +799,97 @@
       }
     },
     {
+      "name": "code-block",
+      "type": "registry:ui",
+      "title": "Code Block",
+      "description": "Code to read and copy: a title or file name, the language, optional line numbers and highlighted lines, a switch between wrapping and scrolling long lines, and a copy button that says when it has copied.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/code-block.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/code-block.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Showing code, commands or configuration in documentation and answers. Colouring by syntax comes from the project (pass `renderLine` with a highlighter's output); the block works without it. For code to edit, bring an editor (CodeMirror, Monaco); for a short word of code in a sentence use `<code>`.",
+        "example": "<CodeBlock title=\"Install\" language=\"sh\" code={\"npm install\\nnpm run dev\"} />\n<CodeBlock language=\"ts\" code={source} lineNumbers highlight={[3, 4]} />",
+        "client": true
+      }
+    },
+    {
+      "name": "collapsible",
+      "type": "registry:ui",
+      "title": "Collapsible",
+      "description": "One section of content that opens and closes under a button that says whether it is open: the disclosure pattern.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react",
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/collapsible.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/collapsible.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Hiding detail that only some people need: more options, the rest of a long answer, a transcript. For several such sections in a column use accordion; for a menu of actions use dropdown-menu.",
+        "example": "<Collapsible>\n  <CollapsibleTrigger>More options</CollapsibleTrigger>\n  <CollapsibleContent>…</CollapsibleContent>\n</Collapsible>",
+        "client": true
+      }
+    },
+    {
+      "name": "color-picker",
+      "type": "registry:ui",
+      "title": "Color Picker",
+      "description": "A colour chosen in OKLCH (lightness, chroma, hue: even steps the eye sees as even): a field of lightness and chroma to point at, a slider for each of the three that the keys drive, swatches of the project's colours, and the value as text that can be typed, in OKLCH or hex.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/input",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/color-picker.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/color-picker.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Choosing a brand colour, a highlight, a label colour. To choose among a few fixed colours use toggle-group or radio-group with swatches; for the theme's highlight use theme-provider (its accent hue and chroma are this picker's).",
+        "example": "<ColorPicker aria-label=\"Label colour\" defaultValue=\"oklch(0.62 0.17 250)\" swatches={[\"oklch(0.62 0.17 250)\", \"oklch(0.7 0.15 150)\", \"#d95926\"]} />",
+        "client": true
+      }
+    },
+    {
       "name": "combobox",
       "type": "registry:ui",
       "title": "Combobox",
@@ -929,6 +1130,70 @@
         "category": "ui",
         "when": "Something the person holds for a limited time: a reserved seat, a price that is kept, a code that expires, a session about to end. Say what happens at the end and offer a way to get more time beside it. Not for decoration or pressure: a countdown that restarts or means nothing is a dark pattern. For progress through a known amount of work use progress.",
         "example": "<p>\n  Your seats are held for{\" \"}\n  <Countdown\n    to={hold.expiresAt}\n    locale=\"en\"\n    thresholds={[300, 60]}\n    announceAt={(_, left) => `${left} left to finish booking`}\n    onExpire={release}\n    expiredLabel=\"no longer: the hold has ended\"\n  />\n</p>",
+        "client": true
+      }
+    },
+    {
+      "name": "currency-input",
+      "type": "registry:ui",
+      "title": "Currency Input",
+      "description": "An amount of money typed the way the locale writes it (its decimal mark, its grouping, its symbol before or after), shown formatted when the field is left, kept as a plain number, with Up and Down to step it and a range it is held to.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/input",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/currency-input.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/currency-input.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Prices, budgets, transfers, any amount in a currency. Also numbers with a unit through `unit` instead of `currency` (kilograms, percent). For a small whole number with buttons use number-stepper; for a range use slider.",
+        "example": "<CurrencyInput aria-label=\"Budget\" currency=\"EUR\" locale=\"de-DE\" defaultValue={1250.5} min={0} name=\"budget\" />",
+        "client": true
+      }
+    },
+    {
+      "name": "data-grid",
+      "type": "registry:ui",
+      "title": "Data Grid",
+      "description": "A table of records a person works in: sorting by one or several columns, a filter per column and a search across all, grouping with totals, columns pinned to the start, shown and hidden, rows chosen by checkbox, pages or a window of rows for thousands, and cells edited in place; one tab stop and arrow keys from cell to cell, to the WAI-ARIA grid pattern.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/button",
+        "@rivier-ui/checkbox",
+        "@rivier-ui/cn",
+        "@rivier-ui/dropdown-menu",
+        "@rivier-ui/input",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/data-grid.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/data-grid.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Lists of records that are sorted, narrowed, compared and changed: orders, accounts, files, results. For a few rows to read use table; for side-by-side comparison of two to four things use compare-table; for an endless feed use virtual-list.",
+        "example": "<DataGrid\n  label=\"Orders\"\n  rows={orders}\n  rowId={(order) => order.id}\n  columns={[\n    { key: \"id\", header: \"Order\", pin: \"start\", width: 110 },\n    { key: \"customer\", header: \"Customer\" },\n    { key: \"status\", header: \"Status\" },\n    { key: \"total\", header: \"Total\", type: \"number\", aggregate: \"sum\", editable: true },\n  ]}\n  selectable\n  pageSize={20}\n  onCellEdit={(id, key, value) => save(id, key, value)}\n/>",
         "client": true
       }
     },
@@ -1209,6 +1474,67 @@
       }
     },
     {
+      "name": "flow-diagram",
+      "type": "registry:ui",
+      "title": "Flow Diagram",
+      "description": "A diagram of boxes joined by arrows that the person edits: nodes dragged or moved with the arrow keys, joined by pressing C and choosing the next node (or by pointer), removed with Delete, zoomed and panned; every change said aloud and the whole diagram also given as a list of steps and links.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/flow-diagram.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/flow-diagram.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Processes, pipelines and simple node graphs the person builds or rearranges: an approval flow, a data pipeline, a decision tree. For a graph to look at, laid out automatically, use network-graph; for stages with amounts use sankey-chart; for work moving between columns use kanban.",
+        "example": "const [nodes, setNodes] = useState([{ id: \"a\", label: \"Order placed\", x: 40, y: 60 }, { id: \"b\", label: \"Paid\", x: 260, y: 60 }]);\nconst [edges, setEdges] = useState([{ id: \"a-b\", source: \"a\", target: \"b\" }]);\n<FlowDiagram aria-label=\"Order flow\" nodes={nodes} edges={edges} onNodesChange={setNodes} onEdgesChange={setEdges} />",
+        "client": true
+      }
+    },
+    {
+      "name": "form",
+      "type": "registry:ui",
+      "title": "Form",
+      "description": "A form that checks itself with the browser's own rules (required, type, length, range, pattern) and the project's, shows each field's message in words under it, and after a failed submit lists every fault at the top as links to the fields, said once.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/form.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/form.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Any form with rules: sign-up, checkout, settings. The rules live on the controls (`required`, `type=\"email\"`, `min`) or in a `match` function; a server's answer goes in `serverInvalid` with its message. For a single field with no rules, field is enough; for a guided form over several steps use wizard.",
+        "example": "<Form onSubmit={(event) => { event.preventDefault(); save(new FormData(event.currentTarget)); }}>\n  <FormErrorSummary title=\"There is a problem\" />\n  <FormField name=\"email\">\n    <FormLabel>Email</FormLabel>\n    <FormControl asChild><Input type=\"email\" required /></FormControl>\n    <FormMessage match=\"valueMissing\">Enter your email address.</FormMessage>\n    <FormMessage match=\"typeMismatch\">Enter an email address like name@example.com.</FormMessage>\n  </FormField>\n  <FormSubmit asChild><Button>Create account</Button></FormSubmit>\n</Form>",
+        "client": true
+      }
+    },
+    {
       "name": "gallery",
       "type": "registry:ui",
       "title": "Gallery",
@@ -1264,6 +1590,96 @@
         "category": "ui",
         "when": "Something in the frame can be asked about or chosen while it is on screen: an object in a scene, a place on a still, a choice in a story. Put Hotspots inside the frame (VideoPlayer, or any `relative` box over a picture) and HotspotList after it; both take the same `hotspots`. A hotspot that appears is announced, because nothing else would tell a screen-reader user it is there. For a point on a map use the map's own markers; for marks on the time bar use the scrubber's `marks`.",
         "example": "const spots = [\n  { id: \"kiln\", x: 32, y: 55, start: 4, end: 12, label: \"The kiln door\" },\n  { id: \"shelf\", x: 70, y: 30, start: 9, end: 20, label: \"Drying shelf\" },\n];\n<VideoPlayerProvider>\n  <VideoPlayer aria-label=\"Inside the workshop\">\n    <VideoPlayerVideo src=\"/workshop.mp4\" />\n    <Hotspots hotspots={spots} onSelect={(spot) => openCard(spot.id)} />\n    <VideoPlayerControls>…</VideoPlayerControls>\n  </VideoPlayer>\n  <HotspotList hotspots={spots} onSelect={(spot) => openCard(spot.id)} aria-label=\"In this scene\" />\n</VideoPlayerProvider>",
+        "client": true
+      }
+    },
+    {
+      "name": "hover-card",
+      "type": "registry:ui",
+      "title": "Hover Card",
+      "description": "A small card of more about a link (a person's profile, a page's summary) that opens after a pause on hover or keyboard focus, and stays while the pointer moves onto it.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/hover-card.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/hover-card.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "A preview that sighted pointer users can do without: the link itself must lead to the same content, because touch screens and screen readers do not get the card. For a few words use tooltip; for content people act on use popover.",
+        "example": "<HoverCard>\n  <HoverCardTrigger asChild><a href=\"/team/ada\">Ada</a></HoverCardTrigger>\n  <HoverCardContent>Designer on the maps team since 2024.</HoverCardContent>\n</HoverCard>",
+        "client": true
+      }
+    },
+    {
+      "name": "image-annotator",
+      "type": "registry:ui",
+      "title": "Image Annotator",
+      "description": "A picture on which areas are marked and named: drawn by dragging, or added with a button and placed with the keys (arrows move, plus and minus resize, Delete removes), each named in a list beside the picture; areas come out as fractions of the picture, every change said aloud.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/image-annotator.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/image-annotator.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Labelling what is in a picture: damage on a photo, rooms on a plan, objects for training a model, notes on a design. For cutting a picture use image-cropper; for named points that play at moments of a video use hotspots.",
+        "example": "<ImageAnnotator src=\"/plan.png\" alt=\"Ground floor plan\" defaultAreas={[{ id: \"a\", x: 0.1, y: 0.2, width: 0.3, height: 0.25, label: \"Kitchen\" }]} onAreasChange={save} />",
+        "client": true
+      }
+    },
+    {
+      "name": "image-cropper",
+      "type": "registry:ui",
+      "title": "Image Cropper",
+      "description": "A picture with a frame over it that chooses the part to keep: dragged or resized by its corners, or moved with the arrow keys and resized with plus and minus, optionally held to a shape (square, 16:9); the choice comes out as fractions and as pixels of the original.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/image-cropper.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/image-cropper.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Cropping an avatar, a cover picture, a product photo before upload. The cutting itself is the project's (a canvas, the server); this gives the rectangle. For marking areas on a picture use image-annotator; for comparing two pictures use compare-slider.",
+        "example": "<ImageCropper src=\"/photo.jpg\" alt=\"The harbour at dawn\" aspect={1} onCropChange={(crop) => setCrop(crop.pixels)} />",
         "client": true
       }
     },
@@ -1324,6 +1740,39 @@
         "when": "Short free text: a name, an email, a number. Wrap it in field for a label and an error; use textarea for several lines, select for a fixed list, input-group to add an icon or a button inside the edge.",
         "example": "<Input type=\"email\" placeholder=\"you@example.com\" />\n<Input size=\"sm\" defaultValue=\"Rivier\" />\n<Input aria-invalid=\"true\" aria-label=\"Email\" defaultValue=\"not-an-email\" />",
         "client": false
+      }
+    },
+    {
+      "name": "kanban",
+      "type": "registry:ui",
+      "title": "Kanban",
+      "description": "Cards in columns (to do, doing, done) that move between and within columns three ways: dragged with a mouse, lifted with Space and carried with the arrow keys, or sent by each card's \"Move to\" menu; every move is said aloud.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn",
+        "@rivier-ui/direction",
+        "@rivier-ui/dropdown-menu",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/kanban.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/kanban.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Work that passes through stages: tasks, applications, orders. For one ordered list use sortable-list; for a schedule over time use gantt-chart; for records to sort and filter use data-grid.",
+        "example": "<Kanban\n  aria-label=\"Tasks\"\n  columns={[{ id: \"todo\", title: \"To do\" }, { id: \"doing\", title: \"Doing\" }, { id: \"done\", title: \"Done\" }]}\n  defaultCards={[{ id: \"1\", column: \"todo\", title: \"Write the brief\" }, { id: \"2\", column: \"doing\", title: \"Draw the map\" }]}\n/>",
+        "client": true
       }
     },
     {
@@ -1449,6 +1898,36 @@
       }
     },
     {
+      "name": "markdown-editor",
+      "type": "registry:ui",
+      "title": "Markdown Editor",
+      "description": "A field for writing Markdown with a toolbar that wraps the chosen words (bold, italic, code, link) or starts a line (heading, list, quote), the same as Ctrl/⌘ with B, I and K, and a tab that shows the project's own preview.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/markdown-editor.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/markdown-editor.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Comments, notes and descriptions where people write a little formatting. The preview is the project's (its Markdown renderer and its sanitiser); without one, leave `renderPreview` out and there is no preview tab. For rich text without markup bring an editor (Tiptap, Lexical); for plain text use textarea.",
+        "example": "<MarkdownEditor aria-label=\"Comment\" defaultValue=\"**Hello**\" renderPreview={(text) => <MyMarkdown source={text} />} name=\"comment\" />",
+        "client": true
+      }
+    },
+    {
       "name": "media-row-list",
       "type": "registry:ui",
       "title": "Media Row List",
@@ -1479,6 +1958,36 @@
         "category": "ui",
         "when": "After a dropzone, when the order of the files matters and each needs a description: the photos of a listing, the slides of a story, the pages of a document. It is ready-made from sortable-list (drag by the handle, lift and move with the keyboard, or the move buttons; every move is read out) and the upload rows of dropzone, and contains no upload engine: the project uploads and passes each row its state. For files whose order does not matter use the dropzone's own UploadList; to reorder things that are not files use sortable-list.",
         "example": "const [rows, setRows] = useState<MediaRow[]>([\n  { id: \"a\", name: \"kitchen.jpg\", size: 1_200_000, state: \"done\", alt: \"The kitchen, from the door\" },\n  { id: \"b\", name: \"garden.jpg\", size: 2_400_000, state: \"uploading\", progress: 40 },\n  { id: \"c\", name: \"stairs.jpg\", state: \"failed\", error: \"The connection dropped.\" },\n]);\nconst [cover, setCover] = useState<string | null>(\"a\");\n<MediaRowList\n  aria-label=\"Pictures, in order\"\n  items={rows}\n  onItemsChange={setRows}\n  cover={cover}\n  onCoverChange={setCover}\n  onAltChange={(id, alt) => setRows((all) => all.map((row) => (row.id === id ? { ...row, alt } : row)))}\n  onRemove={(id) => setRows((all) => all.filter((row) => row.id !== id))}\n  onRetry={(id) => upload(id)}\n/>\n\n// A state of the project's own, a status line, a control of its own, no cover choice, and a description that is required\nconst row: MediaRow = {\n  id: \"d\", name: \"walk.mp4\", state: \"checking\", stateLabel: \"Being checked\", stateTone: \"warning\",\n  status: \"Usually takes a minute.\", controls: <Button size=\"sm\" variant=\"ghost\">Trim</Button>,\n  hideCover: true, altRequired: true, altError: \"Say what the clip shows.\",\n};\n<MediaRowList aria-label=\"Clips\" items={[row]} variant=\"lines\" onAltChange={describe} onPause={pause} onResume={resume} onDropped={({ values }) => save(values)} />",
+        "client": true
+      }
+    },
+    {
+      "name": "menubar",
+      "type": "registry:ui",
+      "title": "Menubar",
+      "description": "A row of menus that stays on screen, as in a desktop application: File, Edit, View, each opening a menu of items, checkbox and radio items and sub-menus, moved through with the arrow keys from one menu to the next.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react",
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/menubar.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/menubar.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "An editor or tool with many commands grouped by kind. For a site's navigation use navbar or navigation-menu; for one button's actions use dropdown-menu; on a phone, prefer a toolbar or a single menu.",
+        "example": "<Menubar>\n  <MenubarMenu>\n    <MenubarTrigger>File</MenubarTrigger>\n    <MenubarContent>\n      <MenubarItem>New <MenubarShortcut>⌘N</MenubarShortcut></MenubarItem>\n      <MenubarSeparator />\n      <MenubarItem>Print</MenubarItem>\n    </MenubarContent>\n  </MenubarMenu>\n</Menubar>",
         "client": true
       }
     },
@@ -1546,6 +2055,67 @@
       }
     },
     {
+      "name": "navigation-menu",
+      "type": "registry:ui",
+      "title": "Navigation Menu",
+      "description": "A site's main links where some open a panel of further links (a mega menu): the panel opens on hover or on Enter, and the arrow keys move between the top links, to the Radix navigation pattern.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react",
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/navigation-menu.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/navigation-menu.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "A site with sections that each hold several pages. For a few plain links use navbar (which also folds them into a sheet on phones); for commands use menubar or dropdown-menu. Below `md`, put the same links in navbar's sheet.",
+        "example": "<NavigationMenu aria-label=\"Main\">\n  <NavigationMenuList>\n    <NavigationMenuItem>\n      <NavigationMenuTrigger>Products</NavigationMenuTrigger>\n      <NavigationMenuContent>\n        <NavigationMenuLink href=\"/maps\">Maps</NavigationMenuLink>\n        <NavigationMenuLink href=\"/charts\">Charts</NavigationMenuLink>\n      </NavigationMenuContent>\n    </NavigationMenuItem>\n    <NavigationMenuItem><NavigationMenuLink href=\"/pricing\">Pricing</NavigationMenuLink></NavigationMenuItem>\n  </NavigationMenuList>\n</NavigationMenu>",
+        "client": true
+      }
+    },
+    {
+      "name": "notification-list",
+      "type": "registry:ui",
+      "title": "Notification List",
+      "description": "An inbox of notices: each with its kind, title, words and time (\"5 min ago\"), unread ones marked by a dot and the word \"Unread\", a switch between all and unread, marking one or all as read, and room for each notice's own action; every change said aloud.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/notification-list.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/notification-list.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "The list behind a bell in an app's header (put it in a popover or sheet), or an activity page. For a message that appears and goes by itself use toaster; for a problem on the page use alert; for a conversation use thread.",
+        "example": "<NotificationList\n  aria-label=\"Notifications\"\n  now=\"2026-11-13T12:00:00Z\"\n  defaultItems={[\n    { id: \"1\", title: \"Report ready\", body: \"The October report can be downloaded.\", time: \"2026-11-13T11:55:00Z\" },\n    { id: \"2\", title: \"New comment\", body: \"On the map of the coast.\", time: \"2026-11-12T09:00:00Z\", read: true },\n  ]}\n/>",
+        "client": true
+      }
+    },
+    {
       "name": "number-stepper",
       "type": "registry:ui",
       "title": "Number Stepper",
@@ -1572,6 +2142,35 @@
         "category": "ui",
         "when": "A small whole number that is usually changed by a step or two: people in a party, a quantity, nights. For a number where the rough position matters use slider; for a free number (a price, a year) use input with type=\"number\". Name it with a Label (pass the same `id`) or `aria-label`.",
         "example": "<Label htmlFor=\"adults\">Adults</Label>\n<NumberStepper id=\"adults\" defaultValue={2} min={1} max={12} />\n\n// Controlled, with its own parts and translated button names\n<NumberStepper value={nights} onValueChange={setNights} min={1} aria-label=\"Nights\">\n  <NumberStepperDecrement aria-label=\"One night fewer\" />\n  <NumberStepperInput />\n  <NumberStepperIncrement aria-label=\"One night more\" />\n</NumberStepper>",
+        "client": true
+      }
+    },
+    {
+      "name": "otp-input",
+      "type": "registry:ui",
+      "title": "Otp Input",
+      "description": "A one-time code typed into a row of single-character boxes: typing moves on, Backspace goes back, arrow keys move between boxes, a pasted or autofilled code fills them all, and the whole code is one value.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/direction",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/otp-input.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/otp-input.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "A short code sent by message or shown by an app: sign-in, confirming an email or a phone. For a password use password-input; for any other short text use input.",
+        "example": "<OtpInput aria-label=\"Code from the message\" length={6} onComplete={(code) => verify(code)} name=\"code\" />",
         "client": true
       }
     },
@@ -1636,6 +2235,37 @@
         "category": "ui",
         "when": "An assistant's reply contains something to look at or work in, not only words, and that thing changes over the conversation. The frame holds its size while it loads, says \"Saving\" in words while a change is on its way, shrinks to a one-line stub when a newer frame replaces it, and can open its content full screen. For a static card use card; for words use message; for a flow of steps put steps or a wizard inside it.",
         "example": "<PartFrame state={plan.state} replacementRef={newerPlan}>\n  <PartFrameHeader>\n    <PartFrameTitle>Plan for Saturday</PartFrameTitle>\n    <PartFrameExpand title=\"Plan for Saturday\"><PlanEditor plan={plan} roomy /></PartFrameExpand>\n  </PartFrameHeader>\n  <PartFrameContent className=\"min-h-40\"><PlanEditor plan={plan} /></PartFrameContent>\n  <PartFrameFooter><Button size=\"sm\">Confirm</Button></PartFrameFooter>\n</PartFrame>\n\n// Replaced by a newer one: a stub that says so and points to it\n<PartFrame state=\"superseded\" supersededBy={<a href=\"#plan-2\">See the new plan</a>}>\n  <PartFrameHeader><PartFrameTitle>Plan for Saturday</PartFrameTitle></PartFrameHeader>\n  <PartFrameContent>…</PartFrameContent>\n</PartFrame>",
+        "client": true
+      }
+    },
+    {
+      "name": "password-input",
+      "type": "registry:ui",
+      "title": "Password Input",
+      "description": "A password field with a button that shows and hides what was typed, a note when Caps Lock is on, and an optional list of the project's rules, each marked met or not met in words as the person types.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/input",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/password-input.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/password-input.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Signing in (current-password) or choosing a password (new-password, with `rules`). For a one-time code use otp-input; for other secrets that must never be shown, a plain input of type password.",
+        "example": "<PasswordInput\n  aria-label=\"New password\"\n  autoComplete=\"new-password\"\n  rules={[\n    { label: \"At least 12 characters\", test: (v) => v.length >= 12 },\n    { label: \"A number\", test: (v) => /\\d/.test(v) },\n  ]}\n/>",
         "client": true
       }
     },
@@ -1782,6 +2412,66 @@
         "category": "ui",
         "when": "Picking one of two to five options that should all be visible. For a longer list use select; for a compact row of icons or short words use toggle-group; for on or off use switch.",
         "example": "<RadioGroup defaultValue=\"monthly\" aria-label=\"Billing period\">\n  <Label><RadioGroupItem value=\"monthly\" /> Monthly</Label>\n  <Label><RadioGroupItem value=\"yearly\" /> Yearly</Label>\n</RadioGroup>",
+        "client": true
+      }
+    },
+    {
+      "name": "rating",
+      "type": "registry:ui",
+      "title": "Rating",
+      "description": "A score of one to five (or any number) shown as stars and chosen like radio buttons: arrow keys move the score, each star named \"3 of 5\"; or, read-only, a score shown with its number in words.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react",
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/rating.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/rating.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Rating a thing on a short scale: a review, feedback after a task. For yes and no use toggle or switch; for a number on a long scale use slider; for showing an average of many ratings use the read-only form with the count beside it.",
+        "example": "<Rating aria-label=\"Your rating\" defaultValue={4} name=\"rating\" />\n<Rating readOnly value={4.3} aria-label=\"Average rating\" />",
+        "client": true
+      }
+    },
+    {
+      "name": "resizable",
+      "type": "registry:ui",
+      "title": "Resizable",
+      "description": "Panels side by side (or stacked) with a handle between each pair that is dragged, or moved with the arrow keys, to share the space differently; Home and End go to the limits and Enter folds a panel away and back: the WAI-ARIA window splitter pattern.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/direction",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/resizable.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/resizable.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Layouts whose parts the person sizes: a list beside a detail view, an editor beside its preview, a map beside its table. For a panel docked beside the whole page use dock; for two fixed columns use split.",
+        "example": "<ResizablePanelGroup defaultSizes={[30, 70]} aria-label=\"Mail\">\n  <ResizablePanel minSize={20} id=\"folders\">Folders</ResizablePanel>\n  <ResizableHandle aria-label=\"Resize the folders\" />\n  <ResizablePanel id=\"messages\">Messages</ResizablePanel>\n</ResizablePanelGroup>",
         "client": true
       }
     },
@@ -1999,6 +2689,38 @@
       }
     },
     {
+      "name": "sidebar",
+      "type": "registry:ui",
+      "title": "Sidebar",
+      "description": "An application's side navigation: groups of links with icons that fold to a slim rail of icons (their names still read out) and back with a button or Ctrl/⌘+B, and that becomes a sheet from the side on narrow screens; with the main area beside it.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/sheet",
+        "@rivier-ui/use-controllable-state",
+        "@rivier-ui/use-hotkeys"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/sidebar.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/sidebar.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "The frame of an app with many sections: a dashboard, settings, a workspace. For a site's header links use navbar; for a panel of tools the person resizes use dock or resizable.",
+        "example": "<SidebarProvider>\n  <Sidebar aria-label=\"Workspace\">\n    <SidebarHeader>Acme</SidebarHeader>\n    <SidebarContent>\n      <SidebarGroup label=\"Work\">\n        <SidebarMenu>\n          <SidebarMenuItem><SidebarMenuButton href=\"/inbox\" icon={<Inbox />} current>Inbox</SidebarMenuButton></SidebarMenuItem>\n          <SidebarMenuItem><SidebarMenuButton href=\"/reports\" icon={<ChartBar />}>Reports</SidebarMenuButton></SidebarMenuItem>\n        </SidebarMenu>\n      </SidebarGroup>\n    </SidebarContent>\n  </Sidebar>\n  <SidebarInset>\n    <SidebarTrigger />\n    …\n  </SidebarInset>\n</SidebarProvider>",
+        "client": true
+      }
+    },
+    {
       "name": "skeleton",
       "type": "registry:ui",
       "title": "Skeleton",
@@ -2022,6 +2744,33 @@
         "category": "ui",
         "when": "Content whose shape is known is on its way. Nothing may jump when it arrives: either size the block like the thing it replaces, or wrap the real component (rendered with placeholder data) in `<Skeleton loading>` so the box is exactly its final size. Mark the region that is loading with `aria-busy=\"true\"`: the placeholders themselves are hidden from assistive technology. For an unknown wait use spinner; for a measurable one use progress.",
         "example": "<div className=\"flex items-center gap-3\" aria-busy=\"true\">\n  <Skeleton className=\"size-10 rounded-full\" />\n  <SkeletonText lines={2} className=\"flex-1\" />\n</div>\n\n// Holds the final size: the card is laid out, invisible and inert, under the placeholder\n<section aria-busy={isLoading}>\n  <Skeleton loading={isLoading}>\n    <PriceCard price={price ?? PLACEHOLDER_PRICE} />\n  </Skeleton>\n</section>",
+        "client": false
+      }
+    },
+    {
+      "name": "skip-link",
+      "type": "registry:ui",
+      "title": "Skip Link",
+      "description": "A link at the very start of the page, hidden until it has keyboard focus, that jumps past the header and navigation to the main content (WCAG 2.4.1).",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/skip-link.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/skip-link.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Every page with a header or navigation before its content: put it first inside `<body>`, and give the main content the id it points to. Several can go in a row (to the content, to the search).",
+        "example": "<SkipLink href=\"#main\">Skip to content</SkipLink>\n…\n<main id=\"main\" tabIndex={-1}>…</main>",
         "client": false
       }
     },
@@ -2346,6 +3095,37 @@
       }
     },
     {
+      "name": "tags-input",
+      "type": "registry:ui",
+      "title": "Tags Input",
+      "description": "A field that collects several short values as removable tags: typed and added with Enter or a comma, pasted as a list, picked from suggestions, removed by their button or with Backspace, each change said aloud.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/tags-input.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/tags-input.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Free-form lists of words: labels on a note, email addresses to invite, skills. For choosing from a fixed list use combobox or chips; for one value use input.",
+        "example": "<TagsInput aria-label=\"Labels\" defaultValue={[\"urgent\"]} suggestions={[\"design\", \"bug\", \"later\"]} name=\"labels\" />",
+        "client": true
+      }
+    },
+    {
       "name": "textarea",
       "type": "registry:ui",
       "title": "Textarea",
@@ -2607,6 +3387,35 @@
       }
     },
     {
+      "name": "toolbar",
+      "type": "registry:ui",
+      "title": "Toolbar",
+      "description": "A row of controls (buttons, toggles, toggle groups, links, separators) that is one stop in the Tab order and moved through with the arrow keys, to the WAI-ARIA toolbar pattern.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "radix-ui"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/toolbar.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/toolbar.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "A cluster of related commands over a piece of content: text formatting over an editor, tools over a canvas, actions over a list. For a site's links use navbar; for two to five choices of which one is on use segmented-control.",
+        "example": "<Toolbar aria-label=\"Formatting\">\n  <ToolbarToggleGroup type=\"multiple\" aria-label=\"Style\">\n    <ToolbarToggleItem value=\"bold\" aria-label=\"Bold\"><Bold /></ToolbarToggleItem>\n    <ToolbarToggleItem value=\"italic\" aria-label=\"Italic\"><Italic /></ToolbarToggleItem>\n  </ToolbarToggleGroup>\n  <ToolbarSeparator />\n  <ToolbarButton>Share</ToolbarButton>\n</Toolbar>",
+        "client": true
+      }
+    },
+    {
       "name": "tooltip",
       "type": "registry:ui",
       "title": "Tooltip",
@@ -2632,6 +3441,68 @@
         "category": "ui",
         "when": "Naming an icon-only button or adding a short hint. It does not open on touch, so never put anything needed there: the control keeps its own `aria-label`. For content people interact with use popover. Put one TooltipProvider around the app (root layout); every Tooltip must be inside one.",
         "example": "<TooltipProvider>\n  <Tooltip>\n    <TooltipTrigger asChild>\n      <Button variant=\"ghost\" size=\"icon\" aria-label=\"Copy link\"><Link2 /></Button>\n    </TooltipTrigger>\n    <TooltipContent>Copy link</TooltipContent>\n  </Tooltip>\n</TooltipProvider>",
+        "client": true
+      }
+    },
+    {
+      "name": "tour",
+      "type": "registry:ui",
+      "title": "Tour",
+      "description": "A guided walk through an interface: a card beside each element in turn, with the element ringed, its step number (\"2 of 5\"), Back, Next and Skip, focus moved into the card, the element scrolled into view, and Escape to end at any point.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/button",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/tour.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/tour.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Showing a new or changed interface once, on request or the first time: where things are, a new feature. Keep it to a few steps and let people leave at once; never block the page. For one hint use tooltip or popover; for a task done in steps use wizard.",
+        "example": "<Tour\n  open={touring}\n  onOpenChange={setTouring}\n  steps={[\n    { target: \"#search\", title: \"Search\", body: \"Find any file by its name or its words.\" },\n    { target: \"#share\", title: \"Share\", body: \"Send a link to the people you work with.\" },\n  ]}\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "tree-view",
+      "type": "registry:ui",
+      "title": "Tree View",
+      "description": "A hierarchy of items that open and close (folders and files, sections and pages), moved through to the WAI-ARIA tree pattern: Up and Down through what is visible, Right to open or go in, Left to close or go up, Home, End, typing a letter to jump, * to open every sibling, and Enter to choose.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/direction",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/tree-view.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/tree-view.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Navigating or choosing within nested items: a file tree, a table of contents, categories. For flat lists use a list or virtual-list; for a few levels of site links use navigation-menu; for nested data to compare use data-grid grouping.",
+        "example": "<TreeView\n  aria-label=\"Files\"\n  items={[\n    { id: \"src\", label: \"src\", children: [{ id: \"app\", label: \"app.tsx\" }, { id: \"lib\", label: \"lib\", children: [{ id: \"cn\", label: \"cn.ts\" }] }] },\n    { id: \"readme\", label: \"README.md\" },\n  ]}\n  defaultExpanded={[\"src\"]}\n  onSelectedChange={(id) => open(id)}\n/>",
         "client": true
       }
     },
@@ -2726,6 +3597,33 @@
         "when": "More items than the page should hold at once (a few hundred or more): a feed, a log, search results, a picture library. Rows may have any height: each is measured once it is drawn and the rest are estimated, and the view does not jump when a row above it turns out taller. Give the box a height and a name (`aria-label`); or, where the list is the page (a feed, results under a header), `scroll=\"window\"` and no height: it then grows to its full length and the window scrolls it. For a short list render the rows plainly; for a conversation that grows at the bottom use thread; for pages of results use pagination. Written here on ResizeObserver instead of adding a virtualisation package: a headless one would bring the offsets but not the roles, the positions for screen readers, the kept focus or the restoration, which are most of this file.",
         "example": "// Rows of any height\n<VirtualList count={messages.length} estimateSize={72} getKey={(index) => messages[index].id} aria-label=\"Messages\" className=\"h-96 rounded-surface border\">\n  {(index) => <article className=\"border-b p-3\">{messages[index].text}</article>}\n</VirtualList>\n\n// A grid, as many columns as fit; the place is remembered for this tab\n<VirtualGrid count={pictures.length} columns={{ minWidth: 160 }} gap={8} estimateSize={160} restoreKey=\"library\" aria-label=\"Pictures\" className=\"h-[32rem]\">\n  {(index) => <img src={pictures[index].src} alt={pictures[index].alt} className=\"aspect-square w-full rounded-control object-cover\" />}\n</VirtualGrid>\n\n// The page scrolls, not a box: no height, and rows above and below the window are not rendered\n<VirtualList scroll=\"window\" count={results.length} estimateSize={96} getKey={(index) => results[index].id} aria-label=\"Results\">\n  {(index) => <ResultCard result={results[index]} />}\n</VirtualList>\n\n// Going to an item\nconst list = useRef<VirtualListHandle>(null);\n<VirtualList handleRef={list} count={10000} aria-label=\"Lines\">{(index) => <p className=\"p-2\">Line {index + 1}</p>}</VirtualList>\n<Button onClick={() => list.current?.scrollToIndex(4999, { align: \"center\" })}>Go to line 5,000</Button>",
         "client": true
+      }
+    },
+    {
+      "name": "visually-hidden",
+      "type": "registry:ui",
+      "title": "Visually Hidden",
+      "description": "Text that screen readers read and sighted people do not see, such as the name of an icon-only control or a heading that the layout makes obvious; with `focusable`, it appears while it has keyboard focus.",
+      "categories": [
+        "ui"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/ui/visually-hidden.tsx",
+          "type": "registry:ui",
+          "target": "components/ui/visually-hidden.tsx"
+        }
+      ],
+      "meta": {
+        "category": "ui",
+        "when": "Words that only assistive technology needs. For a link past repeated content use skip-link; for an icon button's name prefer `aria-label` on the button.",
+        "example": "<button type=\"button\"><Bell aria-hidden=\"true\" /><VisuallyHidden>Notifications</VisuallyHidden></button>",
+        "client": false
       }
     },
     {
@@ -2936,6 +3834,33 @@
       }
     },
     {
+      "name": "pattern",
+      "type": "registry:component",
+      "title": "Pattern",
+      "description": "A quiet background of dots, a grid or diagonal lines drawn in the theme's hairline colour, filling the box it sits in, behind the content and hidden from screen readers.",
+      "categories": [
+        "layout"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/layout/pattern.tsx",
+          "type": "registry:component",
+          "target": "components/layout/pattern.tsx"
+        }
+      ],
+      "meta": {
+        "category": "layout",
+        "when": "A section or a card that needs a texture to set it apart without a colour or a gradient: a hero, an empty state, a canvas. Keep it faint; for a photograph or an illustration use an image.",
+        "example": "<section className=\"relative overflow-hidden\">\n  <Pattern variant=\"grid\" />\n  <h2 className=\"relative\">Plans</h2>\n</section>",
+        "client": false
+      }
+    },
+    {
       "name": "section",
       "type": "registry:component",
       "title": "Section",
@@ -3020,6 +3945,128 @@
         "when": "Spacing a run of siblings evenly: form fields, a button row, a header with actions. For columns that reflow by width use grid; for unequal tiles use bento-grid.",
         "example": "<Stack gap=\"lg\">\n  <h2>Title</h2>\n  <p>Body</p>\n</Stack>\n<Stack direction=\"horizontal\" gap=\"sm\" align=\"center\" justify=\"between\" wrap>\n  <span>Plan</span>\n  <Button size=\"sm\">Change</Button>\n</Stack>\n<Stack asChild gap=\"xs\"><ul><li>One</li><li>Two</li></ul></Stack>",
         "client": false
+      }
+    },
+    {
+      "name": "animated-beam",
+      "type": "registry:component",
+      "title": "Animated Beam",
+      "description": "A flat line drawn between two elements inside a container, bowed if asked, along which a row of dots lights up in turn from the start to the end, showing that something flows from one to the other; it follows the elements as the layout changes and stands still under reduced motion.",
+      "categories": [
+        "motion"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/motion/animated-beam.tsx",
+          "type": "registry:component",
+          "target": "components/motion/animated-beam.tsx"
+        }
+      ],
+      "meta": {
+        "category": "motion",
+        "when": "A diagram in a page that says data or work moves between parts: a source feeding a product, a step handing to the next. Decoration: say the same in words nearby. For a real diagram the person edits use flow-diagram; for amounts use sankey-chart.",
+        "example": "const box = useRef(null), a = useRef(null), b = useRef(null);\n<div ref={box} className=\"relative flex justify-between\">\n  <div ref={a}>Source</div>\n  <div ref={b}>Product</div>\n  <AnimatedBeam containerRef={box} fromRef={a} toRef={b} curvature={40} />\n</div>",
+        "client": true
+      }
+    },
+    {
+      "name": "confetti",
+      "type": "registry:component",
+      "title": "Confetti",
+      "description": "A short burst of flat paper pieces in the chart colours from a point, falling and fading on a canvas over the page, started from code (the handle's `fire`) and never under reduced motion; it says nothing and takes no clicks.",
+      "categories": [
+        "motion"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/motion",
+        "@rivier-ui/theme-color"
+      ],
+      "files": [
+        {
+          "path": "registry/motion/confetti.tsx",
+          "type": "registry:component",
+          "target": "components/motion/confetti.tsx"
+        }
+      ],
+      "meta": {
+        "category": "motion",
+        "when": "Marking a rare success the person worked for: a first project published, a goal reached. Never for routine actions, never on page load. Say the success in words as well (a toast, a heading): the burst is decoration.",
+        "example": "const confetti = useRef<ConfettiHandle>(null);\n<Confetti handleRef={confetti} />\n<Button onClick={(e) => confetti.current?.fire({ x: e.clientX, y: e.clientY })}>Publish</Button>",
+        "client": true
+      }
+    },
+    {
+      "name": "explainer",
+      "type": "registry:component",
+      "title": "Explainer",
+      "description": "Turns an explainer spec (plain JSON: scenes of a title, any chart, a map, a 3D model, a then-and-now comparison, a quote or a caption) into a film on film-stage: playable, scrubbable, with captions, narration in step, a provenance label on every scene that says how it was made, and frames drawn on request for export.",
+      "categories": [
+        "motion"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/area-chart",
+        "@rivier-ui/bar-chart",
+        "@rivier-ui/box-plot",
+        "@rivier-ui/bullet-chart",
+        "@rivier-ui/calendar-heatmap",
+        "@rivier-ui/candlestick-chart",
+        "@rivier-ui/captions",
+        "@rivier-ui/chord-diagram",
+        "@rivier-ui/choropleth",
+        "@rivier-ui/circle-pack",
+        "@rivier-ui/cn",
+        "@rivier-ui/compare-slider",
+        "@rivier-ui/density-chart",
+        "@rivier-ui/donut-chart",
+        "@rivier-ui/dot-plot",
+        "@rivier-ui/explainer-spec",
+        "@rivier-ui/fan-chart",
+        "@rivier-ui/film-stage",
+        "@rivier-ui/funnel-chart",
+        "@rivier-ui/gantt-chart",
+        "@rivier-ui/geo-hexbin",
+        "@rivier-ui/geo-map",
+        "@rivier-ui/geo-markers",
+        "@rivier-ui/geo-routes",
+        "@rivier-ui/heatmap",
+        "@rivier-ui/histogram",
+        "@rivier-ui/line-chart",
+        "@rivier-ui/model-viewer",
+        "@rivier-ui/network-graph",
+        "@rivier-ui/parallel-coordinates",
+        "@rivier-ui/provenance-label",
+        "@rivier-ui/radar-chart",
+        "@rivier-ui/sankey-chart",
+        "@rivier-ui/scatter-chart",
+        "@rivier-ui/slope-chart",
+        "@rivier-ui/small-multiples",
+        "@rivier-ui/stream-chart",
+        "@rivier-ui/sunburst",
+        "@rivier-ui/treemap",
+        "@rivier-ui/waterfall-chart"
+      ],
+      "files": [
+        {
+          "path": "registry/motion/explainer.tsx",
+          "type": "registry:component",
+          "target": "components/motion/explainer.tsx"
+        }
+      ],
+      "meta": {
+        "category": "motion",
+        "when": "An assistant or a project describes a short explanatory film as data and wants it played: a story with numbers, a report as a film, a change on a map. Validate the spec with lib/explainer-spec first; a spec with faults shows them in words instead of a film. For a film drawn by hand use film-stage; for a video file use video-player.",
+        "example": "<Explainer spec={spec} />\n\n// Arranged by the project, and exported frame by frame by scripts/export-film.ts\n<Explainer spec={spec} deterministic exportName=\"main\">\n  <FilmStageFrame aspect={16 / 9}>\n    <ExplainerProvenance />\n    <ExplainerCaptions />\n  </FilmStageFrame>\n</Explainer>",
+        "client": true
       }
     },
     {
@@ -3143,6 +4190,33 @@
         "category": "motion",
         "when": "A headline statistic: customers, revenue, a percentage. Not for values that update live (render those directly), and not for more than a few on one screen.",
         "example": "<NumberTicker value={12480} />\n<NumberTicker value={0.9997} options={{ style: \"percent\", maximumFractionDigits: 2 }} />\n<NumberTicker value={48000} locale=\"de-DE\" options={{ style: \"currency\", currency: \"EUR\", maximumFractionDigits: 0 }} />",
+        "client": true
+      }
+    },
+    {
+      "name": "orbit",
+      "type": "registry:component",
+      "title": "Orbit",
+      "description": "Items set evenly on a ring around a centre that turns slowly, the items staying upright, with the centre in the middle; it pauses while hovered or focused, and under reduced motion the ring stands still.",
+      "categories": [
+        "motion"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/motion/orbit.tsx",
+          "type": "registry:component",
+          "target": "components/motion/orbit.tsx"
+        }
+      ],
+      "meta": {
+        "category": "motion",
+        "when": "Showing that several things connect to one: integrations around a product, sources around a result. Use few items (three to eight) of the same size, each with its own name. For a row of logos use marquee; for a real network use network-graph.",
+        "example": "<Orbit center={<Logo />} items={[<Icon key=\"a\" />, <Icon key=\"b\" />, <Icon key=\"c\" />]} itemLabels={[\"Maps\", \"Charts\", \"Films\"]} />",
         "client": true
       }
     },
@@ -3470,6 +4544,36 @@
       }
     },
     {
+      "name": "word-rotate",
+      "type": "registry:component",
+      "title": "Word Rotate",
+      "description": "One word in a sentence that changes to the next of a list in place, rising and fading, once through the list (or round and round with `loop`, pausing while hovered or focused); screen readers hear the whole list once, and under reduced motion the last word simply stands.",
+      "categories": [
+        "motion"
+      ],
+      "dependencies": [
+        "motion"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/motion"
+      ],
+      "files": [
+        {
+          "path": "registry/motion/word-rotate.tsx",
+          "type": "registry:component",
+          "target": "components/motion/word-rotate.tsx"
+        }
+      ],
+      "meta": {
+        "category": "motion",
+        "when": "A headline that names several things one after another: \"Charts for teams / schools / newsrooms\". Keep the words about the same length. For a whole heading appearing use text-reveal; for a number counting up use number-ticker.",
+        "example": "<h1>Maps for <WordRotate words={[\"teams\", \"schools\", \"newsrooms\"]} /></h1>",
+        "client": true
+      }
+    },
+    {
       "name": "floating-shapes",
       "type": "registry:component",
       "title": "Floating Shapes",
@@ -3532,6 +4636,39 @@
         "category": "three",
         "when": "Showing reach or places at a glance: offices, regions, where requests come from. Use it inside scene. For exact values per place use a table or bar-chart; the globe is not a chart.",
         "example": "<Scene aspect={1} className=\"max-w-lg\" label=\"A globe with markers on Amsterdam, Kochi and San Francisco\">\n  <Globe\n    markers={[\n      { lat: 52.37, lon: 4.9 },\n      { lat: 9.93, lon: 76.27 },\n      { lat: 37.77, lon: -122.42 },\n    ]}\n  />\n</Scene>",
+        "client": true
+      }
+    },
+    {
+      "name": "model-annotations",
+      "type": "registry:component",
+      "title": "Model Annotations",
+      "description": "Labels pinned to points on a 3D model that follow them as the model turns, each a button that opens its note, hidden while its point is behind the camera or out of view; the same notes are always given as a list, so nobody has to find them by turning.",
+      "categories": [
+        "three"
+      ],
+      "dependencies": [
+        "@react-three/fiber",
+        "three"
+      ],
+      "devDependencies": [
+        "@types/three"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/three/model-annotations.tsx",
+          "type": "registry:component",
+          "target": "components/three/model-annotations.tsx"
+        }
+      ],
+      "meta": {
+        "category": "three",
+        "when": "Pointing out parts of a 3D object: the parts of a machine, features of a building, finds on a scan. Put the tracker inside the scene and the labels over it, in the same positioned box. For a flat picture use hotspots; for a model with no notes use model-viewer.",
+        "example": "const store = useAnnotationStore();\n<div className=\"relative\">\n  <Scene label=\"A vase\" aspect={1}>\n    <ModelStage><Vase /></ModelStage>\n    <ModelAnnotationTracker store={store} points={[{ id: \"handle\", position: [0.6, 0.4, 0] }]} />\n  </Scene>\n  <ModelAnnotations store={store} annotations={[{ id: \"handle\", label: \"Handle\", note: \"Added later, in a darker clay.\" }]} />\n</div>",
         "client": true
       }
     },
@@ -3671,6 +4808,40 @@
       }
     },
     {
+      "name": "point-cloud",
+      "type": "registry:component",
+      "title": "Point Cloud",
+      "description": "Data as points in 3D: three numbers place each point inside a framed cube, a fourth field gives its group colour from the chart series; it goes inside scene (and model-stage to turn it), with PointCloudTable as its text alternative.",
+      "categories": [
+        "three"
+      ],
+      "dependencies": [
+        "@react-three/fiber",
+        "three"
+      ],
+      "devDependencies": [
+        "@types/three"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/theme-color"
+      ],
+      "files": [
+        {
+          "path": "registry/three/point-cloud.tsx",
+          "type": "registry:component",
+          "target": "components/three/point-cloud.tsx"
+        }
+      ],
+      "meta": {
+        "category": "three",
+        "when": "Three measures that belong together and are best turned in space: a scan, positions in a volume, an embedding. It is harder to read exactly than a 2D chart, so pass a scatter-chart as the scene's fallback and keep the table. For two measures use scatter-chart; for thousands of points in 2D use density-chart.",
+        "example": "<Scene label=\"Samples by depth, width and height\" aspect={4 / 3} fallback={<ScatterChart label=\"Samples\" data={rows} x=\"width\" y=\"height\" />}>\n  <ModelStage><PointCloud data={rows} x=\"width\" y=\"height\" z=\"depth\" group=\"kind\" /></ModelStage>\n</Scene>\n<PointCloudTable caption=\"Samples\" data={rows} x=\"width\" y=\"height\" z=\"depth\" group=\"kind\" />",
+        "client": true
+      }
+    },
+    {
       "name": "scene",
       "type": "registry:component",
       "title": "Scene",
@@ -3754,8 +4925,180 @@
       ],
       "meta": {
         "category": "viz",
-        "when": "Comparing amounts across categories. Use `orientation=\"horizontal\"` for long names or a ranking, `stacked` when the series add up to a total. For change over many points in time use line-chart; for a single number use a stat, not one bar.",
+        "when": "Comparing amounts across categories. Use `orientation=\"horizontal\"` for long names or a ranking, `stacked` when the series add up to a total, `normalize` to compare each category's split as shares of 100 %. For change over many points in time use line-chart; for a single number use a stat, not one bar.",
         "example": "<BarChart\n  label=\"Orders by channel per quarter\"\n  data={[\n    { quarter: \"Q1\", web: 320, app: 210 },\n    { quarter: \"Q2\", web: 410, app: 290 },\n    { quarter: \"Q3\", web: 380, app: 350 },\n  ]}\n  x=\"quarter\"\n  series={[\n    { key: \"web\", label: \"Web\" },\n    { key: \"app\", label: \"App\" },\n  ]}\n  showValues\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "box-plot",
+      "type": "registry:component",
+      "title": "Box Plot",
+      "description": "The spread of a measure in each of several groups side by side: a box from the first to the third quartile, the median across it, whiskers to the furthest values within 1.5 boxes, and the values beyond them as points; or, as a violin, the shape of each spread.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-array",
+        "d3-shape"
+      ],
+      "devDependencies": [
+        "@types/d3-array",
+        "@types/d3-shape"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/box-plot.tsx",
+          "type": "registry:component",
+          "target": "components/viz/box-plot.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Comparing distributions across groups: which is higher, which is wider, which has outliers. For one group's full shape use histogram; for a few exact numbers per group use bar-chart or dot-plot.",
+        "example": "<BoxPlot\n  label=\"Response time by region\"\n  data={[\n    { region: \"North\", ms: 120 }, { region: \"North\", ms: 140 }, { region: \"North\", ms: 135 }, { region: \"North\", ms: 310 },\n    { region: \"South\", ms: 90 }, { region: \"South\", ms: 110 }, { region: \"South\", ms: 105 }, { region: \"South\", ms: 98 },\n  ]}\n  group=\"region\"\n  value=\"ms\"\n  valueLabel=\"Milliseconds\"\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "bullet-chart",
+      "type": "registry:component",
+      "title": "Bullet Chart",
+      "description": "One measure against its target and its bands (poor, fair, good) in a single slim row: the value as a bar, the target as a tick, the bands as steps of grey behind them. Several rows stack, each on its own scale.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale"
+      ],
+      "devDependencies": [
+        "@types/d3-scale"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/bullet-chart.tsx",
+          "type": "registry:component",
+          "target": "components/viz/bullet-chart.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing how a few measures stand against their goals in little space: a dashboard of targets, a scorecard. For one value against a limit with nothing else use radial-progress or progress; to compare many values with each other use bar-chart.",
+        "example": "<BulletChart\n  label=\"Quarter targets\"\n  items={[\n    { label: \"Revenue\", value: 270, target: 250, ranges: [150, 225, 300] },\n    { label: \"New customers\", value: 1400, target: 1600, ranges: [1000, 1500, 2000] },\n  ]}\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "calendar-heatmap",
+      "type": "registry:component",
+      "title": "Calendar Heatmap",
+      "description": "A value per day laid out as a calendar, a column for each week and a row for each weekday, coloured on one hue from faint to strong, with month and weekday names and arrow keys that move by day and by week.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale"
+      ],
+      "devDependencies": [
+        "@types/d3-scale"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/calendar-heatmap.tsx",
+          "type": "registry:component",
+          "target": "components/viz/calendar-heatmap.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing a daily measure over months: activity, sales per day, rainfall, where the pattern by weekday and season matters. For a few weeks with exact values use bar-chart; for a trend use line-chart; to pick a day use calendar.",
+        "example": "<CalendarHeatmap\n  label=\"Workouts per day\"\n  data={[{ day: \"2026-01-05\", count: 1 }, { day: \"2026-01-06\", count: 2 }, { day: \"2026-01-09\", count: 1 }]}\n  day=\"day\"\n  value=\"count\"\n  from=\"2026-01-01\"\n  to=\"2026-03-31\"\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "candlestick-chart",
+      "type": "registry:component",
+      "title": "Candlestick Chart",
+      "description": "Opening, highest, lowest and closing values per period (a price, a reading): a thin line from low to high, a body from open to close, filled when it closed lower and hollow when it closed higher, so the direction is never colour alone.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale"
+      ],
+      "devDependencies": [
+        "@types/d3-scale"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/candlestick-chart.tsx",
+          "type": "registry:component",
+          "target": "components/viz/candlestick-chart.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing the range and the direction of a value within each period: prices by day, temperatures by day with their extremes. For the close alone use line-chart; for spread across many observations use box-plot.",
+        "example": "<CandlestickChart\n  label=\"Price by day\"\n  data={[\n    { day: new Date(\"2026-03-02\"), open: 10, high: 12, low: 9.5, close: 11.4 },\n    { day: new Date(\"2026-03-03\"), open: 11.4, high: 11.8, low: 10.1, close: 10.3 },\n    { day: new Date(\"2026-03-04\"), open: 10.3, high: 11, low: 10, close: 10.9 },\n  ]}\n  x=\"day\"\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "chart-brush",
+      "type": "registry:component",
+      "title": "Chart Brush",
+      "description": "A small overview of a whole series with a window over it whose two handles are dragged or moved by arrow keys to choose the stretch another chart shows: the range is two row indexes, so it fits any chart.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale",
+        "d3-shape",
+        "radix-ui"
+      ],
+      "devDependencies": [
+        "@types/d3-scale",
+        "@types/d3-shape"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state",
+        "@rivier-ui/use-size"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/chart-brush.tsx",
+          "type": "registry:component",
+          "target": "components/viz/chart-brush.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Letting people zoom a long time series to a part of it: a year of daily values shown a month at a time. Give the chart above only the rows between the two indexes. For a fixed set of periods use segmented-control or tabs; for choosing dates use date-picker.",
+        "example": "const [range, setRange] = useState<[number, number]>([0, 29]);\n<LineChart label=\"Visits\" data={days.slice(range[0], range[1] + 1)} x=\"day\" series={[{ key: \"visits\", label: \"Visits\" }]} />\n<ChartBrush data={days} x=\"day\" y=\"visits\" value={range} onValueChange={setRange} labels={{ start: \"From\", end: \"To\" }} />",
         "client": true
       }
     },
@@ -3768,9 +5111,11 @@
         "viz"
       ],
       "dependencies": [
+        "d3-scale",
         "d3-shape"
       ],
       "devDependencies": [
+        "@types/d3-scale",
         "@types/d3-shape"
       ],
       "registryDependencies": [
@@ -3789,6 +5134,142 @@
         "category": "viz",
         "when": "Building a chart of your own that should match the others. For the common forms use line-chart, area-chart, bar-chart, donut-chart, sparkline, heatmap or radial-progress directly.",
         "example": "<ChartContainer aspect={2} table={{ caption: \"Signups\", columns: [\"Day\", \"Signups\"], rows: [[\"Mon\", 4], [\"Tue\", 9]] }}>\n  {({ width, height }) => (\n    <ChartSvg label=\"Signups by day\" width={width} height={height}>\n      <rect x={0} y={height - 40} width={width / 3} height={40} className={chartSeries(0).fill} />\n      <rect x={width / 2} y={height - 90} width={width / 3} height={90} className={chartSeries(0).fill} />\n    </ChartSvg>\n  )}\n</ChartContainer>\n<ChartLegend items={[{ label: \"Signups\", index: 0 }]} mark=\"rect\" />",
+        "client": true
+      }
+    },
+    {
+      "name": "chord-diagram",
+      "type": "registry:component",
+      "title": "Chord Diagram",
+      "description": "Flows between the members of one group, both ways, around a circle: each member an arc sized by all it sends, each ribbon joining two members with ends as wide as what goes each way, lit with its member on hover or focus.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-shape"
+      ],
+      "devDependencies": [
+        "@types/d3-shape"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/chord-diagram.tsx",
+          "type": "registry:component",
+          "target": "components/viz/chord-diagram.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing exchanges within a set where both directions matter: moves between regions, trade between countries, messages between teams. Keep it to about a dozen members. For flows in one direction through stages use sankey-chart; for links without amounts use network-graph.",
+        "example": "<ChordDiagram\n  label=\"Moves between neighbourhoods\"\n  names={[\"North\", \"South\", \"East\"]}\n  matrix={[\n    [0, 120, 40],\n    [80, 0, 60],\n    [30, 90, 0],\n  ]}\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "choropleth",
+      "type": "registry:component",
+      "title": "Choropleth",
+      "description": "A geo-map layer that colours each region by a number, on one hue from faint to strong, on two hues either side of a midpoint, or in classes with stated edges; with a legend that says each step's range in words and a table of every region's value.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-geo"
+      ],
+      "devDependencies": [
+        "@types/d3-geo"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn",
+        "@rivier-ui/geo-map"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/choropleth.tsx",
+          "type": "registry:component",
+          "target": "components/viz/choropleth.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing a rate or a share that varies by region: turnout by district, rainfall by county. Use rates, not raw counts (large regions look important whatever their count); for counts use geo-markers bubbles. Goes inside geo-map.",
+        "example": "const scale = choroplethScale(regions.features.map((f) => f.properties.rate), { thresholds: [10, 20, 30] });\n<GeoMap label=\"Rate by region\" fit={regions}>\n  <Choropleth label=\"Rate by region\" data={regions} value={(f) => f.properties?.rate} name={(f) => f.properties?.name} scale={scale} />\n</GeoMap>\n<ChoroplethLegend title=\"Rate (%)\" scale={scale} />",
+        "client": true
+      }
+    },
+    {
+      "name": "circle-pack",
+      "type": "registry:component",
+      "title": "Circle Pack",
+      "description": "A hierarchy as circles inside circles: each group an outline holding its parts, each part a circle whose area is its size, with zooming into a group by click or Enter and back out by the trail or Backspace.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-hierarchy"
+      ],
+      "devDependencies": [
+        "@types/d3-hierarchy"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/circle-pack.tsx",
+          "type": "registry:component",
+          "target": "components/viz/circle-pack.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing groups and their members when the grouping matters more than precise sizes: topics and their articles, teams and their projects. To compare sizes closely use treemap or bar-chart; for levels as rings use sunburst.",
+        "example": "<CirclePack\n  label=\"Articles by topic\"\n  data={{\n    name: \"All articles\",\n    children: [\n      { name: \"Science\", children: [{ name: \"Space\", value: 40 }, { name: \"Biology\", value: 25 }] },\n      { name: \"Arts\", children: [{ name: \"Film\", value: 30 }, { name: \"Music\", value: 18 }] },\n    ],\n  }}\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "density-chart",
+      "type": "registry:component",
+      "title": "Density Chart",
+      "description": "Where many points crowd together, drawn as filled contour bands of one hue from faint to strong (like the lines of a height map), with the points optionally on top and each point reachable by arrow keys.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-contour",
+        "d3-delaunay"
+      ],
+      "devDependencies": [
+        "@types/d3-contour",
+        "@types/d3-delaunay"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/density-chart.tsx",
+          "type": "registry:component",
+          "target": "components/viz/density-chart.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Two measures over hundreds or thousands of points, where a scatter-chart would be a blot: where the bulk lies, whether there are two clusters. For under a few hundred points use scatter-chart; for one measure's spread use histogram.",
+        "example": "<DensityChart\n  label=\"Trip length against fare\"\n  data={[{ km: 2, fare: 8 }, { km: 3, fare: 10 }, { km: 2.5, fare: 9 }, { km: 12, fare: 31 }, { km: 11, fare: 29 }]}\n  x=\"km\"\n  y=\"fare\"\n  xLabel=\"Distance (km)\"\n  yLabel=\"Fare\"\n  showPoints\n/>",
         "client": true
       }
     },
@@ -3826,6 +5307,299 @@
       }
     },
     {
+      "name": "dot-plot",
+      "type": "registry:component",
+      "title": "Dot Plot",
+      "description": "Values as dots along a shared axis, one row per category: plain dots for one or more series, a lollipop (a stick to the dot), a dumbbell (two values joined, for a before and after), or a beeswarm (every single value as its own dot, packed so none overlap).",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale"
+      ],
+      "devDependencies": [
+        "@types/d3-scale"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/dot-plot.tsx",
+          "type": "registry:component",
+          "target": "components/viz/dot-plot.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Comparing values across categories with less ink than bars, especially when zero is not meaningful (dot, dumbbell), showing a change between two moments per category (dumbbell), or showing every observation in a few groups (beeswarm). For totals from zero use bar-chart; for a summary of spread use box-plot.",
+        "example": "<DotPlot\n  label=\"Satisfaction before and after\"\n  data={[\n    { team: \"Support\", before: 62, after: 78 },\n    { team: \"Sales\", before: 70, after: 74 },\n    { team: \"Product\", before: 55, after: 71 },\n  ]}\n  y=\"team\"\n  series={[{ key: \"before\", label: \"Before\" }, { key: \"after\", label: \"After\" }]}\n  variant=\"dumbbell\"\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "fan-chart",
+      "type": "registry:component",
+      "title": "Fan Chart",
+      "description": "A forecast drawn honestly: what was observed as a solid line, then the median forecast with nested bands for its intervals (90 %, 50 % …) that widen as the forecast reaches further, with arrow-key reading of every point.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale",
+        "d3-shape"
+      ],
+      "devDependencies": [
+        "@types/d3-scale",
+        "@types/d3-shape"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/fan-chart.tsx",
+          "type": "registry:component",
+          "target": "components/viz/fan-chart.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing a prediction or an estimate with its uncertainty: a forecast, a model's range, a confidence band around a trend. For a series with no uncertainty use line-chart; for the spread of measured values use box-plot.",
+        "example": "<FanChart\n  label=\"Visitors, observed and forecast\"\n  data={[\n    { week: 1, observed: 120 },\n    { week: 2, observed: 132 },\n    { week: 3, observed: 128, median: 128, low90: 128, high90: 128, low50: 128, high50: 128 },\n    { week: 4, median: 136, low90: 118, high90: 152, low50: 128, high50: 143 },\n    { week: 5, median: 141, low90: 110, high90: 170, low50: 126, high50: 155 },\n  ]}\n  x=\"week\"\n  observed=\"observed\"\n  median=\"median\"\n  intervals={[\n    { low: \"low90\", high: \"high90\", label: \"90% interval\" },\n    { low: \"low50\", high: \"high50\", label: \"50% interval\" },\n  ]}\n  forecastFrom={3}\n  labels={{ observed: \"Observed\", median: \"Forecast (median)\", forecast: \"Forecast\" }}\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "funnel-chart",
+      "type": "registry:component",
+      "title": "Funnel Chart",
+      "description": "The steps of a process that people (or things) drop out of, as centred bars that narrow with the count, each with its count, its share of the first step and its share of the step before.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/funnel-chart.tsx",
+          "type": "registry:component",
+          "target": "components/viz/funnel-chart.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing where a sequence loses the most: sign-up steps, a sales pipeline, a hiring process. For flows that split and join use sankey-chart; for amounts that are not a sequence use bar-chart horizontal.",
+        "example": "<FunnelChart\n  label=\"Sign-up steps\"\n  data={[\n    { step: \"Visited\", people: 1200 },\n    { step: \"Started\", people: 640 },\n    { step: \"Confirmed email\", people: 410 },\n    { step: \"Finished\", people: 290 },\n  ]}\n  x=\"step\"\n  value=\"people\"\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "gantt-chart",
+      "type": "registry:component",
+      "title": "Gantt Chart",
+      "description": "Tasks as bars along a time axis, one row each, under optional group headings: how far each has got, which must finish before another starts (arrows), milestones as diamonds and a line for today, with Up and Down reading each task.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale"
+      ],
+      "devDependencies": [
+        "@types/d3-scale"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/gantt-chart.tsx",
+          "type": "registry:component",
+          "target": "components/viz/gantt-chart.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Planning or reporting work over time: a project plan, a release schedule, a timeline of events with lengths. For events without length use timeline (a list) or a line-chart annotation; for a calendar of single days use calendar or calendar-heatmap.",
+        "example": "<GanttChart\n  label=\"Launch plan\"\n  tasks={[\n    { id: \"design\", label: \"Design\", start: \"2026-03-02\", end: \"2026-03-13\", group: \"Product\", progress: 1 },\n    { id: \"build\", label: \"Build\", start: \"2026-03-09\", end: \"2026-04-03\", group: \"Product\", progress: 0.4, dependsOn: [\"design\"] },\n    { id: \"launch\", label: \"Launch\", start: \"2026-04-06\", end: \"2026-04-06\", group: \"Marketing\", milestone: true, dependsOn: [\"build\"] },\n  ]}\n  today=\"2026-03-20\"\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "geo-hexbin",
+      "type": "registry:component",
+      "title": "Geo Hexbin",
+      "description": "A geo-map layer that gathers many points into hexagons or squares of equal size on screen, each coloured on one hue by how many points (or how much weight) fall in it, re-gathered as the map zooms; each cell read by arrow keys and listed in a table.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn",
+        "@rivier-ui/geo-map"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/geo-hexbin.tsx",
+          "type": "registry:component",
+          "target": "components/viz/geo-hexbin.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Thousands of points where single marks would pile up: sightings, incidents, trips, addresses. For a few dozen named places use geo-markers; for values that belong to regions use choropleth. Goes inside geo-map.",
+        "example": "<GeoMap label=\"Sightings\" fit={area}>\n  <GeoFeatures data={area} />\n  <GeoHexbin label=\"Sightings\" points={sightings} radius={14} valueLabel=\"Sightings\" />\n</GeoMap>",
+        "client": true
+      }
+    },
+    {
+      "name": "geo-map",
+      "type": "registry:component",
+      "title": "Geo Map",
+      "description": "A map drawn from GeoJSON the project passes (no tiles, no hosted data), in any d3-geo projection fitted to its box, zoomed and panned by dragging, pinching, Ctrl and the wheel, a double click, buttons or keys, with parts for a graticule, plain shapes, a scale bar, and layers that are read item by item by arrow keys.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-geo",
+        "lucide-react"
+      ],
+      "devDependencies": [
+        "@types/d3-geo"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/announce",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state",
+        "@rivier-ui/use-size"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/geo-map.tsx",
+          "type": "registry:component",
+          "target": "components/viz/geo-map.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing places, regions or routes from data the project holds: a choropleth, sites on a map, flows between cities. Add layers inside it: choropleth, geo-markers, geo-routes, geo-hexbin, geo-tiles. Inside layout/map-frame it loads only when asked. For a street map with search and directions, bring a map engine and put it in map-frame; for a spinning globe as decoration use three/globe.",
+        "example": "<GeoMap label=\"Regions of the study area\" fit={regions} projection=\"equal-earth\">\n  <GeoGraticule />\n  <GeoFeatures data={regions} />\n  <GeoMarkers label=\"Sites\" points={[{ id: \"a\", name: \"Site A\", lon: 10.7, lat: 59.9 }]} />\n  <GeoScaleBar />\n</GeoMap>",
+        "client": true
+      }
+    },
+    {
+      "name": "geo-markers",
+      "type": "registry:component",
+      "title": "Geo Markers",
+      "description": "A geo-map layer of places: points in their group's colour and shape with optional names, or bubbles whose area is a number; each read by arrow keys and listed in a table.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale"
+      ],
+      "devDependencies": [
+        "@types/d3-scale"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn",
+        "@rivier-ui/geo-map"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/geo-markers.tsx",
+          "type": "registry:component",
+          "target": "components/viz/geo-markers.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Marking sites, cities or events on a map, or comparing counts by place (bubbles: area, never radius, carries the number). For values that belong to whole regions use choropleth; for thousands of points use geo-hexbin. Goes inside geo-map.",
+        "example": "<GeoMap label=\"Our stores\" fit={country}>\n  <GeoFeatures data={country} />\n  <GeoMarkers\n    label=\"Stores\"\n    points={[\n      { id: \"a\", name: \"Harbour\", lon: 5.32, lat: 60.39, value: 120 },\n      { id: \"b\", name: \"Station\", lon: 10.75, lat: 59.91, value: 340 },\n    ]}\n    variant=\"bubble\"\n    valueLabel=\"Visits\"\n  />\n</GeoMap>",
+        "client": true
+      }
+    },
+    {
+      "name": "geo-routes",
+      "type": "registry:component",
+      "title": "Geo Routes",
+      "description": "A geo-map layer of journeys and flows between places: great-circle routes (the shortest way over the globe) or arcs drawn over the map, thicker for larger amounts, with an arrow for the direction; each read by arrow keys and listed in a table.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-geo",
+        "d3-scale"
+      ],
+      "devDependencies": [
+        "@types/d3-geo",
+        "@types/d3-scale"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn",
+        "@rivier-ui/geo-map"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/geo-routes.tsx",
+          "type": "registry:component",
+          "target": "components/viz/geo-routes.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing movement between places: flights, deliveries, migration, trade. Keep to a few dozen routes, or aggregate them first. For flows without geography use sankey-chart or chord-diagram. Goes inside geo-map.",
+        "example": "<GeoMap label=\"Flights from the hub\" projection=\"natural-earth\">\n  <GeoGraticule />\n  <GeoRoutes\n    label=\"Flights\"\n    routes={[\n      { id: \"1\", name: \"Hub to Port\", from: [10.7, 59.9], to: [-74, 40.7], value: 12 },\n      { id: \"2\", name: \"Hub to Cape\", from: [10.7, 59.9], to: [18.4, -33.9], value: 4 },\n    ]}\n    valueLabel=\"Flights a week\"\n  />\n</GeoMap>",
+        "client": true
+      }
+    },
+    {
+      "name": "geo-tiles",
+      "type": "registry:component",
+      "title": "Geo Tiles",
+      "description": "A geo-map layer of raster map tiles from an address template the project gives (\"…/{z}/{x}/{y}.png\"), placed under the other layers and following the zoom, with the attribution the tile provider asks for. It has no default address: nothing is fetched unless the project names a server.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/cn",
+        "@rivier-ui/geo-map"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/geo-tiles.tsx",
+          "type": "registry:component",
+          "target": "components/viz/geo-tiles.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "A geo-map needs a picture of streets or terrain under the data and the project has a tile server it may use (its own, or a provider whose terms it accepts). Use projection=\"mercator\" (tiles are drawn in Web Mercator). Tiles come from a third party, so put the map in layout/map-frame with a MapFrameNotice and nothing is requested before the person asks. Without tiles, draw shapes with GeoFeatures.",
+        "example": "<GeoMap label=\"Delivery area\" fit={area} projection=\"mercator\">\n  <GeoTiles url=\"https://tiles.example.org/{z}/{x}/{y}.png\" attribution=\"© Example contributors\" />\n  <GeoFeatures data={area} variant=\"line\" />\n</GeoMap>",
+        "client": true
+      }
+    },
+    {
       "name": "heatmap",
       "type": "registry:component",
       "title": "Heatmap",
@@ -3855,6 +5629,39 @@
         "category": "viz",
         "when": "Spotting patterns across two categories at once: when it is busy, which pairs stand out. To compare exact amounts use bar-chart; for one row of values over time use line-chart.",
         "example": "<Heatmap\n  label=\"Sessions by day and hour\"\n  data={[\n    { day: \"Mon\", hour: \"09\", sessions: 12 },\n    { day: \"Mon\", hour: \"10\", sessions: 30 },\n    { day: \"Tue\", hour: \"09\", sessions: 8 },\n    { day: \"Tue\", hour: \"10\", sessions: 21 },\n  ]}\n  x=\"hour\"\n  y=\"day\"\n  value=\"sessions\"\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "histogram",
+      "type": "registry:component",
+      "title": "Histogram",
+      "description": "How the values of one measure are spread: the range cut into equal bins, each bar as tall as the number of values that fall in it, with arrow-key reading of each bin.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-array"
+      ],
+      "devDependencies": [
+        "@types/d3-array"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/histogram.tsx",
+          "type": "registry:component",
+          "target": "components/viz/histogram.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Seeing the shape of a distribution: where most values are, how wide, whether there are two humps or a long tail. To compare the spread of several groups use box-plot; to compare totals across categories use bar-chart.",
+        "example": "<Histogram\n  label=\"Delivery times\"\n  data={[{ minutes: 22 }, { minutes: 31 }, { minutes: 28 }, { minutes: 45 }, { minutes: 26 }, { minutes: 33 }]}\n  value=\"minutes\"\n  valueLabel=\"Minutes\"\n  bins={8}\n/>",
         "client": true
       }
     },
@@ -3894,6 +5701,100 @@
       }
     },
     {
+      "name": "network-graph",
+      "type": "registry:component",
+      "title": "Network Graph",
+      "description": "Things and the links between them, placed by a force layout that is run to rest before it is drawn (so it is the same every time and never moves on its own), with each node's links lit on hover or focus and every node reachable by arrow keys.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-force"
+      ],
+      "devDependencies": [
+        "@types/d3-force"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/network-graph.tsx",
+          "type": "registry:component",
+          "target": "components/viz/network-graph.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing who or what is connected to what: clusters, bridges between groups, the most linked items. Keep it to a few hundred nodes. For amounts flowing in one direction use sankey-chart; for a hierarchy use treemap or tree-view; for a process the person edits use flow-diagram.",
+        "example": "<NetworkGraph\n  label=\"Libraries and what they use\"\n  nodes={[{ id: \"app\", group: \"Apps\" }, { id: \"ui\", group: \"Libraries\" }, { id: \"charts\", group: \"Libraries\" }, { id: \"maths\", group: \"Libraries\" }]}\n  links={[{ source: \"app\", target: \"ui\" }, { source: \"app\", target: \"charts\" }, { source: \"charts\", target: \"maths\" }]}\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "parallel-coordinates",
+      "type": "registry:component",
+      "title": "Parallel Coordinates",
+      "description": "Many measures of many things at once: one upright axis per measure, each thing a line that crosses every axis at its value, so trade-offs and clusters show as patterns of crossing or parallel lines; each line lit and read by arrow keys.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale"
+      ],
+      "devDependencies": [
+        "@types/d3-scale"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/parallel-coordinates.tsx",
+          "type": "registry:component",
+          "target": "components/viz/parallel-coordinates.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Comparing things across four to ten measures with different units: cars by price, power and weight; plans by cost and limits. For two measures use scatter-chart; for a few things on one scale use radar-chart; for exact values use table or data-grid.",
+        "example": "<ParallelCoordinates\n  label=\"Laptops compared\"\n  data={[\n    { name: \"Alder\", price: 900, weight: 1.3, battery: 12, kind: \"Light\" },\n    { name: \"Birch\", price: 1400, weight: 2.1, battery: 8, kind: \"Power\" },\n    { name: \"Cedar\", price: 700, weight: 1.6, battery: 10, kind: \"Light\" },\n  ]}\n  dimensions={[{ key: \"price\", label: \"Price\" }, { key: \"weight\", label: \"Weight (kg)\" }, { key: \"battery\", label: \"Battery (h)\" }]}\n  name=\"name\"\n  group=\"kind\"\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "radar-chart",
+      "type": "registry:component",
+      "title": "Radar Chart",
+      "description": "Several measures on spokes around a centre, one closed shape per series, so profiles can be compared at a glance: which is stronger where, with arrow keys reading each spoke.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/radar-chart.tsx",
+          "type": "registry:component",
+          "target": "components/viz/radar-chart.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Comparing two or three profiles across five to ten measures on the same scale: skills, product ratings, nutrition against a target. For exact comparison, or measures on different scales, use bar-chart or small-multiples; with more than three series the shapes tangle.",
+        "example": "<RadarChart\n  label=\"Two plans compared\"\n  data={[\n    { measure: \"Speed\", basic: 3, plus: 4 },\n    { measure: \"Storage\", basic: 2, plus: 5 },\n    { measure: \"Support\", basic: 3, plus: 4 },\n    { measure: \"Price\", basic: 5, plus: 3 },\n    { measure: \"Security\", basic: 4, plus: 4 },\n  ]}\n  axis=\"measure\"\n  series={[{ key: \"basic\", label: \"Basic\" }, { key: \"plus\", label: \"Plus\" }]}\n  max={5}\n/>",
+        "client": true
+      }
+    },
+    {
       "name": "radial-progress",
       "type": "registry:component",
       "title": "Radial Progress",
@@ -3918,6 +5819,142 @@
         "category": "viz",
         "when": "One ratio: a quota used, a score, a goal reached. Size it with a width class (`w-32` by default). For several ratios side by side use a list of bars (bar-chart horizontal), not a ring each; for parts of a whole use donut-chart.",
         "example": "<RadialProgress value={72} label=\"Storage used\" />\n<RadialProgress value={3} max={5} label=\"Steps done\" formatValue={(value) => `${value} of 5`} className=\"w-40\" />",
+        "client": true
+      }
+    },
+    {
+      "name": "sankey-chart",
+      "type": "registry:component",
+      "title": "Sankey Chart",
+      "description": "Flows between stages as bands whose widths are the amounts: where a total comes from, where it goes and what is lost on the way, with every node and band reachable by arrow keys.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-sankey"
+      ],
+      "devDependencies": [
+        "@types/d3-sankey"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/sankey-chart.tsx",
+          "type": "registry:component",
+          "target": "components/viz/sankey-chart.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing how amounts move through steps or between categories: a budget from sources to uses, visitors through a sign-up, energy from fuel to use. For a single funnel of shrinking steps use funnel-chart; for links without amounts use network-graph; for two-way flows between the same groups use chord-diagram.",
+        "example": "<SankeyChart\n  label=\"Where the money goes\"\n  nodes={[{ id: \"income\", label: \"Income\" }, { id: \"rent\", label: \"Rent\" }, { id: \"food\", label: \"Food\" }, { id: \"saved\", label: \"Saved\" }]}\n  links={[\n    { source: \"income\", target: \"rent\", value: 1200 },\n    { source: \"income\", target: \"food\", value: 500 },\n    { source: \"income\", target: \"saved\", value: 300 },\n  ]}\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "scatter-chart",
+      "type": "registry:component",
+      "title": "Scatter Chart",
+      "description": "Points placed by two numbers, optionally sized by a third (a bubble chart) and grouped by a category, with the nearest point read under the pointer and every point reachable by arrow keys.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-delaunay",
+        "d3-scale"
+      ],
+      "devDependencies": [
+        "@types/d3-delaunay",
+        "@types/d3-scale"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/scatter-chart.tsx",
+          "type": "registry:component",
+          "target": "components/viz/scatter-chart.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing how two measures relate across many things: does one rise with the other, which stand apart. Give `size` for a third measure as bubble area. For change over time use line-chart; for one measure across categories use bar-chart or dot-plot; for thousands of overlapping points use density-chart.",
+        "example": "<ScatterChart\n  label=\"Price against rating\"\n  data={[\n    { name: \"Alder\", price: 12, rating: 4.1, sold: 320, kind: \"Tea\" },\n    { name: \"Birch\", price: 18, rating: 4.6, sold: 120, kind: \"Tea\" },\n    { name: \"Cedar\", price: 9, rating: 3.8, sold: 540, kind: \"Coffee\" },\n  ]}\n  x=\"price\"\n  y=\"rating\"\n  size=\"sold\"\n  group=\"kind\"\n  name=\"name\"\n  xLabel=\"Price\"\n  yLabel=\"Rating\"\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "slope-chart",
+      "type": "registry:component",
+      "title": "Slope Chart",
+      "description": "Each thing's value at two moments joined by a line, so what rose, what fell and how the ranking changed read at once: names and values at both ends, rises solid and falls dashed so direction never rests on colour.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale"
+      ],
+      "devDependencies": [
+        "@types/d3-scale"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/slope-chart.tsx",
+          "type": "registry:component",
+          "target": "components/viz/slope-chart.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Comparing many things between exactly two moments or conditions: this year and last, before and after a change. For many moments use line-chart or small-multiples; for one thing's change use a stat with its delta; for a few categories use dot-plot dumbbell.",
+        "example": "<SlopeChart\n  label=\"Share of trips by mode\"\n  data={[\n    { mode: \"Car\", y2016: 52, y2026: 41 },\n    { mode: \"Bike\", y2016: 9, y2026: 18 },\n    { mode: \"Transit\", y2016: 24, y2026: 27 },\n  ]}\n  name=\"mode\"\n  from=\"y2016\"\n  to=\"y2026\"\n  fromLabel=\"2016\"\n  toLabel=\"2026\"\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "small-multiples",
+      "type": "registry:component",
+      "title": "Small Multiples",
+      "description": "The same small chart repeated for each group (a region, a product) in a grid that fits its width, every panel on one shared scale so they can be compared at a glance, each read by arrow keys.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale",
+        "d3-shape"
+      ],
+      "devDependencies": [
+        "@types/d3-scale",
+        "@types/d3-shape"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/small-multiples.tsx",
+          "type": "registry:component",
+          "target": "components/viz/small-multiples.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Comparing the shape of one measure across many groups, where one chart with many lines would tangle: more than five series, or groups of very different sizes. For up to five series on one chart use line-chart; for one value per group use bar-chart.",
+        "example": "<SmallMultiples\n  label=\"Monthly visits by region\"\n  data={[\n    { region: \"North\", month: 1, visits: 40 }, { region: \"North\", month: 2, visits: 52 }, { region: \"North\", month: 3, visits: 61 },\n    { region: \"South\", month: 1, visits: 30 }, { region: \"South\", month: 2, visits: 28 }, { region: \"South\", month: 3, visits: 35 },\n  ]}\n  facet=\"region\"\n  x=\"month\"\n  y=\"visits\"\n  kind=\"area\"\n/>",
         "client": true
       }
     },
@@ -3954,6 +5991,144 @@
         "category": "viz",
         "when": "The shape of a trend beside a number that carries the value. Size it with classes (`h-8 w-24` by default). When the reader needs to read values off it, use line-chart or bar-chart.",
         "example": "<Sparkline data={[4, 6, 5, 9, 12, 10, 14]} label=\"Signups, last 7 days\" />\n<Sparkline data={[3, 8, 2, 7, 5]} type=\"bar\" className=\"h-6 w-16\" />",
+        "client": true
+      }
+    },
+    {
+      "name": "stream-chart",
+      "type": "registry:component",
+      "title": "Stream Chart",
+      "description": "Several series stacked as flowing layers around a centre line instead of a baseline (a streamgraph), so the rise and fall of each layer and of the whole read as a shape over time; arrow keys read every moment.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale",
+        "d3-shape"
+      ],
+      "devDependencies": [
+        "@types/d3-scale",
+        "@types/d3-shape"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/stream-chart.tsx",
+          "type": "registry:component",
+          "target": "components/viz/stream-chart.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing how the mix of up to five categories shifts over a long time, where the overall shape matters more than exact values: listening by genre, topics over years. For exact totals use area-chart stacked (with a baseline); for exact values per series use line-chart.",
+        "example": "<StreamChart\n  label=\"Plays by genre\"\n  data={[\n    { year: 2020, jazz: 20, folk: 30, rock: 50 },\n    { year: 2021, jazz: 28, folk: 34, rock: 44 },\n    { year: 2022, jazz: 40, folk: 30, rock: 38 },\n  ]}\n  x=\"year\"\n  series={[{ key: \"jazz\", label: \"Jazz\" }, { key: \"folk\", label: \"Folk\" }, { key: \"rock\", label: \"Rock\" }]}\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "sunburst",
+      "type": "registry:component",
+      "title": "Sunburst",
+      "description": "A hierarchy as rings around a centre: each ring a level, each arc a part sized by its share of its parent, with zooming into any arc by click or Enter and back out by the centre, the trail or Backspace.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-hierarchy",
+        "d3-shape"
+      ],
+      "devDependencies": [
+        "@types/d3-hierarchy",
+        "@types/d3-shape"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/sunburst.tsx",
+          "type": "registry:component",
+          "target": "components/viz/sunburst.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing how a total divides level by level when the depth matters as much as the sizes: a path through categories, a file system, a budget in three levels. For sizes that must be compared closely use treemap (areas in rectangles are easier to judge than arcs); for one level use donut-chart.",
+        "example": "<Sunburst\n  label=\"Visits by source\"\n  data={{\n    name: \"All visits\",\n    children: [\n      { name: \"Search\", children: [{ name: \"Organic\", value: 420 }, { name: \"Paid\", value: 160 }] },\n      { name: \"Social\", children: [{ name: \"Video\", value: 120 }, { name: \"Posts\", value: 80 }] },\n      { name: \"Direct\", value: 300 },\n    ],\n  }}\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "treemap",
+      "type": "registry:component",
+      "title": "Treemap",
+      "description": "A whole split into nested rectangles whose areas are the parts' sizes: groups in their own colours, the parts inside them labelled where they fit, with zooming into a group by click or Enter and back out by the trail or Backspace.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-hierarchy"
+      ],
+      "devDependencies": [
+        "@types/d3-hierarchy"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn",
+        "@rivier-ui/use-controllable-state"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/treemap.tsx",
+          "type": "registry:component",
+          "target": "components/viz/treemap.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Showing how a large total divides across a hierarchy (a budget by department and team, storage by folder) when there are too many parts for a donut. For a few parts use donut-chart; to see the levels as rings use sunburst; to compare exact sizes use bar-chart.",
+        "example": "<Treemap\n  label=\"Spending by area\"\n  data={{\n    name: \"All spending\",\n    children: [\n      { name: \"Housing\", children: [{ name: \"Rent\", value: 1200 }, { name: \"Power\", value: 140 }] },\n      { name: \"Food\", children: [{ name: \"Groceries\", value: 420 }, { name: \"Cafés\", value: 90 }] },\n      { name: \"Travel\", value: 260 },\n    ],\n  }}\n/>",
+        "client": true
+      }
+    },
+    {
+      "name": "waterfall-chart",
+      "type": "registry:component",
+      "title": "Waterfall Chart",
+      "description": "How a starting amount becomes an ending one, step by step: each rise or fall a bar floating from the running total, totals standing on the baseline, signs printed on every step so rises and falls never rest on colour.",
+      "categories": [
+        "viz"
+      ],
+      "dependencies": [
+        "d3-scale"
+      ],
+      "devDependencies": [
+        "@types/d3-scale"
+      ],
+      "registryDependencies": [
+        "@rivier-ui/theme",
+        "@rivier-ui/chart",
+        "@rivier-ui/cn"
+      ],
+      "files": [
+        {
+          "path": "registry/viz/waterfall-chart.tsx",
+          "type": "registry:component",
+          "target": "components/viz/waterfall-chart.tsx"
+        }
+      ],
+      "meta": {
+        "category": "viz",
+        "when": "Explaining a change between two totals: a budget's start to its end, revenue to profit, last year to this year by cause. For parts of one total use bar-chart stacked or treemap; for change over time use line-chart.",
+        "example": "<WaterfallChart\n  label=\"From revenue to profit\"\n  data={[\n    { step: \"Revenue\", amount: 500, total: true },\n    { step: \"Costs\", amount: -220 },\n    { step: \"Marketing\", amount: -80 },\n    { step: \"Other income\", amount: 30 },\n    { step: \"Profit\", amount: 230, total: true },\n  ]}\n  x=\"step\"\n  value=\"amount\"\n  total=\"total\"\n/>",
         "client": true
       }
     }

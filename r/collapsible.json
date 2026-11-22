@@ -1,0 +1,32 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "collapsible",
+  "type": "registry:ui",
+  "title": "Collapsible",
+  "description": "One section of content that opens and closes under a button that says whether it is open: the disclosure pattern.",
+  "categories": [
+    "ui"
+  ],
+  "dependencies": [
+    "lucide-react",
+    "radix-ui"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/collapsible.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/collapsible.tsx",
+      "content": "\"use client\";\n/**\n * @name collapsible\n * @category ui\n * @description One section of content that opens and closes under a button that says whether it is open: the disclosure pattern.\n * @when Hiding detail that only some people need: more options, the rest of a long answer, a transcript. For several such sections in a column use accordion; for a menu of actions use dropdown-menu.\n * @example\n * <Collapsible>\n *   <CollapsibleTrigger>More options</CollapsibleTrigger>\n *   <CollapsibleContent>…</CollapsibleContent>\n * </Collapsible>\n */\nimport { Collapsible as CollapsiblePrimitive } from \"radix-ui\";\nimport { ChevronDown } from \"lucide-react\";\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport function Collapsible({ className, ...props }: ComponentProps<typeof CollapsiblePrimitive.Root>) {\n  return <CollapsiblePrimitive.Root data-slot=\"collapsible\" className={cn(\"flex flex-col gap-2\", className)} {...props} />;\n}\n\n/** The button. It carries aria-expanded; its chevron turns as it opens (not under reduced motion). Use `asChild` for a button of your own. */\nexport function CollapsibleTrigger({ className, children, asChild, ...props }: ComponentProps<typeof CollapsiblePrimitive.Trigger>) {\n  if (asChild) return <CollapsiblePrimitive.Trigger data-slot=\"collapsible-trigger\" asChild {...props}>{children}</CollapsiblePrimitive.Trigger>;\n  return (\n    <CollapsiblePrimitive.Trigger\n      data-slot=\"collapsible-trigger\"\n      className={cn(\"group/trigger inline-flex min-h-10 items-center gap-2 self-start rounded-control text-sm font-medium hover:underline\", className)}\n      {...props}\n    >\n      {children}\n      <ChevronDown aria-hidden=\"true\" className=\"size-4 transition-transform duration-base ease-out group-data-[state=open]/trigger:rotate-180 motion-reduce:transition-none\" />\n    </CollapsiblePrimitive.Trigger>\n  );\n}\n\n/** The content. It appears at once: no height animation, so nothing below it moves in steps. */\nexport function CollapsibleContent({ className, ...props }: ComponentProps<typeof CollapsiblePrimitive.Content>) {\n  return <CollapsiblePrimitive.Content data-slot=\"collapsible-content\" className={cn(\"data-[state=open]:animate-in data-[state=open]:fade-in-0 motion-reduce:animate-none!\", className)} {...props} />;\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "Hiding detail that only some people need: more options, the rest of a long answer, a transcript. For several such sections in a column use accordion; for a menu of actions use dropdown-menu.",
+    "example": "<Collapsible>\n  <CollapsibleTrigger>More options</CollapsibleTrigger>\n  <CollapsibleContent>…</CollapsibleContent>\n</Collapsible>",
+    "client": true
+  }
+}

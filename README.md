@@ -80,6 +80,16 @@ records and consent), `layout` (containers, sections, bento grid, marquee, a fra
 Gaussian splats), `viz` (charts and sparklines), `lib` (helpers: class names,
 motion tokens, reading direction, screen-reader announcements, controllable state).
 
+Added on 2026-11-13 for full ground (the audit is `docs/GAPS-2026-11-13.md`): `viz` now holds 28 kinds of
+chart (distributions, forecasts with intervals, hierarchies, flows, networks, calendars, plans and more) and
+maps drawn from GeoJSON the project passes (`geo-map` with choropleth, marker, route, hexagon and tile
+layers); `motion` an `explainer` that plays a film written as JSON (`lib/explainer-spec`), exported frame by
+frame by `scripts/export-film.ts`; `ui` a data grid, a self-checking form, data entry (tags, one-time code,
+password, money, colour, rating), surfaces and navigation (alert dialog, hover card, collapsible, menubar,
+navigation menu, toolbar, resizable panels, sidebar), boards (tree view, kanban, flow diagram, tour,
+notifications) and editors (code block, Markdown editor, image cropper and annotator); `three` a point cloud
+and labels pinned to a model; `lib` keyboard shortcuts.
+
 Every component is keyboard operable to the WAI-ARIA pattern for its kind, works right-to-left and at phone
 width, stops moving when the visitor asks for less motion, and carries no fixed words: labels are passed in
 or are props with English defaults, so a product in any language can use it.
@@ -109,6 +119,7 @@ npm run site:install   # copies the whole registry into the showcase site with t
 npm run site:dev       # the showcase, http://localhost:3320: every item, with the theme switches
 npm run smoke          # with the showcase running: the overview page in a real browser
 npm run check          # with the showcase running: every component page: keyboard, focus, roles, right-to-left, 390 px, axe-core
+npm run export-film -- url=http://localhost:3320/explainers name=demo   # frames of a deterministic stage: MP4 with ffmpeg, else a zip
 ```
 
 The 3D files on the showcase's `/models` page are written by `scripts/make-test-assets.ts` (computed, not

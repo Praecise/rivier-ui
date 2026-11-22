@@ -30,7 +30,8 @@ readable by an assistant. `registry/ui/button.tsx` and `registry/ui/card.tsx` ar
 - Allowed packages (all installed, latest): `react`, `radix-ui` (the unified package:
   `import { Dialog } from "radix-ui"`, then `Dialog.Root`), `class-variance-authority`, `clsx`,
   `tailwind-merge`, `lucide-react`, `motion` (`import { motion } from "motion/react"`), `three`,
-  `@react-three/fiber`, `d3-scale`, `d3-shape`, `cmdk`, `sonner`, and `@sparkjsdev/spark` in `model-viewer`
+  `@react-three/fiber`, `d3-scale`, `d3-shape`, `d3-array`, `d3-hierarchy`, `d3-sankey`, `d3-force`,
+  `d3-contour`, `d3-delaunay`, `d3-geo` (maths only, as for the other d3 packages), `cmdk`, `sonner`, and `@sparkjsdev/spark` in `model-viewer`
   only, by `import()`. Nothing else without asking. Check the
   installed package's types in `node_modules` before using an API; do not write an API from memory.
 - React 19: `ref` is a normal prop; do not use `forwardRef`. Type props as `ComponentProps<"div">` or

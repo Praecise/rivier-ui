@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "button-group",
+  "type": "registry:ui",
+  "title": "Button Group",
+  "description": "Buttons joined into one block with shared edges (rounded only at the ends), side by side or stacked, with an optional piece of text or a separator between them.",
+  "categories": [
+    "ui"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/button-group.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/button-group.tsx",
+      "content": "/**\n * @name button-group\n * @category ui\n * @description Buttons joined into one block with shared edges (rounded only at the ends), side by side or stacked, with an optional piece of text or a separator between them.\n * @when Related actions that belong together: a split button (an action and its menu), zoom out and in, previous and next. For a choice of one use segmented-control or toggle-group; for a set of commands over content use toolbar.\n * @example\n * <ButtonGroup aria-label=\"Zoom\">\n *   <Button variant=\"outline\" size=\"icon\" aria-label=\"Zoom out\"><Minus /></Button>\n *   <ButtonGroupText>100%</ButtonGroupText>\n *   <Button variant=\"outline\" size=\"icon\" aria-label=\"Zoom in\"><Plus /></Button>\n * </ButtonGroup>\n */\nimport type { ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport type ButtonGroupProps = ComponentProps<\"div\"> & { orientation?: \"horizontal\" | \"vertical\" };\n\n/** A named group. Its children lose the radius where they meet, and their borders overlap so the seam is one line. */\nexport function ButtonGroup({ className, orientation = \"horizontal\", ...props }: ButtonGroupProps) {\n  return (\n    <div\n      data-slot=\"button-group\"\n      role=\"group\"\n      data-orientation={orientation}\n      className={cn(\n        \"inline-flex w-fit items-stretch *:focus-visible:relative *:focus-visible:z-10\",\n        orientation === \"horizontal\"\n          ? \"*:not-first:rounded-s-none *:not-last:rounded-e-none *:not-first:-ms-px\"\n          : \"flex-col *:not-first:rounded-t-none *:not-last:rounded-b-none *:not-first:-mt-px\",\n        className,\n      )}\n      {...props}\n    />\n  );\n}\n\n/** Words or a value between the buttons, in the same frame. */\nexport function ButtonGroupText({ className, ...props }: ComponentProps<\"span\">) {\n  return <span data-slot=\"button-group-text\" className={cn(\"inline-flex items-center rounded-control border border-border-strong bg-muted px-3 text-sm tabular-nums\", className)} {...props} />;\n}\n\n/** A line between buttons of the same look (two solid buttons) so the seam shows. */\nexport function ButtonGroupSeparator({ className, ...props }: ComponentProps<\"span\">) {\n  return <span data-slot=\"button-group-separator\" aria-hidden=\"true\" className={cn(\"w-px self-stretch bg-border-strong\", className)} {...props} />;\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "Related actions that belong together: a split button (an action and its menu), zoom out and in, previous and next. For a choice of one use segmented-control or toggle-group; for a set of commands over content use toolbar.",
+    "example": "<ButtonGroup aria-label=\"Zoom\">\n  <Button variant=\"outline\" size=\"icon\" aria-label=\"Zoom out\"><Minus /></Button>\n  <ButtonGroupText>100%</ButtonGroupText>\n  <Button variant=\"outline\" size=\"icon\" aria-label=\"Zoom in\"><Plus /></Button>\n</ButtonGroup>",
+    "client": false
+  }
+}

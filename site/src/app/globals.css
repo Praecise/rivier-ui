@@ -27,3 +27,11 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
+
+/* The showcase has more component pages than fit in one row of the header: the row scrolls sideways
+   instead of widening the page (Tab still brings each link into view). */
+[data-slot="navbar-links"] {
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-block: 4px;
+}

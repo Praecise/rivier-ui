@@ -3,7 +3,7 @@
  * @name bar-chart
  * @category viz
  * @description A bar chart, vertical or horizontal, grouped or stacked, always measured from zero, with a tooltip on hover and arrow-key reading.
- * @when Comparing amounts across categories. Use `orientation="horizontal"` for long names or a ranking, `stacked` when the series add up to a total. For change over many points in time use line-chart; for a single number use a stat, not one bar.
+ * @when Comparing amounts across categories. Use `orientation="horizontal"` for long names or a ranking, `stacked` when the series add up to a total, `normalize` to compare each category's split as shares of 100 %. For change over many points in time use line-chart; for a single number use a stat, not one bar.
  * @example
  * <BarChart
  *   label="Orders by channel per quarter"
@@ -53,6 +53,8 @@ export type BarChartProps<T extends object> = Omit<ComponentProps<"div">, "child
     orientation?: "vertical" | "horizontal";
     /** Stack the series in one bar per category instead of side by side. */
     stacked?: boolean;
+    /** Stack each category to 100 %: every bar the same length, split by each series' share. Implies `stacked`; the tooltip and the table keep the amounts and add the share. */
+    normalize?: boolean;
     /** Print each bar's value at its end (the total, when stacked), where it fits. */
     showValues?: boolean;
     showGrid?: boolean;
@@ -66,7 +68,7 @@ export type BarChartProps<T extends object> = Omit<ComponentProps<"div">, "child
     height?: number;
   };
 
-type Bar = { category: number; series: number; value: number; from: number; to: number; outer: boolean };
+type Bar = { category: number; series: number; value: number; from: number; to: number; outer: boolean; share?: number };
 
 /** Bars are thin; what the band has left over is air. */
 const MAX_THICKNESS = 24;
@@ -81,7 +83,8 @@ export function BarChart<T extends object>({
   series,
   label,
   orientation = "vertical",
-  stacked = false,
+  stacked: stackedProp = false,
+  normalize = false,
   showValues = false,
   showGrid = true,
   showLegend,
@@ -96,6 +99,7 @@ export function BarChart<T extends object>({
   const [active, setActive] = useState<number | null>(null);
   const [keyboard, setKeyboard] = useState(false);
   const vertical = orientation === "vertical";
+  const stacked = stackedProp || normalize;
 
   const model = useMemo(() => {
     const categories = data.map((row) => String((row as Record<string, unknown>)[x] ?? ""));
@@ -105,9 +109,18 @@ export function BarChart<T extends object>({
       let high = 0;
       let low = 0;
       const start = bars.length;
+      // A 100 % stack measures each part against the sum of the parts' sizes.
+      const whole = normalize ? series.reduce((sum, item) => sum + Math.abs(readNumber(row, item.key) ?? 0), 0) : 1;
       series.forEach((item, index) => {
-        const value = readNumber(row, item.key);
-        if (value === null) return;
+        const amount = readNumber(row, item.key);
+        if (amount === null) return;
+        const value = normalize ? (whole > 0 ? amount / whole : 0) : amount;
+        if (normalize) {
+          bars.push({ category, series: index, value: amount, share: value, from: value >= 0 ? high : low, to: value >= 0 ? high + value : low + value, outer: false });
+          if (value >= 0) high += value;
+          else low += value;
+          return;
+        }
         if (!stacked) {
           bars.push({ category, series: index, value, from: 0, to: value, outer: true });
           high = Math.max(high, value);
@@ -134,10 +147,12 @@ export function BarChart<T extends object>({
     const high = Math.max(0, ...totals.map((total) => total.high));
     const low = Math.min(0, ...totals.map((total) => total.low));
     return { categories, bars, totals, high, low };
-  }, [data, x, series, stacked]);
+  }, [data, x, series, stacked, normalize]);
 
   const { categories, bars, totals } = model;
   const value = formatValue ?? ((number: number) => formatNumber(number, locale));
+  const percent = (share: number): string => formatNumber(share, locale, { style: "percent", maximumFractionDigits: 1 });
+  const withShare = (bar: Bar): string => (bar.share === undefined ? value(bar.value) : `${value(bar.value)} (${percent(bar.share)})`);
   const table = {
     caption: label,
     columns: [xLabel ?? x, ...series.map((item) => item.label)],
@@ -145,14 +160,16 @@ export function BarChart<T extends object>({
       categories[index] ?? "",
       ...series.map((item) => {
         const number = readNumber(row, item.key);
-        return number === null ? "" : value(number);
+        if (number === null) return "";
+        const bar = normalize ? bars.find((candidate) => candidate.category === index && series[candidate.series] === item) : undefined;
+        return bar ? withShare(bar) : value(number);
       }),
     ]),
   };
 
   const current = active === null ? undefined : bars[active];
   const currentLabel = current ? (series[current.series]?.label ?? "") : "";
-  const announcement = keyboard && current ? `${categories[current.category] ?? ""}, ${currentLabel}: ${value(current.value)}` : "";
+  const announcement = keyboard && current ? `${categories[current.category] ?? ""}, ${currentLabel}: ${withShare(current)}` : "";
 
   const move = (step: number | "first" | "last"): void => {
     if (bars.length === 0) return;
@@ -189,7 +206,7 @@ export function BarChart<T extends object>({
             .domain(model.low === model.high ? [0, 1] : [model.low, model.high])
             .nice(ticksWanted);
           const ticks = scale.ticks(ticksWanted);
-          const axisValue = formatValue ?? axisNumberFormatter(Math.max(Math.abs(scale.domain()[0] ?? 0), Math.abs(scale.domain()[1] ?? 0)), locale);
+          const axisValue = normalize ? percent : formatValue ?? axisNumberFormatter(Math.max(Math.abs(scale.domain()[0] ?? 0), Math.abs(scale.domain()[1] ?? 0)), locale);
           const widest = (texts: readonly string[]): number => Math.ceil(Math.max(0, ...texts.map((text) => estimateTextWidth(text))));
           const valueRoom = showValues ? widest(bars.map((bar) => value(bar.value))) + 8 : 0;
           const hasNegative = model.low < 0;
@@ -232,7 +249,7 @@ export function BarChart<T extends object>({
           // Category names that would run into each other are thinned out; every name stays in the table.
           const every = vertical ? Math.max(1, Math.ceil((widest(categories) + 8) / band.step())) : 1;
 
-          const labels = !showValues
+          const labels = !showValues || normalize
             ? []
             : stacked
               ? totals.flatMap((total, category) => {
@@ -345,7 +362,7 @@ export function BarChart<T extends object>({
                   y={tooltipY}
                   side={tooltipX > size.width / 2 ? "left" : "right"}
                   title={categories[current.category]}
-                  rows={[{ label: currentLabel, value: value(current.value), index: current.series, mark: "rect" }]}
+                  rows={[{ label: currentLabel, value: withShare(current), index: current.series, mark: "rect" }]}
                 />
               ) : null}
             </>

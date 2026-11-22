@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "orbit",
+  "type": "registry:component",
+  "title": "Orbit",
+  "description": "Items set evenly on a ring around a centre that turns slowly, the items staying upright, with the centre in the middle; it pauses while hovered or focused, and under reduced motion the ring stands still.",
+  "categories": [
+    "motion"
+  ],
+  "dependencies": [],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn"
+  ],
+  "files": [
+    {
+      "path": "registry/motion/orbit.tsx",
+      "type": "registry:component",
+      "target": "components/motion/orbit.tsx",
+      "content": "\"use client\";\n/**\n * @name orbit\n * @category motion\n * @description Items set evenly on a ring around a centre that turns slowly, the items staying upright, with the centre in the middle; it pauses while hovered or focused, and under reduced motion the ring stands still.\n * @when Showing that several things connect to one: integrations around a product, sources around a result. Use few items (three to eight) of the same size, each with its own name. For a row of logos use marquee; for a real network use network-graph.\n * @example\n * <Orbit center={<Logo />} items={[<Icon key=\"a\" />, <Icon key=\"b\" />, <Icon key=\"c\" />]} itemLabels={[\"Maps\", \"Charts\", \"Films\"]} />\n */\nimport type { ComponentProps, CSSProperties, ReactNode } from \"react\";\nimport { cn } from \"@/lib/cn\";\n\nexport type OrbitProps = Omit<ComponentProps<\"div\">, \"children\"> & {\n  center?: ReactNode;\n  items: readonly ReactNode[];\n  /** Each item's name, for screen readers; the items are listed in this order. */\n  itemLabels: readonly string[];\n  /** Seconds for one turn. Default 40. */\n  duration?: number;\n  /** The ring's size as a share of the box. Default 0.8. */\n  ring?: number;\n  /** Turn the other way. */\n  reverse?: boolean;\n};\n\nexport function Orbit({ center, items, itemLabels, duration = 40, ring = 0.8, reverse = false, className, style, ...props }: OrbitProps) {\n  return (\n    <div\n      data-slot=\"orbit\"\n      className={cn(\"group/orbit relative aspect-square w-full max-w-md\", className)}\n      style={{ [\"--orbit-duration\" as string]: `${duration}s`, ...style } as CSSProperties}\n      {...props}\n    >\n      <ul className=\"sr-only\">\n        {itemLabels.map((label) => (\n          <li key={label}>{label}</li>\n        ))}\n      </ul>\n      <div aria-hidden=\"true\" className=\"absolute inset-0 m-auto rounded-full border border-dashed border-border-strong\" style={{ width: `${ring * 100}%`, height: `${ring * 100}%` }} />\n      <div\n        aria-hidden=\"true\"\n        className={cn(\n          \"absolute inset-0 animate-[spin_var(--orbit-duration)_linear_infinite] group-hover/orbit:[animation-play-state:paused] group-focus-within/orbit:[animation-play-state:paused] motion-reduce:animate-none\",\n          reverse && \"[animation-direction:reverse]\",\n        )}\n      >\n        {items.map((item, index) => {\n          const angle = (index / items.length) * 2 * Math.PI - Math.PI / 2;\n          return (\n            <div\n              key={index}\n              className=\"absolute -translate-x-1/2 -translate-y-1/2\"\n              style={{ left: `${50 + Math.cos(angle) * ring * 50}%`, top: `${50 + Math.sin(angle) * ring * 50}%` }}\n            >\n              {/* Turned back as the ring turns, so the item stays upright. */}\n              <div className={cn(\"animate-[spin_var(--orbit-duration)_linear_infinite] [animation-direction:reverse] group-hover/orbit:[animation-play-state:paused] group-focus-within/orbit:[animation-play-state:paused] motion-reduce:animate-none\", reverse && \"[animation-direction:normal]\")}>\n                {item}\n              </div>\n            </div>\n          );\n        })}\n      </div>\n      {center ? <div className=\"absolute inset-0 m-auto flex size-1/4 items-center justify-center\">{center}</div> : null}\n    </div>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "motion",
+    "when": "Showing that several things connect to one: integrations around a product, sources around a result. Use few items (three to eight) of the same size, each with its own name. For a row of logos use marquee; for a real network use network-graph.",
+    "example": "<Orbit center={<Logo />} items={[<Icon key=\"a\" />, <Icon key=\"b\" />, <Icon key=\"c\" />]} itemLabels={[\"Maps\", \"Charts\", \"Films\"]} />",
+    "client": true
+  }
+}

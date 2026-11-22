@@ -1,0 +1,33 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "rating",
+  "type": "registry:ui",
+  "title": "Rating",
+  "description": "A score of one to five (or any number) shown as stars and chosen like radio buttons: arrow keys move the score, each star named \"3 of 5\"; or, read-only, a score shown with its number in words.",
+  "categories": [
+    "ui"
+  ],
+  "dependencies": [
+    "lucide-react",
+    "radix-ui"
+  ],
+  "registryDependencies": [
+    "@rivier-ui/theme",
+    "@rivier-ui/cn",
+    "@rivier-ui/use-controllable-state"
+  ],
+  "files": [
+    {
+      "path": "registry/ui/rating.tsx",
+      "type": "registry:ui",
+      "target": "components/ui/rating.tsx",
+      "content": "\"use client\";\n/**\n * @name rating\n * @category ui\n * @description A score of one to five (or any number) shown as stars and chosen like radio buttons: arrow keys move the score, each star named \"3 of 5\"; or, read-only, a score shown with its number in words.\n * @when Rating a thing on a short scale: a review, feedback after a task. For yes and no use toggle or switch; for a number on a long scale use slider; for showing an average of many ratings use the read-only form with the count beside it.\n * @example\n * <Rating aria-label=\"Your rating\" defaultValue={4} name=\"rating\" />\n * <Rating readOnly value={4.3} aria-label=\"Average rating\" />\n */\nimport { Star } from \"lucide-react\";\nimport { RadioGroup } from \"radix-ui\";\nimport { useState, type ComponentProps } from \"react\";\nimport { cn } from \"@/lib/cn\";\nimport { useControllableState } from \"@/lib/use-controllable-state\";\n\nexport type RatingProps = Omit<ComponentProps<\"div\">, \"defaultValue\" | \"onChange\" | \"dir\"> & {\n  /** The score, 1 to `max`; 0 for none yet. In read-only form, any number (4.3). */\n  value?: number;\n  defaultValue?: number;\n  onValueChange?: (value: number) => void;\n  /** How many stars. Default 5. */\n  max?: number;\n  /** Shows the score; nothing to choose. */\n  readOnly?: boolean;\n  disabled?: boolean;\n  name?: string;\n  /** The name of each star, and of the read-only score: \"3 of 5\". */\n  starLabel?: (value: string, max: string) => string;\n  locale?: string;\n  size?: \"sm\" | \"md\" | \"lg\";\n};\n\nconst SIZES = { sm: \"size-4\", md: \"size-6\", lg: \"size-8\" } as const;\n\nexport function Rating({ \"aria-label\": ariaLabel, value,\n  defaultValue = 0,\n  onValueChange,\n  max = 5,\n  readOnly = false,\n  disabled,\n  name,\n  starLabel = (v, m) => `${v} of ${m}`,\n  locale = \"en-US\",\n  size = \"md\",\n  className,\n  ...props\n}: RatingProps) {\n  const [score, setScore] = useControllableState<number>({ value, defaultValue, onChange: onValueChange });\n  const [hover, setHover] = useState<number | null>(null);\n  const number = (n: number): string => new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(n);\n  const shown = hover ?? score;\n  const star = (index: number) => {\n    const fill = Math.max(0, Math.min(1, shown - index));\n    return (\n      <span aria-hidden=\"true\" className={cn(\"relative inline-block\", SIZES[size])}>\n        <Star className={cn(\"absolute inset-0 size-full text-border-strong\")} />\n        {fill > 0 ? (\n          <span className=\"absolute inset-y-0 start-0 overflow-hidden\" style={{ width: `${fill * 100}%` }}>\n            <Star className={cn(\"size-full fill-current text-chart-4\", SIZES[size])} />\n          </span>\n        ) : null}\n      </span>\n    );\n  };\n  if (readOnly) {\n    return (\n      <div\n        data-slot=\"rating\"\n        role=\"img\"\n        aria-label={`${ariaLabel ? `${ariaLabel}: ` : \"\"}${starLabel(number(score), number(max))}`}\n        className={cn(\"inline-flex items-center gap-0.5\", className)}\n        {...props}\n      >\n        {Array.from({ length: max }, (_, i) => (\n          <span key={i}>{star(i)}</span>\n        ))}\n      </div>\n    );\n  }\n  return (\n    <RadioGroup.Root\n      data-slot=\"rating\"\n      value={score > 0 ? String(score) : \"\"}\n      onValueChange={(next) => setScore(Number(next))}\n      orientation=\"horizontal\"\n      disabled={disabled}\n      name={name}\n      className={cn(\"inline-flex items-center gap-0.5\", className)}\n      onPointerLeave={() => setHover(null)}\n      aria-label={ariaLabel}\n      {...props}\n    >\n      {Array.from({ length: max }, (_, i) => (\n        <RadioGroup.Item\n          key={i}\n          value={String(i + 1)}\n          aria-label={starLabel(number(i + 1), number(max))}\n          onPointerEnter={() => setHover(i + 1)}\n          className=\"flex size-10 items-center justify-center rounded-control disabled:opacity-50\"\n        >\n          {star(i)}\n        </RadioGroup.Item>\n      ))}\n    </RadioGroup.Root>\n  );\n}\n"
+    }
+  ],
+  "meta": {
+    "category": "ui",
+    "when": "Rating a thing on a short scale: a review, feedback after a task. For yes and no use toggle or switch; for a number on a long scale use slider; for showing an average of many ratings use the read-only form with the count beside it.",
+    "example": "<Rating aria-label=\"Your rating\" defaultValue={4} name=\"rating\" />\n<Rating readOnly value={4.3} aria-label=\"Average rating\" />",
+    "client": true
+  }
+}
