@@ -160,6 +160,68 @@ export async function run(kit: Kit): Promise<void> {
     await kit.sleep(300);
   }
 
+  // Date picker, typed: a text field whose value is the day, with the calendar beside it.
+  const typed = await kit.demo("Date picker: typed");
+  const field = `${typed} [data-slot=date-picker-input]`;
+  const opener = `${typed} [data-slot=date-picker-open]`;
+  const shown = (): Promise<string> => page.evaluate((s) => document.querySelector<HTMLInputElement>(s)?.value ?? "", field);
+  const due = (): Promise<string> => text(`${typed} [data-testid=due]`);
+  const sent = (): Promise<string | null> => attr(`${typed} input[type=hidden][name=due]`, "value");
+  /** Replaces what is in the field with these keystrokes. */
+  const enter = async (value: string): Promise<void> => {
+    await kit.focus(field);
+    await page.evaluate((s) => document.querySelector<HTMLInputElement>(s)?.select(), field);
+    await page.keyboard.type(value);
+    await kit.sleep(100);
+  };
+  check((await shown()) === "14/11/2026", `the field shows the day in the locale's order of digits (${await shown()})`);
+  check((await attr(field, "placeholder")) === "DD/MM/YYYY", `its placeholder is the order to type in (${await attr(field, "placeholder")})`);
+  check((await attr(field, "aria-labelledby")) === "due-label" && (await attr(field, "aria-invalid")) === null, "it is named by its label and not marked invalid");
+  await enter("3/12/2026");
+  check((await due()) === "2026-12-03" && (await sent()) === "2026-12-03", `a typed day is the value at once, and is in the form (${await due()})`);
+  check((await shown()) === "3/12/2026", "the text is left as typed while the field has focus");
+  await keys("Tab");
+  check((await shown()) === "03/12/2026" && (await focusIs(opener)), `leaving the field writes the day out in full, and Tab goes to the calendar button (${await shown()})`);
+  await enter("2026-12-24");
+  check((await due()) === "2026-12-24", `the year first is read in every locale (${await due()})`);
+  await enter("05012027");
+  check((await due()) === "2027-01-05", `eight digits with no separators are read in the locale's order (${await due()})`);
+  await enter("31/02/2027");
+  check((await due()) === "none" && (await sent()) === "", "a day that does not exist is no value, in the form too");
+  check((await attr(field, "aria-invalid")) === null, "the field is not marked while it is still being typed in");
+  await keys("Enter");
+  check((await attr(field, "aria-invalid")) === "true" && (await text(`${typed} [data-testid=refused]`)).startsWith("31/02/2027"), "Enter on something that is not a day marks the field and tells the project, which says why");
+  await enter("15/10/2026");
+  check((await due()) === "none", "a day before the first one allowed is not taken");
+  await enter("22/11/2026");
+  check((await due()) === "none", "nor is a day the calendar does not offer (a Sunday here)");
+  await keys("Tab");
+  check((await attr(field, "aria-invalid")) === "true" && (await shown()) === "22/11/2026", "leaving the field marks it and keeps what was typed");
+  await enter("");
+  await keys("Backspace", "Tab");
+  check((await attr(field, "aria-invalid")) === null && (await due()) === "none", "an emptied field is no value and is not an error");
+  await enter("16/11/2026");
+  check((await attr(opener, "aria-label")) === "Open calendar" && (await attr(opener, "aria-expanded")) === "false", "the button beside it is named and says the calendar is closed");
+  await page.keyboard.down("Alt");
+  await keys("ArrowDown");
+  await page.keyboard.up("Alt");
+  await kit.sleep(300);
+  check((await count(content)) === 1 && (await day()) === "2026-11-16", `Alt+ArrowDown in the field opens the calendar on the typed day (${await day()})`);
+  await kit.axe(typed, "the typed date picker");
+  await kit.axe(content, "its open calendar");
+  await kit.screenshot("picker-typed");
+  await keys(forward, "Enter");
+  await kit.sleep(300);
+  check((await count(content)) === 0 && (await shown()) === "17/11/2026" && (await due()) === "2026-11-17", `a day chosen in the calendar is written in the field (${await shown()})`);
+  check(await focusIs(opener), "and focus returns to the calendar button");
+  await enter("31/02/2027");
+  await keys("Tab");
+  check(await kit.click(opener), "the button opens the calendar");
+  await kit.sleep(300);
+  await keys("Enter");
+  await kit.sleep(300);
+  check((await attr(field, "aria-invalid")) === null && (await count(`${typed} [data-testid=refused]`)) === 0 && (await shown()) !== "31/02/2027", `choosing a day replaces refused text and clears the mark (${await shown()})`);
+
   // Slot picker: a radio group.
   const slots = await kit.demo("Slot picker");
   const group = `${slots} [data-slot=slot-picker][aria-label=Time]`;
